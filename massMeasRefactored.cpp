@@ -372,7 +372,7 @@ int massMeasRefactored()
 {
     auto start = std::chrono::system_clock::now();
     //auto eHandler = new EnergyHandler("hists and root files/cuts/cutKch16Mar22_17h41m.root", "hists and root files/cuts/cutKs28Feb_23h37m.root");
-    auto eHandler = new EnergyHandler("hists and root files/cuts/cutKch16Mar22_17h41m.root", "tr_ph/kskl_2bodyGenVer3.root");
+    auto eHandler = new EnergyHandler("hists and root files/cuts/cutKch16Mar22_17h41m.root", "hists and root files/cuts/kskl_mcgpj5Apr10h08m.root");
     //eHandler->MassCriticalAngle();
     eHandler->MassLnY();
     //delete eHandler;
