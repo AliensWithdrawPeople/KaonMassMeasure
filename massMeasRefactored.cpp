@@ -18,7 +18,6 @@
 class EnergyHandler
 {
 private:
-    TCanvas *c1;
     TTree *kTr;
     TTree *ksTr;
     TProfile *pfY;
@@ -28,8 +27,11 @@ private:
     Int_t runnum;
     Float_t ksdpsi;
 
+    // Momentum ratio = P1/P2, where P1 is the momentum of pi+, P2 is the momentum of pi-.
     Float_t Y;
+    // Energy of beam calculated as sqrt(p^2 + m^2), where p is the momentum of Kch, m is the mass of Kch.
     std::vector<Float_t> e;
+    // Error of energy of beam calculated as sqrt(p^2 + m^2), where p is the momentum of Kch, m is the mass of Kch.
     std::vector<Float_t> eErr;
 
     std::vector<Int_t> entryNum;
@@ -39,9 +41,7 @@ private:
     std::vector<Float_t> runnumV;
 
     std::vector<Float_t> massEMeas;
-    std::vector<Float_t> massECalc;
     std::vector<Float_t> massEMeasErr;
-    std::vector<Float_t> massECalcErr;
 
     std::vector<Float_t> eMerge;
     std::vector<Float_t> eMergeErr;
@@ -49,15 +49,18 @@ private:
 
     int nRunMax;
     std::vector<int> badRuns;
-    Int_t groupsAmount; // number of groups of runs
+    // Number of groups of runs
+    Int_t groupsAmount; 
 
-    // fill badRuns vector and return number of good runs
-    int BadRunSearch(TProfile *pfY);
-    void EnergyCalculation(TProfile *pfY);
+    // Fills badRuns vector and returns number of good runs.
+    int BadRunSearch();
+    // Fills vectors e and eErr.
+    void EnergyCalculation();
+    // Weeds out bad runs.
     void EntryFilter();
+    // Merges runs into groups, fills vector massHistMeas and fits each hist.
     size_t RunsDivider();
     void Draw();
-    void DrawShort(TGraphErrors *tg, std::string title, int position = 0);
 
 public:
     EnergyHandler(std::string fChargedK, std::string fKsKl);
@@ -68,8 +71,6 @@ public:
 
 EnergyHandler::EnergyHandler(std::string fChargedK, std::string fKsKl)
 {
-    c1 = new TCanvas("EnergyStab", "EvsRunMeas, EvsRunCalc, MassVsRunMeas, MassVsRunCalc", 200, 10, 600, 400);
-
     TFile *file = TFile::Open(fChargedK.c_str());
     kTr = (TTree *)file->Get("kChargedTree");
     auto h2EvsRun = new TH2D("dEdXvsPtot", "", 1000, 100, 120, 659, 60741, 61400);
@@ -92,10 +93,12 @@ EnergyHandler::EnergyHandler(std::string fChargedK, std::string fKsKl)
     ksTr->SetBranchAddress("ksdpsi", &ksdpsi);
     ksTr->SetBranchAddress("Y", &Y);
 
-    BadRunSearch(pfY);
+    BadRunSearch();
+
+    delete h2EvsRun;
 }
 
-int EnergyHandler::BadRunSearch(TProfile *pfY)
+int EnergyHandler::BadRunSearch()
 {
     Float_t pAvg = 0;
     int goodRunsCounter = 0;
@@ -119,11 +122,12 @@ int EnergyHandler::BadRunSearch(TProfile *pfY)
     return goodRunsCounter;
 }
 
-void EnergyHandler::EnergyCalculation(TProfile *pfY)
+void EnergyHandler::EnergyCalculation()
 {
     int counter = 0;
     Float_t pAvg = 0;
     Float_t pErr = 0;
+    // Invariant mass of charged Kaon
     Float_t minv = 493.677;
 
     for (int i = 0; i < pfY->GetNbinsX(); i++)
@@ -174,14 +178,10 @@ size_t EnergyHandler::RunsDivider()
     std::string rootFileName = "hists and root files/massMeas macro output/massHist" + std::to_string(date->tm_hour) + "h" + 
                                 std::to_string(date->tm_min) + "m_"+std::to_string(date->tm_yday)+"day.root";
     TFile file2(rootFileName.c_str(), "recreate");
-
-    std::vector<TH1D *> massHistsCalc;
     std::vector<TH1D *> massHistsMeas;
 
-    //auto fermiStep = new TF1("fermiStep", "[2] / (exp(-(x - [0])/[1]) + 1) / ((x-[3])^2)");
     auto fermiStep = new TF1("fermiStep", "[2]/(exp(-(x-[0])/[1])+1)/((x-[3])^2+(x-[4])^4 + [5])");
     fermiStep->SetParameters(497.418, 0.335709, 66506, 399.187, 499.504, -9292.33);
-    //fermiStep->SetParameters(497.417, 0.347717, 4148.13, 492.705);
 
     TFitResultPtr res;
     int j = 1; int m = 0; int l = 0; int tmp = 0;
@@ -193,17 +193,13 @@ size_t EnergyHandler::RunsDivider()
     while (m < nRunMax)
     {
         if (mhCounter != mhCounterPrev)
-        {
-            massHistsMeas.push_back(new TH1D(("Meas" + std::to_string(mhCounter)).c_str(), "Ks mass", 150, 494, 510));
-            massHistsCalc.push_back(new TH1D(("Calc" + std::to_string(mhCounter)).c_str(), "Ks mass", 150, 490, 505));
-        }
+        { massHistsMeas.push_back(new TH1D(("Meas" + std::to_string(mhCounter)).c_str(), "Ks mass", 150, 494, 510)); }
         j = 0; eSum = 0; eErrBackSum = 0; sumEntries = 0;
         while (m + j < nRunMax && sumEntries < 7000)
         {
             ksTr->GetEntry(entryNum[m + j]);
             sumEntries += runEntriesNum[m + j];
             eSum += e[m + j]; eErrBackSum += 1 / (eErr[m + j] * eErr[m + j]);
-            //eSumMeas += emeas; eErrBackSum += 1 / (demeas * demeas);
             l = entryNum[m + j];
             tmp = runnum;
             while (tmp == runnum && l < entryNum[nRunMax - 1] + runEntriesNum[nRunMax - 1])
@@ -211,7 +207,6 @@ size_t EnergyHandler::RunsDivider()
                 massFunc->SetParameter(0, emeas);
                 massHistsMeas[mhCounter]->Fill(massFunc->Eval(ksdpsi));
                 massFunc->SetParameter(0, e[m + j]);
-                massHistsCalc[mhCounter]->Fill(massFunc->Eval(ksdpsi));
                 l++;
                 ksTr->GetEntry(l);
             }
@@ -224,7 +219,6 @@ size_t EnergyHandler::RunsDivider()
             for (int i = 0; i < 10; i++)
             {
                 fermiStep->SetParameters(497.418, 0.335709, 66506, 399.187, 499.504, -9292.33);
-                //fermiStep->SetParameters(497.417, 0.347717, 4148.13, 492.705);
                 res = massHistsMeas[mhCounter]->Fit("fermiStep", "LSQE", "", 495.0, 501);
                 if (res->IsValid())
                 { break; }
@@ -233,23 +227,10 @@ size_t EnergyHandler::RunsDivider()
             ksTr->GetEntry(entryNum[m + j]);
             massErrFunc->SetParameter(0, emeas);
             revMassFunc->SetParameter(0, emeas);
-            //std::cout << mhCounter << " : mass1 = " << res->Parameter(0) << " : mass1Err = " << demeas * massErrFunc->Eval(revMassFunc->Eval(res->Parameter(0))) << std::endl;
-            //massEMeasErr.push_back(demeas * massErrFunc->Eval(revMassFunc->Eval(res->Parameter(0))));
             massEMeasErr.push_back(res->ParError(0));
 
-            for (int i = 0; i < 10; i++)
-            {
-                fermiStep->SetParameters(493.817, 0.345933, 3.43652e7, 480.579, 467.103, -312347);
-                //fermiStep->SetParameters(493.858, 0.332889, 3169.98, 489.695);
-                res = massHistsCalc[mhCounter]->Fit("fermiStep", "LSQE", "", 491.0, 497.2);
-                if (res->IsValid())
-                { break; }
-            }
-            massECalc.push_back(res->Parameter(0));
             massErrFunc->SetParameter(0, eSum / j);
             revMassFunc->SetParameter(0, eSum / j);
-            //massECalcErr.push_back(sqrt(1 / eErrBackSum) * massErrFunc->Eval(revMassFunc->Eval(res->Parameter(0))));
-            massECalcErr.push_back(res->ParError(0));
 
             mhCounter++;
         }
@@ -257,8 +238,14 @@ size_t EnergyHandler::RunsDivider()
     }
     file2.Write();
     file2.Close();
-    massHistsCalc.clear();
+
+    for(auto hist : massHistsMeas)
+    { delete hist; }
     massHistsMeas.clear();
+    
+    delete fermiStep; delete massFunc;
+    delete massErrFunc; delete revMassFunc; 
+
     return eMerge.size();
 }
 
@@ -288,8 +275,8 @@ void EnergyHandler::Draw()
     TGraphErrors *gEvsRunMeas = new TGraphErrors(groupsAmount, groupsStartRunnum.data(), emeasGrouped.data(), zeroes.data(), demeasGrouped.data());
     TGraphErrors *gEvsRunCalc = new TGraphErrors(groupsAmount, groupsStartRunnum.data(), eMerge.data(), zeroes.data(), eMergeErr.data());
     TGraphErrors *gMassMeasVsRun = new TGraphErrors(groupsAmount, groupsStartRunnum.data(), massEMeas.data(), zeroes.data(), massEMeasErr.data());
-    TGraphErrors *gMassCalcVsRun = new TGraphErrors(groupsAmount, groupsStartRunnum.data(), massECalc.data(), zeroes.data(), massECalcErr.data());
   
+    auto c1 = new TCanvas("EnergyStab", "EvsRunMeas, EvsRunCalc, MassVsRunMeas, MassVsRunCalc", 200, 10, 600, 400);
     c1->Divide(2, 2);
     gEvsRunMeas->SetLineColor(2);
 
@@ -297,11 +284,6 @@ void EnergyHandler::Draw()
     gEvsRunMeas->SetTitle("E meas vs Run");
     gEvsRunMeas->SetMarkerStyle(kFullDotLarge);
     gEvsRunMeas->DrawClone("AP");
-
-    c1->cd(4);
-    gMassCalcVsRun->SetTitle("Mass (E calc) vs Run");
-    gMassCalcVsRun->SetMarkerStyle(kFullDotLarge);
-    gMassCalcVsRun->DrawClone("AP");
 
     c1->cd(3);
     gEvsRunCalc->SetTitle("E calc vs Run");
@@ -312,11 +294,15 @@ void EnergyHandler::Draw()
     gMassMeasVsRun->SetTitle("Mass (E meas) vs Run");
     gMassMeasVsRun->SetMarkerStyle(kFullDotLarge);
     gMassMeasVsRun->DrawClone("AP");
+
+    delete gEvsRunMeas;
+    delete gEvsRunCalc;
+    delete gMassMeasVsRun;
 }
 
 void EnergyHandler::MassCriticalAngle()
 {
-    EnergyHandler::EnergyCalculation(pfY);
+    EnergyCalculation();
     EntryFilter();
     
     groupsAmount = RunsDivider();
@@ -343,7 +329,6 @@ void EnergyHandler::MassLnY()
     auto massF = new TF1("MassLnY", 
     "sqrt([0] * [0] * (1 - (1 + sqrt(1 - [1] *[1]) * cos(x))*(1 - sqrt(1 - [1] * [1] * (1 - 4 * 139.57 * 139.57 / [0] / [0])))/ [1] / [1] ))");
     
-    std::vector<Float_t> massY; std::vector<Float_t> lnY;
     auto hMlnY = new TH2D("hMlnY", "M(lnY)", 200, -1, 1, 200, 480, 520);
     for(int i = 0; i < ksTr->GetEntries(); i++)
     {
@@ -351,31 +336,37 @@ void EnergyHandler::MassLnY()
         if(std::find(badRuns.begin(), badRuns.end(), runnum) == badRuns.end() && abs(Y - 1) > 1e-6 && Y < 5 && Y > 0.4)
         {
             massF->SetParameters(emeas, (1 - Y*Y) / (1 + Y*Y));
-            massY.push_back(massF->Eval(ksdpsi));
-            lnY.push_back(log(Y));
             hMlnY->Fill(log(Y), massF->Eval(ksdpsi));
         }
     }
-    std::cout << 2 << std::endl;
-
-    TGraph *gMassLnY = new TGraph(lnY.size(), lnY.data(), massY.data());
     auto canv = new TCanvas("MlnY","Mass(lnY)", 200, 10, 600, 400);
-    gMassLnY->SetTitle("Mass(lnY)"); gMassLnY->SetMarkerStyle(kFullDotLarge);
-    //gMassLnY->Draw("AP");
+    auto pfx = hMlnY->ProfileX("hMlnY_pfx", 60, 160);
     hMlnY->DrawClone();
+    auto res = pfx->Fit("pol0", "SE0", "", -0.4, 0.4);
+    std::cout << "M(lnY) = " << res->Parameter(0) << " +- " << res->ParError(0) << std::endl;
+
+    delete massF;
+    delete hMlnY;
 }
 
 EnergyHandler::~EnergyHandler()
-{ }
+{
+    delete pfY;
+    delete ksTr;
+    delete kTr;
+}
 
 int massMeasRefactored()
 {
     auto start = std::chrono::system_clock::now();
+    
     //auto eHandler = new EnergyHandler("hists and root files/cuts/cutKch16Mar22_17h41m.root", "hists and root files/cuts/cutKs28Feb_23h37m.root");
     auto eHandler = new EnergyHandler("hists and root files/cuts/cutKch16Mar22_17h41m.root", "hists and root files/cuts/kskl_mcgpj5Apr10h08m.root");
+    
     //eHandler->MassCriticalAngle();
     eHandler->MassLnY();
-    //delete eHandler;
+    delete eHandler;
+
     auto end = std::chrono::system_clock::now();
     std::chrono::duration<double> diff = end - start;
     std::cout << "exec time = " << diff.count() << std::endl;
