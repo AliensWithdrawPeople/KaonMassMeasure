@@ -2,6 +2,7 @@
 #include "TCanvas.h"
 #include "TFile.h"
 #include "TF1.h"
+#include "TF2.h"
 #include "TTree.h"
 #include "TGraphErrors.h"
 #include "TGraph.h"
@@ -60,6 +61,7 @@ private:
     void EntryFilter();
     // Merges runs into groups, fills vector massHistMeas and fits each hist.
     size_t RunsDivider();
+    double RadCor(TF1 *massFunc);
     void Draw();
 
 public:
@@ -340,13 +342,31 @@ void EnergyHandler::MassLnY()
         }
     }
     auto canv = new TCanvas("MlnY","Mass(lnY)", 200, 10, 600, 400);
-    auto pfx = hMlnY->ProfileX("hMlnY_pfx", 60, 160);
     hMlnY->DrawClone();
-    auto res = pfx->Fit("pol0", "SE0", "", -0.4, 0.4);
-    std::cout << "M(lnY) = " << res->Parameter(0) << " +- " << res->ParError(0) << std::endl;
 
     delete massF;
     delete hMlnY;
+}
+
+EnergyHandler::RadCor(TF1 *massFunc, Float_t E, Float_t pRatio, Float_t psi)
+{
+    double beta = sqrt(1 - 497.611 * 497.611 / E / E);
+    TF1 Li2("Li2", "-TMath::Log(1-t)/t");
+    double L = TMath::Log(2*E / 0.511 / 0.511);
+    double a = TMath::Pi()*TMath::Pi() / 6 - 1/4;
+    double b = -1 + (1/beta-1)*L/2 + 1/beta*TMath::Log((1+beta)/2) + 
+                (1/beta + beta)/2 *(-Li2.Integral(0,(beta-1)/(1+beta)) + Li2.Integral(0, (1-beta)/(1+beta)) - TMath::Pi()*TMath::Pi()/12 + 
+                L*TMath::Log((1+beta)/2)-2*L*TMath::Log(beta) + 1.5*(TMath::Log((1+beta)/2))^2 -0.5*(TMath::Log(beta))^2 - 
+                3TMath::Log(beta)*TMath::Log((1+beta)/2) + L + 2*TMath::Log((1+beta)/2) );
+                
+    TF2 rc("RadCor", [&](double* x, double*p) { 
+        massFunc->SetParameters(E * (1-x[0]) * (1-x[1]), pRatio);
+        double ev = massFunc->Eval(psi) * (1+ 2/137/TMath::Pi() * (1+a+b) )
+        return x[0] + x[1] * p[0]; 
+        
+        }
+        
+        )
 }
 
 EnergyHandler::~EnergyHandler()
@@ -361,7 +381,7 @@ int massMeasRefactored()
     auto start = std::chrono::system_clock::now();
     
     //auto eHandler = new EnergyHandler("hists and root files/cuts/cutKch16Mar22_17h41m.root", "hists and root files/cuts/cutKs28Feb_23h37m.root");
-    auto eHandler = new EnergyHandler("hists and root files/cuts/cutKch16Mar22_17h41m.root", "hists and root files/cuts/kskl_mcgpj5Apr10h08m.root");
+    auto eHandler = new EnergyHandler("hists and root files/cuts/cutKch16Mar22_17h41m.root", "hists and root files/cuts/kskl_2bgen600k(min_nthit == 11 min_rho = 0.1).root");
     
     //eHandler->MassCriticalAngle();
     eHandler->MassLnY();
