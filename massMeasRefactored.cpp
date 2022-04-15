@@ -24,9 +24,7 @@ private:
     TProfile *pfY;
 
     Float_t emeas; Float_t demeas;
-
-    Int_t runnum;
-    Float_t ksdpsi;
+    Int_t runnum; Float_t ksdpsi;
 
     // Momentum ratio = P1/P2, where P1 is the momentum of pi+, P2 is the momentum of pi-.
     Float_t Y;
@@ -51,6 +49,9 @@ private:
     std::vector<Float_t> groupsStartRunnum;
 
     int nRunMax;
+    double sigmaPsiCrAngle;
+    double avgPsiCrAngle;
+
     std::vector<int> badRuns;
     // Number of groups of runs
     Int_t groupsAmount; 
@@ -63,13 +64,15 @@ private:
     void EntryFilter();
     // Merges runs into groups, fills vector massHistMeas and fits each hist.
     size_t RunsDivider();
-    double RadCor(TF1 *massFunc, Float_t E, Float_t pRatio, Float_t psi);
     void Draw();
 
 public:
     EnergyHandler(std::string fChargedK, std::string fKsKl);
     void MassLnY();
-    void MassCriticalAngle();
+    double GetMassCriticalAngle();
+
+    std::vector<int> GetBadRunsList();
+
     ~EnergyHandler();
 };
 
@@ -81,6 +84,7 @@ EnergyHandler::EnergyHandler(std::string fChargedK, std::string fKsKl)
     Int_t runnum_;
     Float_t tdedx[2];
     Float_t tptot[2];
+
     kTr->SetBranchAddress("runnum", &runnum_);
     kTr->SetBranchAddress("tdedx", tdedx);
     kTr->SetBranchAddress("tptot", tptot);
@@ -99,6 +103,9 @@ EnergyHandler::EnergyHandler(std::string fChargedK, std::string fKsKl)
 
     BadRunSearch();
 }
+
+std::vector<int> EnergyHandler::GetBadRunsList()
+{ return badRuns; }
 
 int EnergyHandler::BadRunSearch()
 {
@@ -174,7 +181,7 @@ void EnergyHandler::EntryFilter()
 
 size_t EnergyHandler::RunsDivider()
 {
-    auto massFunc = new TF1("mass1", "[0] * TMath::Sqrt(1 - (1 - 4 * 139.57 * 139.57 / [0] / [0]) * cos(x / 2) * cos(x / 2))");
+    auto massFuncCrAngle = new TF1("mass1", "[0] * TMath::Sqrt(1 - (1 - 4 * 139.57 * 139.57 / [0] / [0]) * cos(x / 2) * cos(x / 2))");
     auto massErrFunc = new TF1("massErr1", "(1 - cos(x / 2) * cos(x / 2)) / TMath::Sqrt(1 - (1 - 4 * 139.57 * 139.57 / [0] / [0]) * cos(x / 2) * cos(x / 2))");
     auto revMassFunc = new TF1("revMassFunc", "2*TMath::ACos(TMath::Sqrt((1 - x * x / [0] / [0])/(1-4*139.57 * 139.57 / [0] / [0])))");
 
@@ -195,6 +202,7 @@ size_t EnergyHandler::RunsDivider()
     int mhCounter = 0; // counter for massHists
     int mhCounterPrev = -1;
     int sumEntries = 0;
+
     while (m < nRunMax)
     {
         if (mhCounter != mhCounterPrev)
@@ -209,9 +217,9 @@ size_t EnergyHandler::RunsDivider()
             tmp = runnum;
             while (tmp == runnum && l < entryNum[nRunMax - 1] + runEntriesNum[nRunMax - 1])
             {
-                massFunc->SetParameter(0, emeas);
-                massHistsMeas[mhCounter].Fill(massFunc->Eval(ksdpsi));
-                massFunc->SetParameter(0, e[m + j]);
+                massFuncCrAngle->SetParameter(0, emeas);
+                massHistsMeas[mhCounter].Fill(massFuncCrAngle->Eval(ksdpsi));
+                massFuncCrAngle->SetParameter(0, e[m + j]);
                 l++;
                 ksTr->GetEntry(l);
             }
@@ -233,11 +241,11 @@ size_t EnergyHandler::RunsDivider()
             massErrFunc->SetParameter(0, eSum / j);
             revMassFunc->SetParameter(0, eSum / j);
             massEMeasErr.push_back(res->ParError(0));
-
             mhCounter++;
         }
         m += j;
     }
+
     massHistsMeas.pop_back();
     massHistsMeas.shrink_to_fit();
     nRunMax = nRunMax - 1;
@@ -246,7 +254,7 @@ size_t EnergyHandler::RunsDivider()
     file2.Close();
     
     massHistsMeas.clear();
-    delete fermiStep; delete massFunc;
+    delete fermiStep; delete massFuncCrAngle;
     delete massErrFunc; delete revMassFunc; 
     return eMerge.size();
 }
@@ -298,7 +306,7 @@ void EnergyHandler::Draw()
     gMassMeasVsRun.DrawClone("AP");
 }
 
-void EnergyHandler::MassCriticalAngle()
+double EnergyHandler::GetMassCriticalAngle()
 {
     EnergyCalculation();
     EntryFilter();
@@ -315,8 +323,9 @@ void EnergyHandler::MassCriticalAngle()
         else
         { std::cout<<"massEMeasErr["<< i <<"] = 0" << std::endl; }
     }
+
     std::cout << "mass(emeas) = " << bar / massEMeas.size() << " +- " << 1 / sqrt(barErr) << std::endl;
-    
+    return bar / massEMeas.size();
 }
 
 void EnergyHandler::MassLnY()
@@ -343,53 +352,6 @@ void EnergyHandler::MassLnY()
     delete hMlnY;
 }
 
-double EnergyHandler::RadCor(TF1 *massFunc, Float_t E, Float_t pRatio, Float_t psi)
-{
-    double kaonMass = 497.611; double electronMass = 0.511;
-    double s = 4 * E * E;
-    double beta_ = sqrt(1 - kaonMass * kaonMass / E / E);
-    TF1 Li2("Li2", "-TMath::Log(1-t)/t");
-    double L = 2 * TMath::Log(2*E / electronMass);
-    double a = TMath::Pi()*TMath::Pi() / 6 - 1/4;
-    double b = -1 + (1/beta_-1)*L/2 + 1/beta_*TMath::Log((1+beta_)/2) + 
-                (1/beta_ + beta_)/2 *(-Li2.Integral(0,(beta_-1)/(1+beta_)) + Li2.Integral(0, (1-beta_)/(1+beta_)) - TMath::Pi()*TMath::Pi()/12 + 
-                L*TMath::Log((1+beta_)/2)-2*L*TMath::Log(beta_) + 1.5*pow(TMath::Log((1+beta_)/2), 2) -0.5*pow(TMath::Log(beta_), 2) - 
-                3*TMath::Log(beta_)*TMath::Log((1+beta_)/2) + L + 2*TMath::Log((1+beta_)/2) );
-
-    /* 
-    D(x,s) = D_gamma + D_e+e-. 
-    [0] - b=2*alpha/pi * (L-1); [1] - L; [2] - 2*m_e/E.
-    For definition go to https://arxiv.org/abs/hep-ph/9703456v1.
-    */
-    TF1 D("D func", "pow([0]/2*(1-x), [0]/2-1) * ( 1+3*[0]/8+[0]*[0]/16*(9/8-TMath::Pi()*TMath::Pi()/3)) - [0]/4*(1+x)+ \
-        [0]*[0]/32*(4*(1+x)*TMath::Log(1/(1-x)) + (1+3*x*x)/(1-x)*TMath::Log(1/x)-5-x) + \
-        pow([0]/2*(1-x), [0]/2-1)*(-[0]*[0]/288*(2*[1] - 15)) + pow((1/137/TMath::Pi()), 2) * ( 1/12/(1-x) * \
-        pow((1-x-[2]), [0]/2)*(pow(pow(TMath::Log((1-x), 2) /[2]/[2])-5/3), 2) *(1+x^2+[0]/6*(pow(TMath::Log((1-x), 2) /[2]/[2])-5/3)) +\
-        [1]*[1]/4*(2/3*(1-x^3)/x+1/2*(1-x) + (1+x)*TMath::Log(x)) ) * ((1-x-[2] > 0) ? 1 : 0) ");
-
-    /*
-    Cross-section of e+e- -> KsKl.
-    For definition go to https://arxiv.org/abs/1604.02981v3 or https://doi.org/10.1142/S0217751X92001423.
-    TO-DO!!!
-    */
-    TF1 sigma0("sigma0", "1");
-
-    // Krc(s, x1, x2); 
-    // For definition go to https://arxiv.org/abs/hep-ph/9703456v1.
-    TF2 Krc("K RadCor", [&](double* x, double*p) { 
-        massFunc->SetParameters(E * (1-x[0]) * (1-x[1]), pRatio);
-        double bForDFormula = 2/137/TMath::Pi()*(L - 1);
-        D.SetParameters(bForDFormula, L, 2 * electronMass / E);
-        //sigma0.SetParameters(); // TO-DO!!!
-        return (fabs(p[0] - 1) < 0.1 ? massFunc->Eval(psi) : 1) * (1 + 2/137/TMath::Pi() * (1+a+b)) * D.Eval(x[0]) * D.Eval(x[1]) * sigma0(s*(1-x[0]) * (1-x[1])); 
-        }, 0, 1, 0, 1, 1);
-    Krc.SetParameter(0, 0);
-    Double_t N = Krc.Integral(0., 1., 0., 1.);
-    
-    Krc.SetParameter(0, 1);
-    return Krc.Integral(0., 1., 0., 1.) / N;
-}
-
 EnergyHandler::~EnergyHandler()
 {
     delete pfY;
@@ -404,8 +366,10 @@ int massMeasRefactored()
     //auto eHandler = new EnergyHandler("hists and root files/cuts/cutKch16Mar22_17h41m.root", "hists and root files/cuts/cutKs28Feb_23h37m.root");
     auto eHandler = new EnergyHandler("hists and root files/cuts/cutKch16Mar22_17h41m.root", "hists and root files/cuts/kskl_2bgen600k(min_nthit == 11 min_rho = 0.1).root");
     
-    eHandler->MassCriticalAngle();
-    //eHandler->MassLnY();
+    double mass = eHandler->GetMassCriticalAngle();
+    //std::cout << "corrected M(psi_cr) = "<< mass << std::endl;
+    //std::cout << "corrected M(lnY) = " << eHandler->AvgCor(497.61, 510.) << std::endl;
+    // eHandler->MassLnY();
     delete eHandler;
 
     auto end = std::chrono::system_clock::now();
