@@ -363,13 +363,11 @@ int massMeasRefactored()
 {
     auto start = std::chrono::system_clock::now();
     
-    //auto eHandler = new EnergyHandler("hists and root files/cuts/cutKch16Mar22_17h41m.root", "hists and root files/cuts/cutKs28Feb_23h37m.root");
-    auto eHandler = new EnergyHandler("hists and root files/cuts/cutKch16Mar22_17h41m.root", "hists and root files/cuts/kskl_2bgen600k(min_nthit == 11 min_rho = 0.1).root");
+    auto eHandler = new EnergyHandler("hists and root files/cuts/cutKch16Mar22_17h41m.root", "hists and root files/cuts/cutKs28Feb_23h37m.root");
+    //auto eHandler = new EnergyHandler("hists and root files/cuts/cutKch16Mar22_17h41m.root", "hists and root files/cuts/kskl_2bgen600k(min_nthit == 11 min_rho = 0.1).root");
     
-    double mass = eHandler->GetMassCriticalAngle();
-    //std::cout << "corrected M(psi_cr) = "<< mass << std::endl;
-    //std::cout << "corrected M(lnY) = " << eHandler->AvgCor(497.61, 510.) << std::endl;
-    // eHandler->MassLnY();
+    //eHandler->GetMassCriticalAngle();
+    eHandler->MassLnY();
     delete eHandler;
 
     auto end = std::chrono::system_clock::now();
