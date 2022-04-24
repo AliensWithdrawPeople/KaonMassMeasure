@@ -73,7 +73,7 @@ Corrections::~Corrections()
 
 void Corrections::CalcResolutions()
 {
-    auto hPsilnY = new TH2D("hPsilnY", "Psi(lnY)", 200, -0.05, 0.05, 200, 2.45, 2.8);
+    auto hPsilnY = new TH2D("hPsilnY", "Psi(lnY)", 200, -0.4, 0.4, 200, 2.45, 2.8);
     auto hPsi = new TH1D("hPsi", "Psi", 200, 2.4, 3.2);
 
     double Yavg = 0;
@@ -88,7 +88,7 @@ void Corrections::CalcResolutions()
             Yavg += Y;
             counter++;
             hPsi->Fill(ksdpsi);
-            if(fabs(Y - 1) > 1e-6 && fabs(log(Y)) <= 0.05)
+            if(fabs(Y - 1) > 1e-6 && fabs(log(Y)) <= 0.2)
             { hPsilnY->Fill(log(Y), ksdpsi); }
         }
     }
@@ -99,7 +99,7 @@ void Corrections::CalcResolutions()
     for(int i = 0; i < 10; i++)
     {
         fermiStep->SetParameters(2.61082, 0.0102736, 4.36229, 2.29701);
-        res = hPsi->Fit("fermiStep", "SQE0", "", 2.50, 2.69);
+        res = hPsi->Fit("fermiStep", "SQE0", "", 2.50, 2.65);
         if (res->IsValid())
         { break; }
     }
@@ -109,7 +109,7 @@ void Corrections::CalcResolutions()
     auto psiProjY = hPsilnY->ProjectionY();
     for(int i = 0; i < 10; i++)
     {
-        res = psiProjY->Fit("gaus", "LSQE", "", 2.57, 2.65);
+        res = psiProjY->Fit("gaus", "LSQE", "", 2.58, 2.65);
         if (res->IsValid())
         { break; }
     }
