@@ -2,7 +2,7 @@
 #include "TF2.h"
 #include "TTree.h"
 #include <vector>
-#include <complex.h>
+#include <complex>
 #include <algorithm>
 #include <chrono>
 #include <ctime> 
@@ -17,48 +17,68 @@ private:
     Float_t E;
     Float_t pRatio;
     Float_t psi;
-    Float_t pK0;
     double s;
-    // Maybe: 1 / alpha = 137.071999.
-    static const double alpha = 1 / 137.035999;  
-    static const double kaonMass = 497.611;   
-    static const double electronMass = 0.511;
 
-    // Born cross-section.
+    double L;
+    // Maybe: 1 / alpha = 137.071999.
+    constexpr static double alpha = 1 / 137.035999;  
+    constexpr static double kaonMass = 497.611;   
+    constexpr static double electronMass = 0.511;
+    constexpr static double pi = 3.14159265358979323846;
+    // Relevant to D function.
+    constexpr static double a = pi * pi / 6 - 1/4;
+
+    /*
+    Born cross-section of e+e- -> KsKl.
+    For definition go to https://arxiv.org/abs/1604.02981v3 or https://doi.org/10.1142/S0217751X92001423.
+    Look here: https://cmd.inp.nsk.su/websvn/filedetails.php?repname=Cmd3Sim&path=%2Ftrunk%2Fgenerator%2Fradcor%2Fsrc%2FTKnFormFactor.C
+    */
     double Sigma0(const double &s);
     // Return FormFactor of e+e- -> KsKl.
     std::complex<double> FormFactor(const double &s);
 public:
-    RadCor(Float_t K0momentum, Float_t energy, Float_t ksdpsi, Float_t momentumRatio);
+    RadCor(Float_t energy, Float_t ksdpsi, Float_t momentumRatio);
     double RadCorEval();
     ~RadCor();
 };
 
-RadCor::RadCor(Float_t K0momentum, Float_t energy, Float_t ksdpsi, Float_t momentumRatio)
+RadCor::RadCor(Float_t energy, Float_t ksdpsi, Float_t momentumRatio)
 {
     E = energy; pRatio = momentumRatio;
-    psi = ksdpsi; pK0 = K0momentum;
+    psi = ksdpsi;
+
+    //massFunc = new TF1("mass1", "[0] * TMath::Sqrt(1 - (1 - 4 * 139.57 * 139.57 / [0] / [0]) * cos(x / 2) * cos(x / 2))");
+    massFunc = new TF1("MassLnY", "sqrt([0] * [0] * (1 - (1 + sqrt(1 - [1] *[1]) * cos(x))*(1 - sqrt(1 - [1] * [1] * (1 - 4 * 139.57 * 139.57 / [0] / [0])))/ [1] / [1] ))");
+    massFunc->SetParameter(1, (1 - pRatio*pRatio) / (1 + pRatio*pRatio));
 
     s = 4 * E * E;
     // Auxilary function 
-    Li2 = new TF1("Li2", "-TMath::Log(1-t)/t");
-    /* 
-    D(x,s) = D_gamma + D_e+e-. 
-    [0] - b=2*alpha/pi * (L-1); [1] - L; [2] - 2*m_e/E.
-    For definition go to https://arxiv.org/abs/hep-ph/9703456v1.
-    */
-    D = new TF1("D func", "pow([0]/2*(1-x), [0]/2-1) * ( 1+3*[0]/8+[0]*[0]/16*(9/8-TMath::Pi()*TMath::Pi()/3)) - [0]/4*(1+x)+ \
-        [0]*[0]/32*(4*(1+x)*TMath::Log(1/(1-x)) + (1+3*x*x)/(1-x)*TMath::Log(1/x)-5-x) + \
-        pow([0]/2*(1-x), [0]/2-1)*(-[0]*[0]/288*(2*[1] - 15)) + pow((1/137/TMath::Pi()), 2) * ( 1/12/(1-x) * \
-        pow((1-x-[2]), [0]/2)*(pow(pow(TMath::Log((1-x), 2) /[2]/[2])-5/3), 2) *(1+pow(x, 2) +[0]/6*(pow(TMath::Log((1-x), 2) /[2]/[2])-5/3)) +\
-        [1]*[1]/4*(2/3*(1-x^3)/x+1/2*(1-x) + (1+x)*TMath::Log(x)) ) * ((1-x-[2] > 0) ? 1 : 0)");
+    Li2 = new TF1("Li2", "-TMath::Log(1-x[0])/x[0]");
+
+    L = 2 * TMath::Log(2*E / electronMass);
+    // par1 = b=2*alpha/pi * (L-1)
+    double par1 = 2 * alpha/TMath::Pi()*(L - 1.);
+    // par2 = 2*m_e/E
+    double par2 = 2. * electronMass / E;
 
     /*
-    Cross-section of e+e- -> KsKl.
-    For definition go to https://arxiv.org/abs/1604.02981v3 or https://doi.org/10.1142/S0217751X92001423.
-    Look here: https://cmd.inp.nsk.su/websvn/filedetails.php?repname=Cmd3Sim&path=%2Ftrunk%2Fgenerator%2Fradcor%2Fsrc%2FTKnFormFactor.C
+    Structure D-function 
+    D(x,s) = D_gamma + D_e+e-. 
+    For definition go to https://arxiv.org/abs/hep-ph/9703456v1.
     */
-    Sigma0();
+    D = new TF1("D func", [&](double *x, double *p){
+        double Dgamma = par1/2. * pow((1-x[0]), par1/2.-1.) * (1. + 3.*par1/8. + par1*par1/16.*(9./8.- pi * pi/3.)) 
+        - par1/4.*(1+x[0]) + par1*par1/32.*(-4.*(1+x[0])*TMath::Log(1.-x[0]) - (1+3.*x[0]*x[0])/(1.-x[0])*TMath::Log(x[0])-5.-x[0]);
+
+        double Dee = 0;
+        if(1-x[0]-par2 > 0)
+        {
+            Dee = par1/2*pow(1-x[0], par1/2.-1.)*(-par1*par1/288.*(2.*L - 15.)) + 
+            pow(alpha / pi, 2.) * ( 1./12./(1.-x[0]) * pow(1.-x[0]-par2, par1/2.)*pow(2. * TMath::Log((1.-x[0]) / par2) - 5./3., 2.) *
+            (1.+x[0] * x[0] + par1/6.*(2. * TMath::Log((1.- x[0]) / par2) - 5./3.)) + L*L/4.*(2./3.*(1-pow(x[0], 3.)) / x[0] + (1.-x[0]) / 2. +
+            (1. + x[0])*TMath::Log(x[0])) );
+        }
+        return Dgamma + Dee;}, 1e-6, 1-1e-6, 1);
 }
 
 RadCor::~RadCor()
@@ -110,16 +130,14 @@ std::complex<double> RadCor::FormFactor(const double &s)
 double RadCor::Sigma0(const double &s)
 {
     auto ff = FormFactor(s);
-    return alpha * alpha * (1 - 4 * kaonMass * kaonMass / s) * TMath::Pi() / s * fabs(ff * std::conj(ff));
+    return alpha * alpha * pow(1 - 4 * kaonMass * kaonMass / s, 3./2.) * 2 / 3 * TMath::Pi() / s * abs(ff * std::conj(ff));
 }
 
 double RadCor::RadCorEval()
 {
     double beta_ = sqrt(1 - kaonMass * kaonMass / E / E);
-    double L = 2 * TMath::Log(2*E / electronMass);
-    double a = TMath::Pi()*TMath::Pi() / 6 - 1/4;
     double b = -1 + (1/beta_-1)*L/2 + 1/beta_*TMath::Log((1+beta_)/2) + 
-                (1/beta_ + beta_)/2 *(-Li2.Integral(0,(beta_-1)/(1+beta_)) + Li2.Integral(0, (1-beta_)/(1+beta_)) - TMath::Pi()*TMath::Pi()/12 + 
+                (1/beta_ + beta_)/2 *(-Li2->Integral(0,(beta_-1)/(1+beta_)) + Li2->Integral(0, (1-beta_)/(1+beta_)) - TMath::Pi()*TMath::Pi()/12 + 
                 L*TMath::Log((1+beta_)/2)-2*L*TMath::Log(beta_) + 1.5*pow(TMath::Log((1+beta_)/2), 2) -0.5*pow(TMath::Log(beta_), 2) - 
                 3*TMath::Log(beta_)*TMath::Log((1+beta_)/2) + L + 2*TMath::Log((1+beta_)/2) );
 
@@ -130,21 +148,29 @@ double RadCor::RadCorEval()
                                 p[0] == 1 stands for convolution of mass func and Krc.  
     For definition go to https://arxiv.org/abs/hep-ph/9703456v1.
     */
-    TF2 Krc("K RadCor", [&](double* x, double*p) { 
-        massFunc->SetParameters(E * (1-x[0]) * (1-x[1]), pRatio);
-        double bForDFormula = 2/137/TMath::Pi()*(L - 1);
-        D.SetParameters(bForDFormula, L, 2 * electronMass / E);
-        return (fabs(p[0] - 1) < 0.1 ? massFunc->Eval(psi) : 1) * (1 + 2/137/TMath::Pi() * (1+a+b)) * D.Eval(x[0]) * D.Eval(x[1]) * Sigma0(s*(1-x[0]) * (1-x[1])); 
-        }, 0, 1, 0, 1, 1);
-    Krc.SetParameter(0, 0);
+   std::cout<<"faf"<<std::endl;
+    TF2 Krc("K RadCor", [&](double* x, double* p) { 
+        massFunc->SetParameter(0, E * sqrt((1-x[0]) * (1-x[1])));
+        if(1 - 4 * kaonMass * kaonMass / ( s*(1.-x[0]) * (1.-x[1]) ) >= 0)
+        { 
+            return (fabs(p[0] - 1) < 0.1 ? massFunc->Eval(psi) : 1) * 
+            (1 + 2 * alpha / pi * (1 + a + b)) * D->Eval(x[0]) * D->Eval(x[1]) * Sigma0(s*(1-x[0]) * (1-x[1])); 
+        }
+        else
+        { return 0.; }
 
-    Double_t N = Krc.Integral(0., 1., 0., 1.);
-    
+        }, 1e-6, 0.05, 1e-6, 0.05, 1);
+    Krc.SetParameter(0, 0);
+    Double_t N = Krc.Integral(1e-6, 0.05, 1e-6, 0.05);
     Krc.SetParameter(0, 1);
-    return Krc.Integral(0., 1., 0., 1.) / N;
+    massFunc->SetParameter(0, E);
+    return massFunc->Eval(psi);
+    //return Krc.Integral(1e-6, 0.05, 1e-6, 0.05) / N;
 }
 
 int radCor()
 {
-    
+    auto rc = new RadCor(510., 2.61545, 1e-6);
+    std::cout << rc->RadCorEval() << std::endl;
+    return 0;
 }
