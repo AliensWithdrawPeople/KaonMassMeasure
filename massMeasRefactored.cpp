@@ -23,6 +23,9 @@ private:
     TTree *ksTr;
     TProfile *pfY;
 
+    TF1 *massCrAngle;
+    TF1 *massFullRec;
+
     Float_t emeas; Float_t demeas;
     Int_t runnum; Float_t ksdpsi;
 
@@ -68,7 +71,7 @@ private:
 
 public:
     EnergyHandler(std::string fChargedK, std::string fKsKl);
-    void MassLnY();
+    void MassLnY(int drawOpt = 0);
     double GetMassCriticalAngle();
 
     std::vector<int> GetBadRunsList();
@@ -84,6 +87,14 @@ EnergyHandler::EnergyHandler(std::string fChargedK, std::string fKsKl)
     Int_t runnum_;
     Float_t tdedx[2];
     Float_t tptot[2];
+
+    // [0] = energy;
+    massCrAngle = new TF1("mass1", "[0] * TMath::Sqrt(1 - (1 - 4 * 139.57 * 139.57 / [0] / [0]) * cos(x / 2) * cos(x / 2))");
+
+    // [0] = E; [1] = eta = (1 - Y^2) / (1 + Y^2)
+    // M = sqrt(E^2[1- 1/eta^2 (1+sqrt(1-eta^2)cosx) * (1 - sqrt(1-eta^2 * [1 - 4 * 139.57 * 139.57 / E^2]))]
+    massFullRec = new TF1("MassLnY", 
+    "sqrt([0] * [0] * (1 - (1 + sqrt(1 - [1] *[1]) * cos(x))*(1 - sqrt(1 - [1] * [1] * (1 - 4 * 139.57 * 139.57 / [0] / [0])))/ [1] / [1] ))");
 
     kTr->SetBranchAddress("runnum", &runnum_);
     kTr->SetBranchAddress("tdedx", tdedx);
@@ -181,7 +192,7 @@ void EnergyHandler::EntryFilter()
 
 size_t EnergyHandler::RunsDivider()
 {
-    auto massFuncCrAngle = new TF1("mass1", "[0] * TMath::Sqrt(1 - (1 - 4 * 139.57 * 139.57 / [0] / [0]) * cos(x / 2) * cos(x / 2))");
+    // [0] - energy
     auto massErrFunc = new TF1("massErr1", "(1 - cos(x / 2) * cos(x / 2)) / TMath::Sqrt(1 - (1 - 4 * 139.57 * 139.57 / [0] / [0]) * cos(x / 2) * cos(x / 2))");
     auto revMassFunc = new TF1("revMassFunc", "2*TMath::ACos(TMath::Sqrt((1 - x * x / [0] / [0])/(1-4*139.57 * 139.57 / [0] / [0])))");
 
@@ -217,9 +228,9 @@ size_t EnergyHandler::RunsDivider()
             tmp = runnum;
             while (tmp == runnum && l < entryNum[nRunMax - 1] + runEntriesNum[nRunMax - 1])
             {
-                massFuncCrAngle->SetParameter(0, emeas);
-                massHistsMeas[mhCounter].Fill(massFuncCrAngle->Eval(ksdpsi));
-                massFuncCrAngle->SetParameter(0, e[m + j]);
+                massCrAngle->SetParameter(0, emeas);
+                massHistsMeas[mhCounter].Fill(massCrAngle->Eval(ksdpsi));
+                massCrAngle->SetParameter(0, e[m + j]);
                 l++;
                 ksTr->GetEntry(l);
             }
@@ -232,7 +243,7 @@ size_t EnergyHandler::RunsDivider()
             for (int i = 0; i < 10; i++)
             {
                 fermiStep->SetParameters(497.418, 0.335709, 66506, 399.187, 499.504, -9292.33);
-                res = massHistsMeas[mhCounter].Fit("fermiStep", "LSQE0", "", 495.0, 501);
+                res = massHistsMeas[mhCounter].Fit("fermiStep", "LSQE", "", 495.0, 501);
                 if (res->IsValid())
                 { break; }
             }
@@ -254,8 +265,8 @@ size_t EnergyHandler::RunsDivider()
     file2.Close();
     
     massHistsMeas.clear();
-    delete fermiStep; delete massFuncCrAngle;
-    delete massErrFunc; delete revMassFunc; 
+    delete fermiStep; delete massErrFunc; 
+    delete revMassFunc; 
     return eMerge.size();
 }
 
@@ -328,28 +339,45 @@ double EnergyHandler::GetMassCriticalAngle()
     return bar / massEMeas.size();
 }
 
-void EnergyHandler::MassLnY()
-{
-    // [0] = E; [1] = eta = (1 - Y^2) / (1 + Y^2)
-    // M = sqrt(E^2[1- 1/eta^2 (1+sqrt(1-eta^2)cosx) * (1 - sqrt(1-eta^2 * [1 - 4 * 139.57 * 139.57 / E^2]))]
-    auto massF = new TF1("MassLnY", 
-    "sqrt([0] * [0] * (1 - (1 + sqrt(1 - [1] *[1]) * cos(x))*(1 - sqrt(1 - [1] * [1] * (1 - 4 * 139.57 * 139.57 / [0] / [0])))/ [1] / [1] ))");
-    
+void EnergyHandler::MassLnY(int drawOpt = 0)
+{    
     auto hMlnY = new TH2D("hMlnY", "M(lnY)", 200, -1, 1, 200, 480, 520);
+    auto hM_CrAnglelnY = new TH2D("hM_CrAnglelnY", "M_CrAngle(lnY)", 200, -0.4, 0.4, 200, 490, 515);
+    auto hPsilnY = new TH2D("hPsilnY", "Psi(lnY)", 200, -0.4, 0.4, 200, 2.5, 3.1);
     for(int i = 0; i < ksTr->GetEntries(); i++)
     {
         ksTr->GetEntry(i);
-        if(std::find(badRuns.begin(), badRuns.end(), runnum) == badRuns.end() && abs(Y - 1) > 1e-6 && Y < 5 && Y > 0.4)
+        if(std::find(badRuns.begin(), badRuns.end(), runnum) == badRuns.end() && abs(Y - 1) > 1e-9)
         {
-            massF->SetParameters(emeas, (1 - Y*Y) / (1 + Y*Y));
-            hMlnY->Fill(log(Y), massF->Eval(ksdpsi));
+            massFullRec->SetParameters(emeas, (1 - Y*Y) / (1 + Y*Y));
+            massCrAngle->SetParameter(0, emeas);
+            hMlnY->Fill(log(Y), massFullRec->Eval(ksdpsi));
+            hM_CrAnglelnY->Fill(log(Y), massCrAngle->Eval(ksdpsi));
+            hPsilnY->Fill(log(Y), ksdpsi);
         }
     }
     auto canv = new TCanvas("MlnY","Mass(lnY)", 200, 10, 600, 400);
-    hMlnY->DrawClone();
+    switch (drawOpt)
+    {
+    case 0:
+        hMlnY->DrawClone();
+        break;
 
-    delete massF;
+    case 1:
+        hM_CrAnglelnY->ProfileX()->DrawClone();
+        break;
+    
+    case 2:
+        hPsilnY->ProfileX()->DrawClone();
+        break;
+    default:
+        hMlnY->DrawClone();
+        break;
+    }
+
     delete hMlnY;
+    delete hM_CrAnglelnY;
+    delete hPsilnY;
 }
 
 EnergyHandler::~EnergyHandler()
@@ -357,17 +385,20 @@ EnergyHandler::~EnergyHandler()
     delete pfY;
     delete ksTr;
     delete kTr;
+    delete massCrAngle;
+    delete massFullRec;
 }
 
 int massMeasRefactored()
 {
+    gROOT->Reset();
     auto start = std::chrono::system_clock::now();
     
-    auto eHandler = new EnergyHandler("hists and root files/cuts/cutKch16Mar22_17h41m.root", "hists and root files/cuts/cutKs28Feb_23h37m.root");
-    //auto eHandler = new EnergyHandler("hists and root files/cuts/cutKch16Mar22_17h41m.root", "hists and root files/cuts/kskl_2bgen600k(min_nthit == 11 min_rho = 0.1).root");
+    //auto eHandler = new EnergyHandler("hists and root files/cuts/cutKch16Mar22_17h41m.root", "hists and root files/cuts/cutKs28Feb_23h37m.root");
+    auto eHandler = new EnergyHandler("hists and root files/cuts/cutKch16Mar22_17h41m.root", "hists and root files/cuts/kskl_2bgen600k(min_nthit == 11 min_rho = 0.1).root");
     
     //eHandler->GetMassCriticalAngle();
-    eHandler->MassLnY();
+    eHandler->MassLnY(0);
     delete eHandler;
 
     auto end = std::chrono::system_clock::now();

@@ -47,10 +47,11 @@ RadCor::RadCor(Float_t energy, Float_t ksdpsi, Float_t momentumRatio)
     E = energy; pRatio = momentumRatio;
     psi = ksdpsi;
 
-    //massFunc = new TF1("mass1", "[0] * TMath::Sqrt(1 - (1 - 4 * 139.57 * 139.57 / [0] / [0]) * cos(x / 2) * cos(x / 2))");
+    massFunc = new TF1("mass1", "[0] * TMath::Sqrt(1 - (1 - 4 * 139.57 * 139.57 / [0] / [0]) * cos(x / 2) * cos(x / 2))");
+    /*
     massFunc = new TF1("MassLnY", "sqrt([0] * [0] * (1 - (1 + sqrt(1 - [1] *[1]) * cos(x))*(1 - sqrt(1 - [1] * [1] * (1 - 4 * 139.57 * 139.57 / [0] / [0])))/ [1] / [1] ))");
     massFunc->SetParameter(1, (1 - pRatio*pRatio) / (1 + pRatio*pRatio));
-
+    */
     s = 4 * E * E;
     // Auxilary function 
     Li2 = new TF1("Li2", "-TMath::Log(1-x[0])/x[0]");
@@ -150,7 +151,7 @@ double RadCor::RadCorEval()
     */
    std::cout<<"faf"<<std::endl;
     TF2 Krc("K RadCor", [&](double* x, double* p) { 
-        massFunc->SetParameter(0, E * sqrt((1-x[0]) * (1-x[1])));
+        massFunc->SetParameter(0, E * sqrt((1-x[0]) * (1-x[1])) );
         if(1 - 4 * kaonMass * kaonMass / ( s*(1.-x[0]) * (1.-x[1]) ) >= 0)
         { 
             return (fabs(p[0] - 1) < 0.1 ? massFunc->Eval(psi) : 1) * 
@@ -163,14 +164,15 @@ double RadCor::RadCorEval()
     Krc.SetParameter(0, 0);
     Double_t N = Krc.Integral(1e-6, 0.05, 1e-6, 0.05);
     Krc.SetParameter(0, 1);
+    double rc = Krc.Integral(1e-6, 0.05, 1e-6, 0.05) / N;
     massFunc->SetParameter(0, E);
-    return massFunc->Eval(psi);
-    //return Krc.Integral(1e-6, 0.05, 1e-6, 0.05) / N;
+    return massFunc->Eval(2.61289);
+    //return rc - massFunc->Eval(2.615);
 }
 
 int radCor()
 {
-    auto rc = new RadCor(510., 2.61545, 1e-6);
+    auto rc = new RadCor(510., 2.61545, 1. - 1e-5);
     std::cout << rc->RadCorEval() << std::endl;
     return 0;
 }

@@ -25,11 +25,9 @@ private:
     TF1 *massFuncFullRec;
 
     // sigma_psi - uncertainty of critical angle between pi+ and pi-(particles after decay of Ks).
-    double sigmaPsiCrAngle;
-    double avgPsiCrAngle;
+    double avgPsi;
     double sigmaPsi;
-    double avgPsiFullRec;
-    
+
     std::vector<int> badRuns;
 
     Float_t emeas; Float_t demeas;
@@ -42,7 +40,7 @@ public:
     Corrections(std::string fKsKl, std::vector<int> badRuns);
     double CalcCor(double massKs, double energy, double psiAvg, double sigmaPsi, bool isCriticalAngleMethod = false);
     double GetCorrectedMass(double massKs, double energy, bool isCriticalAngleMethod = true);
-    std::tuple<double, double> GetResolution(bool isCriticalAngleMethod = true);
+    std::tuple<double, double> GetResolution();
     ~Corrections();
 };
 
@@ -88,70 +86,50 @@ void Corrections::CalcResolutions()
             Yavg += Y;
             counter++;
             hPsi->Fill(ksdpsi);
-            if(fabs(Y - 1) > 1e-6 && fabs(log(Y)) <= 0.2)
+            if(fabs(Y - 1) > 1e-9)
             { hPsilnY->Fill(log(Y), ksdpsi); }
         }
     }
     Yavg /=counter;
     eAvg /= counter;
-    auto fermiStep = new TF1("fermiStep", "[2]/(exp(-(x-[0])/[1])+1)/((x-[3])^4 + (x-[4])^2)");
     TFitResultPtr res;
     for(int i = 0; i < 10; i++)
     {
-        fermiStep->SetParameters(2.61082, 0.0102736, 4.36229, 2.29701);
-        res = hPsi->Fit("fermiStep", "SQE0", "", 2.50, 2.65);
+        res = hPsilnY->ProfileX()->Fit("pol6", "SQE0", "", -0.4, 0.4);
         if (res->IsValid())
         { break; }
     }
-    avgPsiCrAngle = res->Parameter(0);
-    sigmaPsiCrAngle = res->ParError(0);
-
-    auto psiProjY = hPsilnY->ProjectionY();
-    for(int i = 0; i < 10; i++)
-    {
-        res = psiProjY->Fit("gaus", "LSQE", "", 2.58, 2.65);
-        if (res->IsValid())
-        { break; }
-    }
-    avgPsiFullRec = res->Parameter(1); //2.61545; // DO IT CORRECTLY!!!
-    sigmaPsi = res->Parameter(2); //0.0226; // DO IT CORRECTLY!!!
+    avgPsi = res->Parameter(0);
+    sigmaPsi = 0.01; //res->ParError(0);
+    std::cout << "sigma_psi = " << sigmaPsi << std::endl;
 
     massFuncCrAngle->SetParameter(0, eAvg);
     massFuncFullRec->SetParameters(eAvg, (1 - Yavg * Yavg) / (1 + Yavg * Yavg));
     
-    delete fermiStep;
     delete hPsi;
     delete hPsilnY;
 }
 
 double Corrections::CalcCor(double massKs, double energy, double psiAvg, double sigmaPsi, bool isCriticalAngleMethod = false)
 {
-    double Mcorr = massKs - sigmaPsi*sigmaPsi / 2 * (isCriticalAngleMethod? massFuncCrAngle->Derivative2(psiAvg) : massFuncFullRec->Derivative2(psiAvg));
+    double Mcorr = sigmaPsi * sigmaPsi / 2 * (isCriticalAngleMethod? massFuncCrAngle->Derivative2(psiAvg) : massFuncFullRec->Derivative2(psiAvg));
     return Mcorr;
 }
 
-std::tuple<double, double> Corrections::GetResolution(bool isCriticalAngleMethod = true)
-{
-    if(isCriticalAngleMethod)
-    { return std::make_tuple(avgPsiCrAngle, sigmaPsiCrAngle); }
-    else
-    { return std::make_tuple(avgPsiFullRec, sigmaPsi); }
-}
+std::tuple<double, double> Corrections::GetResolution()
+{ return std::make_tuple(avgPsi, sigmaPsi); }
 
 double Corrections::GetCorrectedMass(double massKs, double energy, bool isCriticalAngleMethod = true)
 {
     double massCorrected = -1;
-    if(isCriticalAngleMethod)
-    { massCorrected = CalcCor(massKs, energy, avgPsiCrAngle, sigmaPsi, true); }
-    else
-    { massCorrected = CalcCor(massKs, energy, avgPsiFullRec, sigmaPsi, false); }
+    massCorrected = CalcCor(massKs, energy, avgPsi, sigmaPsi, isCriticalAngleMethod);
     return massCorrected;
 }
 
 void corrections()
 {
     auto cor = new Corrections("hists and root files/cuts/kskl_2bgen600k(min_nthit == 11 min_rho = 0.1).root", {});
-    std::cout << cor->GetCorrectedMass(497.579, 510, true) << std::endl;
+    std::cout << cor->GetCorrectedMass(497.610, 510, true) << std::endl;
     // FullRec 497.604
     // CrAngle 497.579
     delete cor;
