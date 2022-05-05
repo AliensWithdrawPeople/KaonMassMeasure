@@ -100,7 +100,7 @@ void Corrections::CalcResolutions()
         { break; }
     }
     avgPsi = res->Parameter(0);
-    sigmaPsi = 0.01; //res->ParError(0);
+    sigmaPsi = 1.64407e-02; //res->ParError(0);
     std::cout << "sigma_psi = " << sigmaPsi << std::endl;
 
     massFuncCrAngle->SetParameter(0, eAvg);
@@ -113,6 +113,8 @@ void Corrections::CalcResolutions()
 double Corrections::CalcCor(double massKs, double energy, double psiAvg, double sigmaPsi, bool isCriticalAngleMethod = false)
 {
     double Mcorr = sigmaPsi * sigmaPsi / 2 * (isCriticalAngleMethod? massFuncCrAngle->Derivative2(psiAvg) : massFuncFullRec->Derivative2(psiAvg));
+    double sigmaOfSigmaPsi = 1.04220e-04;
+    std::cout << "sigma_deltaM = " << sigmaOfSigmaPsi * 2 * abs(Mcorr) * 1000 << " keV" << std::endl;
     return Mcorr;
 }
 
@@ -122,15 +124,15 @@ std::tuple<double, double> Corrections::GetResolution()
 double Corrections::GetCorrectedMass(double massKs, double energy, bool isCriticalAngleMethod = true)
 {
     double massCorrected = -1;
-    massCorrected = CalcCor(massKs, energy, avgPsi, sigmaPsi, isCriticalAngleMethod);
+    massCorrected =  massKs - CalcCor(massKs, energy, avgPsi, sigmaPsi, isCriticalAngleMethod);
     return massCorrected;
 }
 
 void corrections()
 {
     auto cor = new Corrections("hists and root files/cuts/kskl_2bgen600k(min_nthit == 11 min_rho = 0.1).root", {});
-    std::cout << cor->GetCorrectedMass(497.610, 510, true) << std::endl;
-    // FullRec 497.604
-    // CrAngle 497.579
+    std::cout << cor->GetCorrectedMass(497.602, 510, false) << " MeV" << std::endl;
+    // FullRec 497.602 +- 0.003 MeV
+    // CrAngle 497.623 +- 0.007 MeV
     delete cor;
 }
