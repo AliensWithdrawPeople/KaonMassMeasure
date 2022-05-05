@@ -4,6 +4,7 @@
 #include <vector>
 #include <complex>
 #include <algorithm>
+#include <cmath>
 #include <chrono>
 #include <ctime> 
 
@@ -11,7 +12,6 @@ class RadCor
 {
 private:
     TF1 *massFunc;
-    TF1 *Li2;
     TF1 *D;
 
     Float_t E;
@@ -54,7 +54,6 @@ RadCor::RadCor(Float_t energy, Float_t ksdpsi, Float_t momentumRatio)
     */
     s = 4 * E * E;
     // Auxilary function 
-    Li2 = new TF1("Li2", "-TMath::Log(1-x[0])/x[0]");
 
     L = 2 * TMath::Log(2*E / electronMass);
     // par1 = b=2*alpha/pi * (L-1)
@@ -85,7 +84,6 @@ RadCor::RadCor(Float_t energy, Float_t ksdpsi, Float_t momentumRatio)
 RadCor::~RadCor()
 {
     delete massFunc;
-    delete Li2;
     delete D;
 }
 
@@ -131,14 +129,14 @@ std::complex<double> RadCor::FormFactor(const double &s)
 double RadCor::Sigma0(const double &s)
 {
     auto ff = FormFactor(s);
-    return alpha * alpha * pow(1 - 4 * kaonMass * kaonMass / s, 3./2.) * 2 / 3 * TMath::Pi() / s * abs(ff * std::conj(ff));
+    return 204.5 * alpha * alpha * pow(1 - 4 * kaonMass * kaonMass / s, 3./2.) * 2 / 3 * TMath::Pi() / s * abs(ff * std::conj(ff));
 }
 
 double RadCor::RadCorEval()
 {
     double beta_ = sqrt(1 - kaonMass * kaonMass / E / E);
     double b = -1 + (1/beta_-1)*L/2 + 1/beta_*TMath::Log((1+beta_)/2) + 
-                (1/beta_ + beta_)/2 *(-Li2->Integral(0,(beta_-1)/(1+beta_)) + Li2->Integral(0, (1-beta_)/(1+beta_)) - TMath::Pi()*TMath::Pi()/12 + 
+                (1/beta_ + beta_)/2 *(-TMath::DiLog((beta_-1)/(1+beta_)) + TMath::DiLog((1-beta_)/(1+beta_)) - TMath::Pi()*TMath::Pi()/12 + 
                 L*TMath::Log((1+beta_)/2)-2*L*TMath::Log(beta_) + 1.5*pow(TMath::Log((1+beta_)/2), 2) -0.5*pow(TMath::Log(beta_), 2) - 
                 3*TMath::Log(beta_)*TMath::Log((1+beta_)/2) + L + 2*TMath::Log((1+beta_)/2) );
 
@@ -149,9 +147,8 @@ double RadCor::RadCorEval()
                                 p[0] == 1 stands for convolution of mass func and Krc.  
     For definition go to https://arxiv.org/abs/hep-ph/9703456v1.
     */
-   std::cout<<"faf"<<std::endl;
     TF2 Krc("K RadCor", [&](double* x, double* p) { 
-        massFunc->SetParameter(0, E * sqrt((1-x[0]) * (1-x[1])) );
+        massFunc->SetParameter(0, E * sqrt((1.-x[0]) * (1.-x[1])) );
         if(1 - 4 * kaonMass * kaonMass / ( s*(1.-x[0]) * (1.-x[1]) ) >= 0)
         { 
             return (fabs(p[0] - 1) < 0.1 ? massFunc->Eval(psi) : 1) * 
@@ -159,20 +156,20 @@ double RadCor::RadCorEval()
         }
         else
         { return 0.; }
+        }, 0, 1, 0, 1, 1);
 
-        }, 1e-6, 0.05, 1e-6, 0.05, 1);
     Krc.SetParameter(0, 0);
-    Double_t N = Krc.Integral(1e-6, 0.05, 1e-6, 0.05);
+    Double_t N = Krc.Integral(0, 0.9, 0, 0.9);
     Krc.SetParameter(0, 1);
-    double rc = Krc.Integral(1e-6, 0.05, 1e-6, 0.05) / N;
+    double rc = Krc.Integral(0, 0.9, 0, 0.9) / N;
     massFunc->SetParameter(0, E);
-    return massFunc->Eval(2.61289);
-    //return rc - massFunc->Eval(2.615);
+    return rc;
+    
 }
 
 int radCor()
 {
-    auto rc = new RadCor(510., 2.61545, 1. - 1e-5);
+    auto rc = new RadCor(510., 2.61545, 1. - 1e-9);
     std::cout << rc->RadCorEval() << std::endl;
     return 0;
 }

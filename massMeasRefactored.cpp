@@ -356,19 +356,30 @@ void EnergyHandler::MassLnY(int drawOpt = 0)
             hPsilnY->Fill(log(Y), ksdpsi);
         }
     }
+
+    std::vector<Float_t> vec1 {-0.375, -0.325, -0.275, -0.225, -0.175, -0.125, -0.075, -0.025, 0.025, 0.075, 0.125, 0.175, 0.225, 0.275, 0.325, 0.375};
+    std::vector<Float_t> vec2 {3.19063e-02, 2.82665e-02, 2.47311e-02, 2.22439e-02, 2.02644e-02, 1.80345e-02, 1.69571e-02, 1.70616e-02, 
+                            1.64551e-02, 1.71439e-02, 1.76623e-02, 1.93162e-02, 2.14901e-02, 2.18948e-02, 2.82895e-02, 3.18759e-02};
+    std::vector<Float_t> vec3 {3.83317e-04, 3.59502e-04, 2.97918e-04, 2.69812e-04, 2.99872e-04, 2.93041e-04, 2.70385e-04, 2.34586e-04, 
+                            2.40656e-04, 2.73209e-04, 3.11617e-04, 3.03507e-04, 3.67857e-04, 5.47664e-04, 3.34352e-04, 4.05535e-04};
+    std::vector<Float_t> zeroes(groupsAmount, 0.0);
+    int tt = 16;
+    TGraphErrors gSigma(tt, vec1.data(), vec2.data(), zeroes.data(), vec3.data());
+
     auto canv = new TCanvas("MlnY","Mass(lnY)", 200, 10, 600, 400);
     switch (drawOpt)
     {
     case 0:
         hMlnY->DrawClone();
         break;
-
     case 1:
         hM_CrAnglelnY->ProfileX()->DrawClone();
         break;
-    
     case 2:
-        hPsilnY->ProfileX()->DrawClone();
+        hPsilnY->DrawClone();
+        break;
+    case 3:
+        gSigma.DrawClone();
         break;
     default:
         hMlnY->DrawClone();
@@ -394,8 +405,8 @@ int massMeasRefactored()
     gROOT->Reset();
     auto start = std::chrono::system_clock::now();
     
-    //auto eHandler = new EnergyHandler("hists and root files/cuts/cutKch16Mar22_17h41m.root", "hists and root files/cuts/cutKs28Feb_23h37m.root");
-    auto eHandler = new EnergyHandler("hists and root files/cuts/cutKch16Mar22_17h41m.root", "hists and root files/cuts/kskl_2bgen600k(min_nthit == 11 min_rho = 0.1).root");
+    auto eHandler = new EnergyHandler("hists and root files/cuts/cutKch16Mar22_17h41m.root", "hists and root files/cuts/cutKs28Feb_23h37m.root");
+    //auto eHandler = new EnergyHandler("hists and root files/cuts/cutKch16Mar22_17h41m.root", "hists and root files/cuts/kskl_2bgen600k(min_nthit == 11 min_rho = 0.1).root");
     
     //eHandler->GetMassCriticalAngle();
     eHandler->MassLnY(0);
