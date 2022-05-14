@@ -124,15 +124,17 @@ std::tuple<double, double> Corrections::GetResolution()
 double Corrections::GetCorrectedMass(double massKs, double energy, bool isCriticalAngleMethod = true)
 {
     double massCorrected = -1;
-    massCorrected =  massKs - CalcCor(massKs, energy, avgPsi, sigmaPsi, isCriticalAngleMethod);
+    massCorrected =  CalcCor(massKs, energy, avgPsi, sigmaPsi, isCriticalAngleMethod);
     return massCorrected;
 }
 
 void corrections()
 {
     auto cor = new Corrections("hists and root files/cuts/kskl_2bgen600k(min_nthit == 11 min_rho = 0.1).root", {});
-    std::cout << cor->GetCorrectedMass(497.602, 510, false) << " MeV" << std::endl;
-    // FullRec 497.602 +- 0.003 MeV
-    // CrAngle 497.623 +- 0.007 MeV
+    std::cout << cor->GetCorrectedMass(497.645, 509.5, false) << " MeV" << std::endl;
+    // FullRec 2body 497.602 +- 0.003 MeV
+    // CrAngle 2body 497.623 +- 0.007 MeV
+    // FullRec MCGPJ 497.724 +- 0.003 MeV
+    // CrAngle MCGPJ 497.726 +- 0.006 MeV
     delete cor;
 }

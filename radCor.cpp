@@ -36,6 +36,7 @@ private:
     double Sigma0(const double &s);
     // Return FormFactor of e+e- -> KsKl.
     std::complex<double> FormFactor(const double &s);
+    double DEval(const double &z);
 public:
     RadCor(Float_t energy, Float_t ksdpsi, Float_t momentumRatio);
     double RadCorEval();
@@ -57,7 +58,7 @@ RadCor::RadCor(Float_t energy, Float_t ksdpsi, Float_t momentumRatio)
 
     L = 2 * TMath::Log(2*E / electronMass);
     // par1 = b=2*alpha/pi * (L-1)
-    double par1 = 2 * alpha/TMath::Pi()*(L - 1.);
+    double par1 = 2 * alpha/pi*(L - 1.);
     // par2 = 2*m_e/E
     double par2 = 2. * electronMass / E;
 
@@ -66,6 +67,7 @@ RadCor::RadCor(Float_t energy, Float_t ksdpsi, Float_t momentumRatio)
     D(x,s) = D_gamma + D_e+e-. 
     For definition go to https://arxiv.org/abs/hep-ph/9703456v1.
     */
+    /*
     D = new TF1("D func", [&](double *x, double *p){
         double Dgamma = par1/2. * pow((1-x[0]), par1/2.-1.) * (1. + 3.*par1/8. + par1*par1/16.*(9./8.- pi * pi/3.)) 
         - par1/4.*(1+x[0]) + par1*par1/32.*(-4.*(1+x[0])*TMath::Log(1.-x[0]) - (1+3.*x[0]*x[0])/(1.-x[0])*TMath::Log(x[0])-5.-x[0]);
@@ -79,12 +81,24 @@ RadCor::RadCor(Float_t energy, Float_t ksdpsi, Float_t momentumRatio)
             (1. + x[0])*TMath::Log(x[0])) );
         }
         return Dgamma + Dee;}, 1e-6, 1-1e-6, 1);
+    */
 }
 
 RadCor::~RadCor()
 {
     delete massFunc;
     delete D;
+}
+
+double RadCor::DEval(const double &z)
+{
+    double x = 1 - z;
+    double b = 2 * alpha/pi*(L - 1.);
+    double b2 = 0.5 * b;
+    double D0   = 1. + 3./8.* b + b * b /16. * (9./8. - pi * pi / 3.);
+
+    double D = b2*pow(x,b2-1) * D0 - 0.5*b2*(1+z) - b2 * b2 / 8 * (4*( 1 + z)*log(x)+(1+3*z*z)/x * log1p(-x) + 5 + z);
+    return D;
 }
 
 std::complex<double> RadCor::FormFactor(const double &s)
@@ -134,12 +148,11 @@ double RadCor::Sigma0(const double &s)
 
 double RadCor::RadCorEval()
 {
-    double beta_ = sqrt(1 - kaonMass * kaonMass / E / E);
-    double b = -1 + (1/beta_-1)*L/2 + 1/beta_*TMath::Log((1+beta_)/2) + 
-                (1/beta_ + beta_)/2 *(-TMath::DiLog((beta_-1)/(1+beta_)) + TMath::DiLog((1-beta_)/(1+beta_)) - TMath::Pi()*TMath::Pi()/12 + 
-                L*TMath::Log((1+beta_)/2)-2*L*TMath::Log(beta_) + 1.5*pow(TMath::Log((1+beta_)/2), 2) -0.5*pow(TMath::Log(beta_), 2) - 
-                3*TMath::Log(beta_)*TMath::Log((1+beta_)/2) + L + 2*TMath::Log((1+beta_)/2) );
-
+    double beta = sqrt(1 - kaonMass * kaonMass / E / E);
+    double b = -1 + 0.5*(1-beta)/beta*L + 1/beta*TMath::Log((1+beta)/2) + 
+                0.5*(1+beta*beta)/beta *(-TMath::DiLog(-(1-beta)/(1+beta)) + TMath::DiLog((1-beta)/(1+beta)) - pi*pi/12 + 
+                L*TMath::Log((1+beta)/2)-2*L*TMath::Log(beta) + 1.5*pow(TMath::Log((1+beta)/2), 2) -0.5*pow(TMath::Log(beta), 2) - 
+                3*TMath::Log(beta)*TMath::Log((1+beta)/2) + L + 2*TMath::Log((1+beta)/2) );
 
     /* 
     Krc(s, x1, x2);
@@ -149,19 +162,20 @@ double RadCor::RadCorEval()
     */
     TF2 Krc("K RadCor", [&](double* x, double* p) { 
         massFunc->SetParameter(0, E * sqrt((1.-x[0]) * (1.-x[1])) );
+
         if(1 - 4 * kaonMass * kaonMass / ( s*(1.-x[0]) * (1.-x[1]) ) >= 0)
         { 
-            return (fabs(p[0] - 1) < 0.1 ? massFunc->Eval(psi) : 1) * 
-            (1 + 2 * alpha / pi * (1 + a + b)) * D->Eval(x[0]) * D->Eval(x[1]) * Sigma0(s*(1-x[0]) * (1-x[1])); 
+            return(fabs(p[0] - 1) < 0.1 ? massFunc->Eval(psi) * 1.019093 : 1) * 
+            (1 + 2 * alpha / pi * (1 + a + b)) * DEval(x[0]) * DEval(x[1]) * Sigma0(s*(1-x[0]) * (1-x[1])); 
         }
         else
         { return 0.; }
         }, 0, 1, 0, 1, 1);
 
     Krc.SetParameter(0, 0);
-    Double_t N = Krc.Integral(0, 0.9, 0, 0.9);
+    Double_t N = Krc.Integral(0.016, 0.05, 0.016, 0.05);
     Krc.SetParameter(0, 1);
-    double rc = Krc.Integral(0, 0.9, 0, 0.9) / N;
+    double rc = Krc.Integral(0.016, 0.05, 0.016, 0.05) / N;
     massFunc->SetParameter(0, E);
     return rc;
     
@@ -169,7 +183,12 @@ double RadCor::RadCorEval()
 
 int radCor()
 {
-    auto rc = new RadCor(510., 2.61545, 1. - 1e-9);
+    auto rc = new RadCor(509.5, 2.62255, 1. - 1e-9);
+    // FullRec 2body 497.602 +- 0.003 MeV
+    // CrAngle 2body 497.623 +- 0.007 MeV
+    // FullRec MCGPJ 497.724 +- 0.003 MeV 
+    // CrAngle MCGPJ 497.726 +- 0.006 MeV psi = 2.61516
+    // Exp 497.605 +- 0.004 psi = 2.62255
     std::cout << rc->RadCorEval() << std::endl;
     return 0;
 }

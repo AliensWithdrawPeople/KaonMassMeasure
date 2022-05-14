@@ -356,6 +356,8 @@ void EnergyHandler::MassLnY(int drawOpt = 0)
             hPsilnY->Fill(log(Y), ksdpsi);
         }
     }
+    massFullRec->SetParameters(509.5, (1 - 0.99999*0.99999) / (1 + 0.99999*0.99999));
+    std::cout<<"mass(psi=2.61516) = " << massFullRec->Eval(2.62255) << std::endl;
 
     std::vector<Float_t> vec1 {-0.375, -0.325, -0.275, -0.225, -0.175, -0.125, -0.075, -0.025, 0.025, 0.075, 0.125, 0.175, 0.225, 0.275, 0.325, 0.375};
     std::vector<Float_t> vec2 {3.19063e-02, 2.82665e-02, 2.47311e-02, 2.22439e-02, 2.02644e-02, 1.80345e-02, 1.69571e-02, 1.70616e-02, 
@@ -376,7 +378,7 @@ void EnergyHandler::MassLnY(int drawOpt = 0)
         hM_CrAnglelnY->ProfileX()->DrawClone();
         break;
     case 2:
-        hPsilnY->DrawClone();
+        hPsilnY->ProfileX()->DrawClone();
         break;
     case 3:
         gSigma.DrawClone();
@@ -405,11 +407,12 @@ int massMeasRefactored()
     gROOT->Reset();
     auto start = std::chrono::system_clock::now();
     
-    auto eHandler = new EnergyHandler("hists and root files/cuts/cutKch16Mar22_17h41m.root", "hists and root files/cuts/cutKs28Feb_23h37m.root");
+    //auto eHandler = new EnergyHandler("hists and root files/cuts/cutKch16Mar22_17h41m.root", "hists and root files/cuts/ksklCut_11May22.root");
     //auto eHandler = new EnergyHandler("hists and root files/cuts/cutKch16Mar22_17h41m.root", "hists and root files/cuts/kskl_2bgen600k(min_nthit == 11 min_rho = 0.1).root");
+    auto eHandler = new EnergyHandler("hists and root files/cuts/cutKch16Mar22_17h41m.root", "hists and root files/cuts/ksklCutMCGPJ_10May22(eff=0.247).root");
     
     //eHandler->GetMassCriticalAngle();
-    eHandler->MassLnY(0);
+    eHandler->MassLnY(2);
     delete eHandler;
 
     auto end = std::chrono::system_clock::now();
