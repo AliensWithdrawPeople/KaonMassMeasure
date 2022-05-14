@@ -1,12 +1,12 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Tue Apr  5 10:05:54 2022 by ROOT version 6.24/06
+// Tue May 10 21:08:35 2022 by ROOT version 6.24/06
 // from TTree tr_ph/Tree with the non-collinear events
-// found on file: E:/Science/BINP/Kaon Mass Measure/tr_ph/tr_ph_KsKlsim_mcgpj.root
+// found on file: E:/Science/BINP/Kaon Mass Measure/tr_ph/tr_ph_KsKlsim_mcgpj800k.root
 //////////////////////////////////////////////////////////
 
-#ifndef ksklCut_mcgpj_h
-#define ksklCut_mcgpj_h
+#ifndef ksklMCGPJ_h
+#define ksklMCGPJ_h
 
 #include <TROOT.h>
 #include <TChain.h>
@@ -14,7 +14,7 @@
 
 // Header file for the classes stored in the TTree if any.
 
-class ksklCut_mcgpj {
+class ksklMCGPJ {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
@@ -57,59 +57,59 @@ public :
    Float_t         vxyz[5][3];   //[nv]
    Int_t           nt;
    Int_t           it[2];
-   Int_t           tnhit[9];   //[nt]
-   Float_t         tlength[9];   //[nt]
-   Float_t         tphi[9];   //[nt]
-   Float_t         tth[9];   //[nt]
-   Float_t         tptot[9];   //[nt]
-   Float_t         tphiv[9];   //[nt]
-   Float_t         tthv[9];   //[nt]
-   Float_t         tptotv[9];   //[nt]
-   Float_t         trho[9];   //[nt]
-   Float_t         tdedx[9];   //[nt]
-   Float_t         tz[9];   //[nt]
-   Float_t         tt0[9];   //[nt]
-   Float_t         tant[9];   //[nt]
-   Float_t         tchi2r[9];   //[nt]
-   Float_t         tchi2z[9];   //[nt]
-   Float_t         tchi2ndf[9];   //[nt]
-   Int_t           tcharge[9];   //[nt]
-   Float_t         ten[9];   //[nt]
-   Float_t         tfc[9];   //[nt]
-   Float_t         tenlxe[9];   //[nt]
-   Float_t         tlengthlxe[9];   //[nt]
-   Float_t         tenslxe_layers[9][14];   //[nt]
-   Float_t         tencsi[9];   //[nt]
-   Float_t         tenbgo[9];   //[nt]
-   Float_t         tclth[9];   //[nt]
-   Float_t         tclphi[9];   //[nt]
-   Float_t         terr[9][3][3];   //[nt]
-   Float_t         terr0[9][5][5];   //[nt]
-   Int_t           tindlxe[9];   //[nt]
-   Float_t         tzcc[9][2];   //[nt]
-   Float_t         txyzatcl[9][3];   //[nt]
-   Float_t         txyzatlxe[9][3];   //[nt]
-   Int_t           tenconv[9];   //[nt]
+   Int_t           tnhit[10];   //[nt]
+   Float_t         tlength[10];   //[nt]
+   Float_t         tphi[10];   //[nt]
+   Float_t         tth[10];   //[nt]
+   Float_t         tptot[10];   //[nt]
+   Float_t         tphiv[10];   //[nt]
+   Float_t         tthv[10];   //[nt]
+   Float_t         tptotv[10];   //[nt]
+   Float_t         trho[10];   //[nt]
+   Float_t         tdedx[10];   //[nt]
+   Float_t         tz[10];   //[nt]
+   Float_t         tt0[10];   //[nt]
+   Float_t         tant[10];   //[nt]
+   Float_t         tchi2r[10];   //[nt]
+   Float_t         tchi2z[10];   //[nt]
+   Float_t         tchi2ndf[10];   //[nt]
+   Int_t           tcharge[10];   //[nt]
+   Float_t         ten[10];   //[nt]
+   Float_t         tfc[10];   //[nt]
+   Float_t         tenlxe[10];   //[nt]
+   Float_t         tlengthlxe[10];   //[nt]
+   Float_t         tenslxe_layers[10][14];   //[nt]
+   Float_t         tencsi[10];   //[nt]
+   Float_t         tenbgo[10];   //[nt]
+   Float_t         tclth[10];   //[nt]
+   Float_t         tclphi[10];   //[nt]
+   Float_t         terr[10][3][3];   //[nt]
+   Float_t         terr0[10][5][5];   //[nt]
+   Int_t           tindlxe[10];   //[nt]
+   Float_t         tzcc[10][2];   //[nt]
+   Float_t         txyzatcl[10][3];   //[nt]
+   Float_t         txyzatlxe[10][3];   //[nt]
+   Int_t           tenconv[10];   //[nt]
    Int_t           nks_total;
    Int_t           nks;
-   Int_t           ksvind[5][2];   //[nks]
-   Int_t           kstype[5];   //[nks]
-   Int_t           ksfstatus[5];   //[nks]
-   Float_t         ksvchi[5];   //[nks]
-   Float_t         ksvxyz[5][3];   //[nks]
-   Float_t         ksminv[5];   //[nks]
-   Float_t         ksalign[5];   //[nks]
-   Float_t         kstlen[5];   //[nks]
-   Float_t         ksdpsi[5];   //[nks]
-   Float_t         kslen[5];   //[nks]
-   Float_t         ksz0[5];   //[nks]
-   Float_t         ksphi[5];   //[nks]
-   Float_t         ksth[5];   //[nks]
-   Float_t         ksptot[5];   //[nks]
-   Float_t         kspiphi[5][2];   //[nks]
-   Float_t         kspith[5][2];   //[nks]
-   Float_t         kspipt[5][2];   //[nks]
-   Float_t         kserr[5][3][3];   //[nks]
+   Int_t           ksvind[6][2];   //[nks]
+   Int_t           kstype[6];   //[nks]
+   Int_t           ksfstatus[6];   //[nks]
+   Float_t         ksvchi[6];   //[nks]
+   Float_t         ksvxyz[6][3];   //[nks]
+   Float_t         ksminv[6];   //[nks]
+   Float_t         ksalign[6];   //[nks]
+   Float_t         kstlen[6];   //[nks]
+   Float_t         ksdpsi[6];   //[nks]
+   Float_t         kslen[6];   //[nks]
+   Float_t         ksz0[6];   //[nks]
+   Float_t         ksphi[6];   //[nks]
+   Float_t         ksth[6];   //[nks]
+   Float_t         ksptot[6];   //[nks]
+   Float_t         kspiphi[6][2];   //[nks]
+   Float_t         kspith[6][2];   //[nks]
+   Float_t         kspipt[6][2];   //[nks]
+   Float_t         kserr[6][3][3];   //[nks]
    Int_t           ntlxe_total;
    Int_t           ntlxe;
    Int_t           ntlxelayers[10];   //[ntlxe]
@@ -126,28 +126,28 @@ public :
    Float_t         tlxesen_layers[10][14];   //[ntlxe]
    Int_t           nph_total;
    Int_t           nph;
-   Float_t         phen[11];   //[nph]
-   Float_t         phth[11];   //[nph]
-   Float_t         phphi[11];   //[nph]
-   Float_t         phrho[11];   //[nph]
-   Float_t         phen0[11];   //[nph]
-   Float_t         phth0[11];   //[nph]
-   Float_t         phphi0[11];   //[nph]
-   Float_t         phlxe[11];   //[nph]
-   Float_t         phslxe_layers[11][14];   //[nph]
-   Float_t         pherr[11][3];   //[nph]
-   Float_t         phcsi[11];   //[nph]
-   Float_t         phbgo[11];   //[nph]
-   Int_t           phflag[11];   //[nph]
-   Int_t           phconv[11];   //[nph]
-   Int_t           phfc[11];   //[nph]
+   Float_t         phen[12];   //[nph]
+   Float_t         phth[12];   //[nph]
+   Float_t         phphi[12];   //[nph]
+   Float_t         phrho[12];   //[nph]
+   Float_t         phen0[12];   //[nph]
+   Float_t         phth0[12];   //[nph]
+   Float_t         phphi0[12];   //[nph]
+   Float_t         phlxe[12];   //[nph]
+   Float_t         phslxe_layers[12][14];   //[nph]
+   Float_t         pherr[12][3];   //[nph]
+   Float_t         phcsi[12];   //[nph]
+   Float_t         phbgo[12];   //[nph]
+   Int_t           phflag[12];   //[nph]
+   Int_t           phconv[12];   //[nph]
+   Int_t           phfc[12];   //[nph]
    Int_t           nzcs_total;
    Int_t           nzcs;
-   Int_t           zcsch[17];   //[nzcs]
-   Int_t           zcsstat[17];   //[nzcs]
-   Float_t         zcsamp[17];   //[nzcs]
-   Float_t         zcstime[17];   //[nzcs]
-   Float_t         zcsphi[17];   //[nzcs]
+   Int_t           zcsch[18];   //[nzcs]
+   Int_t           zcsstat[18];   //[nzcs]
+   Float_t         zcsamp[18];   //[nzcs]
+   Float_t         zcstime[18];   //[nzcs]
+   Float_t         zcsphi[18];   //[nzcs]
    Int_t           nzcc_total;
    Int_t           nzcc;
    Int_t           zccl[20];   //[nzcc]
@@ -164,25 +164,25 @@ public :
    Float_t         anta1[16];   //[nant]
    Int_t           antst[16];   //[nant]
    Int_t           nmu;
-   Int_t           much[8];   //[nmu]
-   Float_t         mut0[8];   //[nmu]
-   Float_t         mut1[8];   //[nmu]
-   Float_t         mut2[8];   //[nmu]
-   Float_t         mut3[8];   //[nmu]
-   Float_t         mua0[8];   //[nmu]
-   Float_t         mua1[8];   //[nmu]
-   Float_t         mua2[8];   //[nmu]
-   Float_t         mua3[8];   //[nmu]
-   Int_t           must[8];   //[nmu]
+   Int_t           much[9];   //[nmu]
+   Float_t         mut0[9];   //[nmu]
+   Float_t         mut1[9];   //[nmu]
+   Float_t         mut2[9];   //[nmu]
+   Float_t         mut3[9];   //[nmu]
+   Float_t         mua0[9];   //[nmu]
+   Float_t         mua1[9];   //[nmu]
+   Float_t         mua2[9];   //[nmu]
+   Float_t         mua3[9];   //[nmu]
+   Int_t           must[9];   //[nmu]
    Int_t           nsim;
-   Int_t           simtype[18];   //[nsim]
-   Int_t           simorig[18];   //[nsim]
-   Float_t         simmom[18];   //[nsim]
-   Float_t         simphi[18];   //[nsim]
-   Float_t         simtheta[18];   //[nsim]
-   Float_t         simvtx[18];   //[nsim]
-   Float_t         simvty[18];   //[nsim]
-   Float_t         simvtz[18];   //[nsim]
+   Int_t           simtype[20];   //[nsim]
+   Int_t           simorig[20];   //[nsim]
+   Float_t         simmom[20];   //[nsim]
+   Float_t         simphi[20];   //[nsim]
+   Float_t         simtheta[20];   //[nsim]
+   Float_t         simvtx[20];   //[nsim]
+   Float_t         simvty[20];   //[nsim]
+   Float_t         simvtz[20];   //[nsim]
    Int_t           ncorr;
    Int_t           idcorr[1];   //[ncorr]
    Int_t           bitcorr[1];   //[ncorr]
@@ -363,8 +363,8 @@ public :
    TBranch        *b_nlostbanks;   //!
    TBranch        *b_ncorruptedbanks;   //!
 
-   ksklCut_mcgpj(TTree *tree=0);
-   virtual ~ksklCut_mcgpj();
+   ksklMCGPJ(TTree *tree=0);
+   virtual ~ksklMCGPJ();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
@@ -376,15 +376,15 @@ public :
 
 #endif
 
-#ifdef ksklCut_mcgpj_cxx
-ksklCut_mcgpj::ksklCut_mcgpj(TTree *tree) : fChain(0) 
+#ifdef ksklMCGPJ_cxx
+ksklMCGPJ::ksklMCGPJ(TTree *tree) : fChain(0) 
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("E:/Science/BINP/Kaon Mass Measure/tr_ph/tr_ph_KsKlsim_mcgpj.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("E:/Science/BINP/Kaon Mass Measure/tr_ph/tr_ph_KsKlsim_mcgpj800k.root");
       if (!f || !f->IsOpen()) {
-         f = new TFile("E:/Science/BINP/Kaon Mass Measure/tr_ph/tr_ph_KsKlsim_mcgpj.root");
+         f = new TFile("E:/Science/BINP/Kaon Mass Measure/tr_ph/tr_ph_KsKlsim_mcgpj800k.root");
       }
       f->GetObject("tr_ph",tree);
 
@@ -392,19 +392,19 @@ ksklCut_mcgpj::ksklCut_mcgpj(TTree *tree) : fChain(0)
    Init(tree);
 }
 
-ksklCut_mcgpj::~ksklCut_mcgpj()
+ksklMCGPJ::~ksklMCGPJ()
 {
    if (!fChain) return;
    delete fChain->GetCurrentFile();
 }
 
-Int_t ksklCut_mcgpj::GetEntry(Long64_t entry)
+Int_t ksklMCGPJ::GetEntry(Long64_t entry)
 {
 // Read contents of entry.
    if (!fChain) return 0;
    return fChain->GetEntry(entry);
 }
-Long64_t ksklCut_mcgpj::LoadTree(Long64_t entry)
+Long64_t ksklMCGPJ::LoadTree(Long64_t entry)
 {
 // Set the environment to read one entry
    if (!fChain) return -5;
@@ -417,7 +417,7 @@ Long64_t ksklCut_mcgpj::LoadTree(Long64_t entry)
    return centry;
 }
 
-void ksklCut_mcgpj::Init(TTree *tree)
+void ksklMCGPJ::Init(TTree *tree)
 {
    // The Init() function is called when the selector needs to initialize
    // a new tree or chain. Typically here the branch addresses and branch
@@ -605,7 +605,7 @@ void ksklCut_mcgpj::Init(TTree *tree)
    Notify();
 }
 
-Bool_t ksklCut_mcgpj::Notify()
+Bool_t ksklMCGPJ::Notify()
 {
    // The Notify() function is called when a new file is opened. This
    // can be either for a new TTree in a TChain or when when a new TTree
@@ -616,18 +616,18 @@ Bool_t ksklCut_mcgpj::Notify()
    return kTRUE;
 }
 
-void ksklCut_mcgpj::Show(Long64_t entry)
+void ksklMCGPJ::Show(Long64_t entry)
 {
 // Print contents of entry.
 // If entry is not specified, print current entry
    if (!fChain) return;
    fChain->Show(entry);
 }
-Int_t ksklCut_mcgpj::Cut(Long64_t entry)
+Int_t ksklMCGPJ::Cut(Long64_t entry)
 {
 // This function may be called from Loop.
 // returns  1 if entry is accepted.
 // returns -1 otherwise.
    return 1;
 }
-#endif // #ifdef ksklCut_mcgpj_cxx
+#endif // #ifdef ksklMCGPJ_cxx

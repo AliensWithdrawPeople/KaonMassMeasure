@@ -1,5 +1,5 @@
-#define ksklCut_mcgpj_cxx
-#include "ksklCut_mcgpj.h"
+#define ksklMCGPJ_cxx
+#include "ksklMCGPJ.h"
 #include <TH2.h>
 #include <TH1D.h>
 #include <TStyle.h>
@@ -7,7 +7,7 @@
 #include <TMath.h>
 #include <TCanvas.h>
 
-void ksklCut_mcgpj::Loop(std::string histFileName)
+void ksklMCGPJ::Loop(std::string histFileName)
 {
     //   In a ROOT session, you can do:
     //      root> .L ksklCut_mcgpj.C
@@ -40,6 +40,7 @@ void ksklCut_mcgpj::Loop(std::string histFileName)
 
     Float_t dpsi;
     Float_t Y;
+    Float_t eff;
     tNew->Branch("emeas", &emeas0, "emeas/F");
     tNew->Branch("demeas", &demeas0, "demeas/F");
     tNew->Branch("runnum", &runnum, "runnum/I");
@@ -61,6 +62,7 @@ void ksklCut_mcgpj::Loop(std::string histFileName)
     auto hist = new TH2D("hist", "", 1000, 0, 600, 1000, 0, 600);
 
     Long64_t nentries = fChain->GetEntriesFast();
+    std::cout << "e_mc = " <<  nentries << std::endl;
 
     Long64_t nbytes = 0, nb = 0;
     for (Long64_t jentry = 0; jentry < nentries; jentry++)
@@ -105,7 +107,9 @@ void ksklCut_mcgpj::Loop(std::string histFileName)
         NgoodTr = 0;
     }
 
-    std::cout << "e_mc = " << (double)tNew->GetEntriesFast() / nentries << std::endl;
+    eff = (double) tNew->GetEntriesFast() / nentries;
+    std::cout << "nentries " << nentries << std::endl;
+    std::cout << "e_mc = " <<  eff << std::endl;
     std::cout << "NgoodTrS = " << NgoodTrS << std::endl;
 
     hist->GetYaxis()->SetTitle("pi+ momentum [MeV/c]");
