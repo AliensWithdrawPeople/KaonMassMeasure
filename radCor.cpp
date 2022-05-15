@@ -18,6 +18,7 @@ private:
     Float_t pRatio;
     Float_t psi;
     double s;
+    double sigmaPsi = 1.64407e-02;
 
     double L;
     // Maybe: 1 / alpha = 137.071999.
@@ -165,7 +166,7 @@ double RadCor::RadCorEval()
 
         if(1 - 4 * kaonMass * kaonMass / ( s*(1.-x[0]) * (1.-x[1]) ) >= 0)
         { 
-            return(fabs(p[0] - 1) < 0.1 ? massFunc->Eval(psi) * 1.019093 : 1) * 
+            return(fabs(p[0] - 1) < 0.1 ? (massFunc->Eval(psi) - sigmaPsi * sigmaPsi / 2 * massFunc->Derivative2(psi)) * 1.019093 : 1) * 
             (1 + 2 * alpha / pi * (1 + a + b)) * DEval(x[0]) * DEval(x[1]) * Sigma0(s*(1-x[0]) * (1-x[1])); 
         }
         else
@@ -183,12 +184,16 @@ double RadCor::RadCorEval()
 
 int radCor()
 {
-    auto rc = new RadCor(509.5, 2.62255, 1. - 1e-9);
+    auto rc = new RadCor(510, 2.61516, 1. - 1e-9);
     // FullRec 2body 497.602 +- 0.003 MeV
     // CrAngle 2body 497.623 +- 0.007 MeV
     // FullRec MCGPJ 497.724 +- 0.003 MeV 
     // CrAngle MCGPJ 497.726 +- 0.006 MeV psi = 2.61516
     // Exp 497.605 +- 0.004 psi = 2.62255
+
+    // Exp 15/05 psi = 2.62214
+    // CrAngle 497.601 +- 0.004 MeV
+    // FullRec 497.603 +- 0.003 MeV * 1.019093
     std::cout << rc->RadCorEval() << std::endl;
     return 0;
 }
