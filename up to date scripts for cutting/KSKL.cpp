@@ -82,21 +82,23 @@ void KSKL::Loop(std::string histFileName)
         if(NgoodTr == 2)
         { NgoodTrS++; }
 
-        if (NgoodTr == 2 && nks == 1 && is_coll != 1 && ksalign[0] > 0.85 &&
-            (tdedx[ksvind[0][0]] + tdedx[ksvind[0][1]]) / 2 < 5000 &&
+        if (NgoodTr == 2 && nks == 1 && is_coll != 1 && ksalign[0] > 0.85 && (tdedx[ksvind[0][0]] + tdedx[ksvind[0][1]]) / 2 < 5000 &&
             abs(kspith[0][0] - TMath::Pi() / 2) <= 0.9 && abs(kspith[0][1] - TMath::Pi() / 2) <= 0.9 &&
-            //20 - half of the linear size of Drift Chamber  
+            //20 - half of the linear size of Drift Chamber
             //(20 - ksz0[0]) * fabs(TMath::Tan(kspith[0][0])) > 15 && (20 - ksz0[0]) * fabs(TMath::Tan(kspith[0][1])) > 15 &&
+            kspipt[0][0] > 130 && kspipt[0][1] > 130 && 
+            kspipt[0][0] < 320 && kspipt[0][1] < 320 &&
+            ksminv[0] > 480 && ksminv[0] < 510 &&
             tcharge[ksvind[0][0]] * tcharge[ksvind[0][1]] < 0)
         {
             if (tcharge[ksvind[0][0]] > 0)
-            { 
-                Y = kspipt[0][0] / kspipt[0][1]; 
+            {
+                Y = kspipt[0][0] / kspipt[0][1];
                 hist->Fill(kspipt[0][0], kspipt[0][1]);
             }
             else
-            { 
-                Y = kspipt[0][1] / kspipt[0][0]; 
+            {
+                Y = kspipt[0][1] / kspipt[0][0];
                 hist->Fill(kspipt[0][1], kspipt[0][0]);
             }
             dpsi = ksdpsi[0];
@@ -106,11 +108,10 @@ void KSKL::Loop(std::string histFileName)
         NgoodTr = 0;
     }
 
-    std::cout << "e_mc = "<< (double) tNew->GetEntriesFast() / nentries << std::endl;
     std::cout << "NgoodTrS = "<< NgoodTrS << std::endl;
 
-    hist->GetYaxis()->SetTitle("pi+ momentum [MeV/c]");
-    hist->GetXaxis()->SetTitle("pi- momentum [MeV/c]");
+    hist->GetYaxis()->SetTitle("P_{#pi^{+}} [MeV/c]");
+    hist->GetXaxis()->SetTitle("P_{#pi^{-}} [MeV/c]");
     hist->Draw("COL");
 
     top->Write();

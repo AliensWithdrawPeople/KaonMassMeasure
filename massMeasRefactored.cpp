@@ -6,6 +6,7 @@
 #include "TTree.h"
 #include "TGraphErrors.h"
 #include "TGraph.h"
+#include "TMultiGraph.h"
 #include "TProfile.h"
 #include "TFitResultPtr.h"
 #include "TFitResult.h"
@@ -274,7 +275,6 @@ void EnergyHandler::Draw()
 {
     std::vector<Float_t> emeasGrouped;
     std::vector<Float_t> demeasGrouped;
-
     for(int i = 0; i < groupsAmount; i++)
     {
         for(int j = 0; j < nRunMax; j++)
@@ -289,6 +289,12 @@ void EnergyHandler::Draw()
         }
     }
 
+    std::vector<Float_t> eRatio;
+    for(int i = 0; i < eMerge.size(); i++)
+    {
+        eMerge[i] += 3.8;
+    }
+
     std::cout<<"Number of groups: " << groupsAmount <<std::endl;
 
     std::vector<Float_t> zeroes(groupsAmount, 0.0);
@@ -296,25 +302,39 @@ void EnergyHandler::Draw()
     TGraphErrors gEvsRunMeas(groupsAmount, groupsStartRunnum.data(), emeasGrouped.data(), zeroes.data(), demeasGrouped.data());
     TGraphErrors gEvsRunCalc(groupsAmount, groupsStartRunnum.data(), eMerge.data(), zeroes.data(), eMergeErr.data());
     TGraphErrors gMassMeasVsRun(groupsAmount, groupsStartRunnum.data(), massEMeas.data(), zeroes.data(), massEMeasErr.data());
-  
+    TGraph gRatio(groupsAmount-1, groupsStartRunnum.data(), eRatio.data());
+    
+    TMultiGraph *mg = new TMultiGraph();
+
     auto c1 = new TCanvas("EnergyStab", "EvsRunMeas, EvsRunCalc, MassVsRunMeas, MassVsRunCalc", 200, 10, 600, 400);
-    c1->Divide(2, 2);
-    gEvsRunMeas.SetLineColor(2);
+    //c1->Divide(2, 2);
+    gEvsRunMeas.SetLineColor(kBlack);
 
-    c1->cd(1);
+    //c1->cd(1);
     gEvsRunMeas.SetTitle("E meas vs Run");
-    gEvsRunMeas.SetMarkerStyle(kFullDotLarge);
-    gEvsRunMeas.DrawClone("AP");
+    gEvsRunMeas.GetXaxis()->SetTitle("Number of run");
+    gEvsRunMeas.GetYaxis()->SetTitle("E_{beam}, MeV");
+    //gEvsRunMeas.DrawClone("");
 
-    c1->cd(3);
-    gEvsRunCalc.SetTitle("E calc vs Run");
-    gEvsRunCalc.SetMarkerStyle(kFullDotLarge);
-    gEvsRunCalc.DrawClone("AP");
+    //c1->cd(3);
+    //gEvsRunCalc.SetTitle("E calc vs Run");
+    gEvsRunCalc.SetMarkerColor(kBlue);
+    //gEvsRunCalc.DrawClone("Same");
+    
+    mg->Add(&gEvsRunMeas);
+    mg->Add(&gEvsRunCalc);
+    mg->GetXaxis()->SetTitle("Number of run");
+    mg->GetYaxis()->SetTitle("E_{beam}, MeV");
+    mg->DrawClone("AP");
 
+    delete mg;
+
+/*
     c1->cd(2);
     gMassMeasVsRun.SetTitle("Mass (E meas) vs Run");
     gMassMeasVsRun.SetMarkerStyle(kFullDotLarge);
     gMassMeasVsRun.DrawClone("AP");
+*/
 }
 
 double EnergyHandler::GetMassCriticalAngle()
@@ -342,8 +362,12 @@ double EnergyHandler::GetMassCriticalAngle()
 void EnergyHandler::MassLnY(int drawOpt = 0)
 {    
     auto hMlnY = new TH2D("hMlnY", "M(lnY)", 200, -1, 1, 200, 480, 520);
+    auto hMPsi = new TH2D("hMlnY", "M(lnY)", 200, 2, TMath::Pi(), 200, 480, 520);
     auto hM_CrAnglelnY = new TH2D("hM_CrAnglelnY", "M_CrAngle(lnY)", 200, -0.4, 0.4, 200, 490, 515);
     auto hPsilnY = new TH2D("hPsilnY", "Psi(lnY)", 200, -0.4, 0.4, 200, 2.5, 3.1);
+
+    auto aa = new TGraph();
+
     for(int i = 0; i < ksTr->GetEntries(); i++)
     {
         ksTr->GetEntry(i);
@@ -354,20 +378,11 @@ void EnergyHandler::MassLnY(int drawOpt = 0)
             hMlnY->Fill(log(Y), massFullRec->Eval(ksdpsi));
             hM_CrAnglelnY->Fill(log(Y), massCrAngle->Eval(ksdpsi));
             hPsilnY->Fill(log(Y), ksdpsi);
+            hMPsi->Fill(ksdpsi, massFullRec->Eval(ksdpsi));
         }
     }
-    massFullRec->SetParameters(509.5, (1 - 0.99999*0.99999) / (1 + 0.99999*0.99999));
-    std::cout<<"mass(psi=2.61516) = " << massFullRec->Eval(2.62255) << std::endl;
-
-    std::vector<Float_t> vec1 {-0.375, -0.325, -0.275, -0.225, -0.175, -0.125, -0.075, -0.025, 0.025, 0.075, 0.125, 0.175, 0.225, 0.275, 0.325, 0.375};
-    std::vector<Float_t> vec2 {3.19063e-02, 2.82665e-02, 2.47311e-02, 2.22439e-02, 2.02644e-02, 1.80345e-02, 1.69571e-02, 1.70616e-02, 
-                            1.64551e-02, 1.71439e-02, 1.76623e-02, 1.93162e-02, 2.14901e-02, 2.18948e-02, 2.82895e-02, 3.18759e-02};
-    std::vector<Float_t> vec3 {3.83317e-04, 3.59502e-04, 2.97918e-04, 2.69812e-04, 2.99872e-04, 2.93041e-04, 2.70385e-04, 2.34586e-04, 
-                            2.40656e-04, 2.73209e-04, 3.11617e-04, 3.03507e-04, 3.67857e-04, 5.47664e-04, 3.34352e-04, 4.05535e-04};
-    std::vector<Float_t> zeroes(groupsAmount, 0.0);
-    int tt = 16;
-    TGraphErrors gSigma(tt, vec1.data(), vec2.data(), zeroes.data(), vec3.data());
-
+    hMlnY->GetYaxis()->SetTitle("M_{K^{0}_{S}}, #frac{MeV}{c^{2}}");
+    hMlnY->GetXaxis()->SetTitle("ln(Y)");
     auto canv = new TCanvas("MlnY","Mass(lnY)", 200, 10, 600, 400);
     switch (drawOpt)
     {
@@ -381,16 +396,23 @@ void EnergyHandler::MassLnY(int drawOpt = 0)
         hPsilnY->ProfileX()->DrawClone();
         break;
     case 3:
-        gSigma.DrawClone();
+        hMPsi->DrawClone();
         break;
     default:
-        hMlnY->DrawClone();
+        aa->AddPoint(505, 1.00258);
+        aa->AddPoint(508, 1.006126);
+        aa->AddPoint(509, 1.005469);
+        aa->AddPoint(510, 1.0049);
+        aa->AddPoint(511, 1.00459);
+
+        aa->DrawClone();
         break;
     }
 
     delete hMlnY;
     delete hM_CrAnglelnY;
     delete hPsilnY;
+    delete hMPsi;
 }
 
 EnergyHandler::~EnergyHandler()
@@ -407,12 +429,12 @@ int massMeasRefactored()
     gROOT->Reset();
     auto start = std::chrono::system_clock::now();
     
-    //auto eHandler = new EnergyHandler("hists and root files/cuts/cutKch16Mar22_17h41m.root", "hists and root files/cuts/ksklCut_11May22.root");
+    //auto eHandler = new EnergyHandler("hists and root files/cuts/kchCut21May.root", "hists and root files/cuts/ksklCut_11May22.root");
     //auto eHandler = new EnergyHandler("hists and root files/cuts/cutKch16Mar22_17h41m.root", "hists and root files/cuts/kskl_2bgen600k(min_nthit == 11 min_rho = 0.1).root");
-    auto eHandler = new EnergyHandler("hists and root files/cuts/cutKch16Mar22_17h41m.root", "hists and root files/cuts/ksklCutMCGPJ_10May22(eff=0.247).root");
+    auto eHandler = new EnergyHandler("hists and root files/cuts/kchCut21May.root", "hists and root files/cuts/ksklMCGPJ(E=510 & n=800k).root");
     
     //eHandler->GetMassCriticalAngle();
-    eHandler->MassLnY(2);
+    eHandler->MassLnY(0);
     delete eHandler;
 
     auto end = std::chrono::system_clock::now();

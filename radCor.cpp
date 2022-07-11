@@ -7,6 +7,7 @@
 #include <cmath>
 #include <chrono>
 #include <ctime> 
+#include "TRandom.h"
 
 class RadCor
 {
@@ -23,7 +24,7 @@ private:
     double L;
     // Maybe: 1 / alpha = 137.071999.
     constexpr static double alpha = 1 / 137.035999;  
-    constexpr static double kaonMass = 497.611;   
+    constexpr static double kaonMass = 497.614;   
     constexpr static double electronMass = 0.511;
     constexpr static double pi = 3.14159265358979323846;
     // Relevant to D function.
@@ -34,26 +35,31 @@ private:
     For definition go to https://arxiv.org/abs/1604.02981v3 or https://doi.org/10.1142/S0217751X92001423.
     Look here: https://cmd.inp.nsk.su/websvn/filedetails.php?repname=Cmd3Sim&path=%2Ftrunk%2Fgenerator%2Fradcor%2Fsrc%2FTKnFormFactor.C
     */
-    double Sigma0(const double &s);
+    Float16_t Sigma0(const double &s);
     // Return FormFactor of e+e- -> KsKl.
     std::complex<double> FormFactor(const double &s);
-    double DEval(const double &z);
+    Float16_t DEval(const double &z);
 public:
-    RadCor(Float_t energy, Float_t ksdpsi, Float_t momentumRatio);
+    RadCor(Float_t energy, Float_t ksdpsi, Float_t momentumRatio, bool isCrAngleMethod = true);
     double RadCorEval();
     ~RadCor();
 };
 
-RadCor::RadCor(Float_t energy, Float_t ksdpsi, Float_t momentumRatio)
+RadCor::RadCor(Float_t energy, Float_t ksdpsi, Float_t momentumRatio, bool isCrAngleMethod = true)
 {
     E = energy; pRatio = momentumRatio;
     psi = ksdpsi;
 
-    massFunc = new TF1("mass1", "[0] * TMath::Sqrt(1 - (1 - 4 * 139.57 * 139.57 / [0] / [0]) * cos(x / 2) * cos(x / 2))");
-    /*
-    massFunc = new TF1("MassLnY", "sqrt([0] * [0] * (1 - (1 + sqrt(1 - [1] *[1]) * cos(x))*(1 - sqrt(1 - [1] * [1] * (1 - 4 * 139.57 * 139.57 / [0] / [0])))/ [1] / [1] ))");
-    massFunc->SetParameter(1, (1 - pRatio*pRatio) / (1 + pRatio*pRatio));
-    */
+    if(isCrAngleMethod)
+    { 
+        massFunc = new TF1("mass1", "[0] * TMath::Sqrt(1 - (1 - 4 * 139.57 * 139.57 / [0] / [0]) * cos(x / 2) * cos(x / 2))");
+    }
+    else
+    {
+        massFunc = new TF1("MassLnY", "sqrt([0] * [0] * (1 - (1 + sqrt(1 - [1] *[1]) * cos(x))*(1 - sqrt(1 - [1] * [1] * (1 - 4 * 139.57 * 139.57 / [0] / [0])))/ [1] / [1] ))");
+        massFunc->SetParameter(1, (1 - pRatio*pRatio) / (1 + pRatio*pRatio));
+    }
+    
     s = 4 * E * E;
     // Auxilary function 
 
@@ -91,14 +97,14 @@ RadCor::~RadCor()
     delete D;
 }
 
-double RadCor::DEval(const double &z)
+Float16_t RadCor::DEval(const double &z)
 {
-    double x = 1 - z;
-    double b = 2 * alpha/pi*(L - 1.);
-    double b2 = 0.5 * b;
-    double D0   = 1. + 3./8.* b + b * b /16. * (9./8. - pi * pi / 3.);
+    Float16_t x = 1 - z;
+    Float16_t b = 2 * alpha/pi*(L - 1.);
+    Float16_t b2 = 0.5 * b;
+    Float16_t D0   = 1. + 3./8.* b + b * b /16. * (9./8. - pi * pi / 3.);
 
-    double D = b2*pow(x,b2-1) * D0 - 0.5*b2*(1+z) - b2 * b2 / 8 * (4*( 1 + z)*log(x)+(1+3*z*z)/x * log1p(-x) + 5 + z);
+    Float16_t D = b2*pow(x,b2-1) * D0 - 0.5*b2*(1+z) - b2 * b2 / 8 * (4*( 1 + z)*log(x)+(1+3*z*z)/x * log1p(-x) + 5 + z);
     return D;
 }
 
@@ -141,17 +147,17 @@ std::complex<double> RadCor::FormFactor(const double &s)
     return sqrt(1 / alpha)*ATot;// maybe alpha^-1 = 137.071999
 }
 
-double RadCor::Sigma0(const double &s)
+Float16_t RadCor::Sigma0(const double &s)
 {
     auto ff = FormFactor(s);
-    return 204.5 * alpha * alpha * pow(1 - 4 * kaonMass * kaonMass / s, 3./2.) * 2 / 3 * TMath::Pi() / s * abs(ff * std::conj(ff));
+    return 204.5 * alpha * alpha * pow(1 - 4 * kaonMass * kaonMass / s, 3./2.) * 2 / 3 * TMath::Pi() / s * abs(ff * std::conj(ff)) * 1e6;
 }
 
 double RadCor::RadCorEval()
 {
     double beta = sqrt(1 - kaonMass * kaonMass / E / E);
     double b = -1 + 0.5*(1-beta)/beta*L + 1/beta*TMath::Log((1+beta)/2) + 
-                0.5*(1+beta*beta)/beta *(-TMath::DiLog(-(1-beta)/(1+beta)) + TMath::DiLog((1-beta)/(1+beta)) - pi*pi/12 + 
+                0.5*(1+beta*beta)/beta * (-TMath::DiLog(-(1-beta)/(1+beta)) + TMath::DiLog((1-beta)/(1+beta)) - pi*pi/12 + 
                 L*TMath::Log((1+beta)/2)-2*L*TMath::Log(beta) + 1.5*pow(TMath::Log((1+beta)/2), 2) -0.5*pow(TMath::Log(beta), 2) - 
                 3*TMath::Log(beta)*TMath::Log((1+beta)/2) + L + 2*TMath::Log((1+beta)/2) );
 
@@ -163,37 +169,49 @@ double RadCor::RadCorEval()
     */
     TF2 Krc("K RadCor", [&](double* x, double* p) { 
         massFunc->SetParameter(0, E * sqrt((1.-x[0]) * (1.-x[1])) );
-
         if(1 - 4 * kaonMass * kaonMass / ( s*(1.-x[0]) * (1.-x[1]) ) >= 0)
         { 
-            return(fabs(p[0] - 1) < 0.1 ? (massFunc->Eval(psi) - sigmaPsi * sigmaPsi / 2 * massFunc->Derivative2(psi)) * 1.019093 : 1) * 
-            (1 + 2 * alpha / pi * (1 + a + b)) * DEval(x[0]) * DEval(x[1]) * Sigma0(s*(1-x[0]) * (1-x[1])); 
+            return (fabs(p[0] - 1) < 0.1 ? (massFunc->Eval(psi)- sigmaPsi * sigmaPsi / 2 * massFunc->Derivative2(psi) ) * 1.004836  : 1) * // (massFunc->Eval(psi)- sigmaPsi * sigmaPsi / 2 * massFunc->Derivative2(psi) )
+            (1 + 2 * alpha / pi * (1 + a + b)) * DEval(x[0]) * DEval(x[1]) * Sigma0(s*(1-x[0]) * (1-x[1]));
         }
         else
-        { return 0.; }
+        { return 0.0; }
         }, 0, 1, 0, 1, 1);
 
     Krc.SetParameter(0, 0);
-    Double_t N = Krc.Integral(0.016, 0.05, 0.016, 0.05);
+
+    double xmin = 1e-10;//0.017;
+    double xmax = 1 - 4*kaonMass*kaonMass/s; //0.05;
+    Double_t N = Krc.Integral(xmin, xmax, xmin, xmax, 1e-10);
     Krc.SetParameter(0, 1);
-    double rc = Krc.Integral(0.016, 0.05, 0.016, 0.05) / N;
+    double rc = Krc.Integral(xmin, xmax, xmin, xmax, 1e-10)/N;
     massFunc->SetParameter(0, E);
-    return rc;
-    
+    return rc ; 
 }
+
 
 int radCor()
 {
-    auto rc = new RadCor(510, 2.61516, 1. - 1e-9);
+    auto rc = new RadCor(510, 2.61516, 1., true);
     // FullRec 2body 497.602 +- 0.003 MeV
     // CrAngle 2body 497.623 +- 0.007 MeV
     // FullRec MCGPJ 497.724 +- 0.003 MeV 
     // CrAngle MCGPJ 497.726 +- 0.006 MeV psi = 2.61516
     // Exp 497.605 +- 0.004 psi = 2.62255
-
-    // Exp 15/05 psi = 2.62214
+    
     // CrAngle 497.601 +- 0.004 MeV
-    // FullRec 497.603 +- 0.003 MeV * 1.019093
+    // FullRec 497.603 +- 0.003 MeV
+
+    // Toy MC
+    // E =      514 (0.018)         511 (0.0155)        510 ()              509                     508                 505
+    // psi =    2.56835 (2.5659)    2.60012 (2.59945)   2.61516 (2.61438)   2.63627 (2.63566)       2.65877 (2.65833)   2.73436 (2.7339)
+    // Mass0 =  499.183 +- 0.017    497.982 +- 0.008    497.726 +- 0.006    497.728 +- 0.007        497.744 +- 0.009    497.762 +- 0.007
+    // dMass =                      -0.434205           -0.0908659          -0.0995038              -0.187103           -0.198127
+ 
+
+    auto revMassFunc = new TF1("revMassFunc", "2*TMath::ACos(TMath::Sqrt((1 - x * x / [0] / [0])/(1-4*139.57 * 139.57 / [0] / [0])))");
+    revMassFunc->SetParameter(0, 505.);
+    std::cout << "!!!!!!!!!!! " << revMassFunc->Eval(497.762) << std::endl;
     std::cout << rc->RadCorEval() << std::endl;
     return 0;
 }
