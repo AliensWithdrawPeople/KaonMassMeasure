@@ -1,12 +1,12 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Mon Feb 28 23:27:57 2022 by ROOT version 6.24/06
+// Wed May 11 19:22:23 2022 by ROOT version 6.24/06
 // from TTree tr_ph/Tree with the non-collinear events
 // found on file: E:/Science/BINP/Kaon Mass Measure/tr_ph/scan2018_omphi_tr_ph_fc_e509.5_v8.root
 //////////////////////////////////////////////////////////
 
-#ifndef KSKL_h
-#define KSKL_h
+#ifndef ksklCut_h
+#define ksklCut_h
 
 #include <TROOT.h>
 #include <TChain.h>
@@ -14,7 +14,7 @@
 
 // Header file for the classes stored in the TTree if any.
 
-class KSKL {
+class ksklCut {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
@@ -365,8 +365,8 @@ public :
    TBranch        *b_nlostbanks;   //!
    TBranch        *b_ncorruptedbanks;   //!
 
-   KSKL(TTree *tree=0);
-   virtual ~KSKL();
+   ksklCut(TTree *tree=0);
+   virtual ~ksklCut();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
@@ -378,8 +378,8 @@ public :
 
 #endif
 
-#ifdef KSKL_cxx
-KSKL::KSKL(TTree *tree) : fChain(0) 
+#ifdef ksklCut_cxx
+ksklCut::ksklCut(TTree *tree) : fChain(0) 
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
@@ -394,19 +394,19 @@ KSKL::KSKL(TTree *tree) : fChain(0)
    Init(tree);
 }
 
-KSKL::~KSKL()
+ksklCut::~ksklCut()
 {
    if (!fChain) return;
    delete fChain->GetCurrentFile();
 }
 
-Int_t KSKL::GetEntry(Long64_t entry)
+Int_t ksklCut::GetEntry(Long64_t entry)
 {
 // Read contents of entry.
    if (!fChain) return 0;
    return fChain->GetEntry(entry);
 }
-Long64_t KSKL::LoadTree(Long64_t entry)
+Long64_t ksklCut::LoadTree(Long64_t entry)
 {
 // Set the environment to read one entry
    if (!fChain) return -5;
@@ -419,7 +419,7 @@ Long64_t KSKL::LoadTree(Long64_t entry)
    return centry;
 }
 
-void KSKL::Init(TTree *tree)
+void ksklCut::Init(TTree *tree)
 {
    // The Init() function is called when the selector needs to initialize
    // a new tree or chain. Typically here the branch addresses and branch
@@ -608,7 +608,7 @@ void KSKL::Init(TTree *tree)
    Notify();
 }
 
-Bool_t KSKL::Notify()
+Bool_t ksklCut::Notify()
 {
    // The Notify() function is called when a new file is opened. This
    // can be either for a new TTree in a TChain or when when a new TTree
@@ -619,18 +619,18 @@ Bool_t KSKL::Notify()
    return kTRUE;
 }
 
-void KSKL::Show(Long64_t entry)
+void ksklCut::Show(Long64_t entry)
 {
 // Print contents of entry.
 // If entry is not specified, print current entry
    if (!fChain) return;
    fChain->Show(entry);
 }
-Int_t KSKL::Cut(Long64_t entry)
+Int_t ksklCut::Cut(Long64_t entry)
 {
 // This function may be called from Loop.
 // returns  1 if entry is accepted.
 // returns -1 otherwise.
    return 1;
 }
-#endif // #ifdef KSKL_cxx
+#endif // #ifdef ksklCut_cxx
