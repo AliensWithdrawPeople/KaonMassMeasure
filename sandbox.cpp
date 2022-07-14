@@ -18,8 +18,8 @@
 int sandbox()
 {
     //TFile *file = TFile::Open("E:/Science/BINP/Kaon Mass Measure/tr_ph/scan2018_omphi_tr_ph_fc_e509.5_v8.root");    
-    TFile *file = TFile::Open("E:/Science/BINP/Kaon Mass Measure/tr_ph/tr_ph_kskl_2bodygen600k.root");    
-    //TFile *file = TFile::Open("E:/Science/BINP/Kaon Mass Measure/tr_ph/tr_ph_KsKlsim_mcgpj800k.root");    
+    //TFile *file = TFile::Open("E:/Science/BINP/Kaon Mass Measure/tr_ph/tr_ph_kskl_2bodygen600k.root");    
+    TFile *file = TFile::Open("E:/Science/BINP/Kaon Mass Measure/tr_ph/tr_ph_KsKlsim_mcgpj800k.root");    
     auto tr1 = (TTree *)file->Get("tr_ph");
 
     Float_t ksTheta[10]; Float_t klTheta[30]; Float_t ksZ[30];
@@ -34,13 +34,13 @@ int sandbox()
     tr1->SetBranchAddress("phth0", klTheta);
     tr1->SetBranchAddress("phphi0", klPhi);
     tr1->SetBranchAddress("phrho", klRho);
-
     tr1->SetBranchAddress("phen0", klEn);
 
     tr1->SetBranchAddress("nks", &nks); 
     tr1->SetBranchAddress("nph", &nph);
     tr1->SetBranchAddress("xbeam", &xbeam);
     tr1->SetBranchAddress("ybeam", &ybeam);
+
     
     // Theta = kl.Theta()
     auto hdPhiTheta = new TH2D("hdPhiTheta", "", 600, 0, TMath::Pi(), 600, 0, 2*TMath::Pi());
@@ -65,6 +65,7 @@ int sandbox()
     for(int i = 0; i < tr1->GetEntriesFast(); i++)
     {
         tr1->GetEntry(i);
+        
         for(int k = 0; k < nks; k++)
         {
             ks.SetMagThetaPhi(1, ksTheta[k], ksPhi[k]);
@@ -85,15 +86,6 @@ int sandbox()
                 }
                 
                 hCosPsi->Fill(cosPsi);
-
-                // if(z-component of the cross product of Ks and Kl vectors < 0)
-                /*
-                rotAngle = TMath::ATan2(TMath::Sin(ksTheta[k]) * TMath::Sin(ksPhi[k]) + TMath::Cos(klTheta[j]), TMath::Cos(ksTheta[k]) + TMath::Sin(klTheta[j]) * TMath::Sin(klPhi[j]));
-                if(cos(rotAngle) * (TMath::Sin(ksTheta[k])*TMath::Cos(ksPhi[k]) * TMath::Sin(klTheta[j])*TMath::Sin(klPhi[j]) - 
-                   TMath::Sin(ksTheta[k]) * TMath::Sin(ksPhi[k]) * TMath::Sin(klTheta[j])*TMath::Cos(klPhi[j])) + 
-                   sin(rotAngle) * (TMath::Cos(ksTheta[k]) * TMath::Sin(klTheta[j]) * TMath::Cos(klPhi[j]) - TMath::Cos(klTheta[j]) * TMath::Sin(ksTheta[k]) * TMath::Cos(ksPhi[k])) < 0)
-                { psi = 2 * TMath::Pi() - psi; }
-                */
                 
                 foo = ks.Phi() - kl.Phi() < 0;
                 if(fabs(ks.Phi() - kl.Phi()) <= TMath::Pi())
@@ -129,7 +121,7 @@ int sandbox()
     hClEdPhi->GetXaxis()->SetTitle("#Delta#phi, rad");
     hClEdPhi->GetYaxis()->SetTitle("Cluster Energy,  MeV");
 
-    hdPhiTheta->Draw("COL");
-    
+    hClEnergy->Draw("COL");
+
     return n;
 }
