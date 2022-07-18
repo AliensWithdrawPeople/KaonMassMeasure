@@ -61,7 +61,7 @@ int sandbox()
     double rotAngle = 0;
     int foo = 0;
     double dPhi = 0;
-
+/*
     for(int i = 0; i < tr1->GetEntriesFast(); i++)
     {
         tr1->GetEntry(i);
@@ -122,6 +122,12 @@ int sandbox()
     hClEdPhi->GetYaxis()->SetTitle("Cluster Energy,  MeV");
 
     hClEnergy->Draw("COL");
-
+*/
+    auto massFullRec = new TF1("MassLnY", 
+    "sqrt(x * x * (1 - (1 + sqrt(1 - [1] *[1]) * cos([0]))*(1 - sqrt(1 - [1] * [1] * (1 - 4 * 139.57 * 139.57 / x / x)))/ [0] / [0] ))", 400, 600);
+    massFullRec->SetParameter(0, 2.61516);
+    massFullRec->SetParameter(1, 0.99999);
+    std::cout << massFullRec->GetX(490, 450, 570, 1e-3, 10000) << " : " << massFullRec->GetX(505, 450, 570, 1e-3, 10000) << std::endl;
+    massFullRec->Draw();
     return n;
 }

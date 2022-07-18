@@ -7,6 +7,7 @@
 #include <TMath.h>
 #include <TCanvas.h>
 #include <TLatex.h>
+#include <TVector3.h>
 
 void kskl2bGen::Loop(std::string histFileName)
 {
@@ -64,12 +65,34 @@ void kskl2bGen::Loop(std::string histFileName)
     double cutPtot = 40;
 
     double cosKlKs = 0;
+    TVector3 ks;
+    TVector3 kl;
+    // Auxilary var (for dPhi).
+    int foo = 0;
+    // dPhi - angle between Ks and Kl
+    double dPhi = 0;
     int tmpCounter = 0;
     std::vector<Int_t> ksCand = {};
 
     auto hist = new TH2D("hist", "", 1000, 0, 600, 1000, 0, 600);
     auto histKlCands = new TH1D("KlCands", "number of Kl candidates for one Ks candidate", 5, 0, 5);
     auto histKsCands = new TH1D("KsCands", "number of Ks candidates", 5, 0, 5);
+    // Theta = kl.Theta()
+    auto hdPhiTheta = new TH2D("hdPhiTheta", "", 600, 0, TMath::Pi(), 600, 0, 2*TMath::Pi());
+    auto hdThetadPhi = new TH2D("hdThetadPhi", "", 600, 0, 2*TMath::Pi(), 600, -TMath::Pi(), TMath::Pi());
+    auto hClEdPhi = new TH2D("hClEdPhi", "", 600, 0, 2 * TMath::Pi(), 600, 0, 600);
+    auto hPsi = new TH1D("hPsi", "", 628, 0, 6.28);
+
+    hdThetadPhi->GetXaxis()->SetTitle("#Delta#phi, rad");
+    hdThetadPhi->GetYaxis()->SetTitle("#Delta#theta, rad");
+
+    hdPhiTheta->GetXaxis()->SetTitle("#theta of Kl, rad");
+    hdPhiTheta->GetYaxis()->SetTitle("#Delta#phi, rad");
+
+    hPsi->GetXaxis()->SetTitle("Angle between motion vectors Ks and Kl, rad");
+
+    hClEdPhi->GetXaxis()->SetTitle("#Delta#phi, rad");
+    hClEdPhi->GetYaxis()->SetTitle("Cluster Energy,  MeV");
 
     Long64_t nentries = fChain->GetEntriesFast();
 
@@ -125,32 +148,56 @@ void kskl2bGen::Loop(std::string histFileName)
         {
             for(int k = 0; k < nks; k++)
             {
-               if(ksalign[k] > 0.85 && (tdedx[ksvind[k][0]] + tdedx[ksvind[k][1]]) / 2 < 5000 &&
-                  abs(kspith[k][0] - TMath::Pi() / 2) <= 0.9 && abs(kspith[k][1] - TMath::Pi() / 2) <= 0.9 &&
+                if(ksalign[k] > 0.85 && (tdedx[ksvind[k][0]] + tdedx[ksvind[k][1]]) / 2 < 5000 &&
+                  abs(kspith[k][0] - TMath::Pi() / 2) <= 0.7 && 
+                  abs(kspith[k][1] - TMath::Pi() / 2) <= 0.7 &&
                   //20 - half of the linear size of Drift Chamber
                   //(20 - ksz0[0]) * fabs(TMath::Tan(kspith[0][0])) > 15 && (20 - ksz0[0]) * fabs(TMath::Tan(kspith[0][1])) > 15 &&
                   //kspipt[k][0] > 120 && kspipt[k][1] > 120 && 
                   //kspipt[k][0] < 350 && kspipt[k][1] < 350 &&
                   tcharge[ksvind[k][0]] * tcharge[ksvind[k][1]] < 0 && kstype[k] == 0) // Added kstype[k] == 0.
-               {
-                  for(int j = 0; j < nph; j++)
-                  {
-                     // phth0 and phphi0 are theta and phi respectively angles of KL candidate ,
-                     cosKlKs =   TMath::Sin(ksth[k])*TMath::Cos(ksphi[k]) * TMath::Sin(phth0[j])*TMath::Cos(phphi0[j]) + 
-                                 TMath::Sin(ksth[k]) * TMath::Sin(ksphi[k]) * TMath::Sin(phth0[j])*TMath::Sin(phphi0[j]) +
-                                 TMath::Cos(ksth[k]) * TMath::Cos(phth0[j]);
+                {
+                    ks.SetMagThetaPhi(1, ksth[k], ksphi[k]);
 
-                    if(fabs(cosKlKs) > -0.8 && phen0[j] > -50)
-                     { tmpCounter++; } 
-                  }
+                    for(int j = 0; j < nph; j++)
+                    {
+                        // phth0 and phphi0 are theta and phi respectively angles of KL candidate.
+                        kl.SetMagThetaPhi(phrho[j], phth0[j], phphi0[j]);
+                        // Shift to the center of phi decay. 
+                        kl.SetX(kl.X() - xbeam);
+                        kl.SetY(kl.Y() - ybeam);
+                        kl.SetZ(kl.Z() - ksz0[k]);
 
-                  
-      
-                  histKlCands->Fill(tmpCounter);
-                  if(tmpCounter > 0)
-                  { ksCand.push_back(k); }
-                  tmpCounter = 0;
-               }
+                        hPsi->Fill(ks.Angle(kl));
+
+                        foo = ks.Phi() - kl.Phi() < 0;
+                        if(fabs(ks.Phi() - kl.Phi()) <= TMath::Pi())
+                        { 
+                            dPhi = ks.Phi() - kl.Phi() + foo * 2 * TMath::Pi();
+                            hdThetadPhi->Fill(dPhi, ks.Theta() + kl.Theta() - TMath::Pi());
+                            // phen0 - cluster energy. So this is the energy deposition of Kl candidate.
+                            hClEdPhi->Fill(dPhi, phen0[j]); 
+                            hdPhiTheta->Fill(kl.Theta(), dPhi);
+                        }
+                        else
+                        { 
+                            dPhi = std::pow(-1, foo) * 2 * TMath::Pi() - (ks.Phi() - kl.Phi()) + foo * 2 * TMath::Pi();
+                            hdThetadPhi->Fill(dPhi, ks.Theta() + kl.Theta() - TMath::Pi()); 
+                            hClEdPhi->Fill(dPhi, phen0[j]);
+                            hdPhiTheta->Fill(kl.Theta(), dPhi);
+                        }
+
+                        if(fabs(dPhi - TMath::Pi()) < 0.5 && phen0[j] > 40)
+                        { tmpCounter++; } 
+                    }
+
+                    
+        
+                    histKlCands->Fill(tmpCounter);
+                    if(tmpCounter > 0)
+                    { ksCand.push_back(k); }
+                    tmpCounter = 0;
+                }
             }
 
             histKsCands->Fill(ksCand.size());

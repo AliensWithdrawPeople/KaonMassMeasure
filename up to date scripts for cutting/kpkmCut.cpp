@@ -84,7 +84,7 @@ void kpkmCut::Loop()
       if (NgoodTr == 2 && is_coll==1 && tnhit[0]>10 && tnhit[1]>10 && tcharge[0]*tcharge[1] < 0 &&
          (tth[0]*tcharge[0] + tth[1]*tcharge[1] + TMath::Pi()) / 2 < TMath::Pi() - 1 && 
          (tth[0]*tcharge[0] + tth[1]*tcharge[1] + TMath::Pi()) / 2 > 1 && 
-         abs(tth[1] - TMath::Pi()/2) <= 0.9  &&
+         abs(tth[1] - TMath::Pi()/2) <= 0.7 && abs(tth[1] - TMath::Pi()/2) <= 0.7 &&
          (tdedx[0]+tdedx[1])/2 > 7000 &&
          fabs(tptot[0]-tptot[1])/(tptot[0]+tptot[1]) < 0.3 &&
          tcharge[0] * tcharge[1] < 0)
