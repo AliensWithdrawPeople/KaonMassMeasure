@@ -60,7 +60,10 @@ def F(x: float, s: float)->float:
     return f + epemPart
 
 def SigmaCorrected(s:float)->float:
-    sigma:float = integrate.quad(lambda x: pow(x, -0.85), 0, 0.04)[0]
+    eps:float = (np.sqrt(s) - 2 * kaonMass) / kaonMass
+    sigma:float = integrate.quad(lambda x: SigmaBorn(s * (1-x)) * F(x, s) if x < 1 - 4 * kaonMass * kaonMass / s else 0, 0, eps)[0]
     return sigma
 
-print(SigmaCorrected(1010*1010))
+energy:float = 1010.466
+s:float = energy * energy
+print(SigmaCorrected(s) *1e9)
