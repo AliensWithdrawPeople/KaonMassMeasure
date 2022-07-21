@@ -1,11 +1,14 @@
+from typing import List
 import numpy as np
 from scipy import integrate
+from scipy.interpolate import make_interp_spline
 
 pi:float = np.pi
 alpha:float = 1 / 137.035999
-kaonMass:float = 497.614  
-electronMass:float = 0.511
-a:float = pi * pi / 6 - 1 / 4
+mK:float = 497.614  
+"""Kaon mass (MeV)"""
+me:float = 0.511 
+"""Electron mass (MeV)"""
 
 def FormFactor(s: float)->complex:
     MPhi = 1.01919e+03
@@ -37,33 +40,67 @@ def FormFactor(s: float)->complex:
     return np.sqrt(1 / alpha)*ATot
 
 def SigmaBorn(s:float)->float:
-    return 204.5 * alpha * alpha * pow(1 - 4 * kaonMass * kaonMass / s, 3./2.) * 2 / 3 * pi / s * pow(abs(FormFactor(s)), 2.)
+    energies:List = [1004.066, 1010.466, 1012.955, 1015.068, 1016.105, 1017.155, 1017.156, 1018.046, 1019.118,  1019.214, 1019.421, 1019.902, 
+                    1021.222, 1021.309, 1022.078,  1022.744, 1023.264,  1025.320, 1027.956, 1029.090, 1033.907, 1040.028,  1049.864,  1050.862,  1059.947]
+    cross_sections:List = [6.87, 42.16, 96.74, 219.53, 366.33, 628.15, 624.76, 996.62, 1413.65,  1433.05, 1434.84, 1341.91,  833.20, 
+                            807.54, 582.93,  443.71, 377.77,  199.26, 115.93, 96.96, 50.12, 31.27,  16.93,  17.47,  12.09]
+    data = np.array([energies, cross_sections]).T 
+    data2 = data[data[:,0].argsort()]
+    spline = make_interp_spline(data2[:, 0], data2[:, 1], k=2)
+    x = np.linspace(mK-10, max(energies), 10000)
+    y = spline(x)
+    y = np.where(x<=mK, 0, y)
+    return np.interp(s, (x**2), y)
+    # Old version (incorrect)
+    #return 204.5 * alpha * alpha * pow(1 - 4 * mK * mK / s, 3./2.) * 2 / 3 * pi / s * pow(abs(FormFactor(s)), 2.)
 
 def F(x: float, s: float)->float:
     # L = ln(s / m_e^2)
-    L:float = np.log(s / electronMass / electronMass)
+    L:float = np.log(s / me / me)
     # beta = 2*alpha/pi * (L-1)
     beta:float = 2 * alpha / pi *(L - 1)
-    # Brackets before x^(beta - 1) in F.
-    par1:float = 1 + alpha / pi * (pi * pi / 3 - 1./2.) + 3./4. * beta - 1./24. * beta * beta *(L / 3. + 2 * pi * pi - 37./4.)
 
-    f:float = beta * pow(x, beta - 1.) * par1  - beta * (1. - x /2.) + beta * beta / 8. * (4. * (2. - x) * np.log(1. / x) + 1. / x * (1. + 3. * (1.-x)*(1.-x)) * np.log(1./(1.-x)) - 6. + x)
+    p1:float = beta * x**(beta - 1.) * (1 + alpha / pi * (pi**2 / 3 - 1./2.) + 3./4. * beta - 1./24. * beta**2 * (L / 3. + 2 * pi ** 2 - 37./4.) )
+    p2:float = beta * (1. - x /2.)
+
+    p3:float = 4. * (2. - x) * np.log(1. / x)
+    p4:float = 1. / x * (1. + 3. * (1.-x)**2) * np.log(1./(1.-x))
+
+    # Photon part
+    phPart:float = p1  - p2 + beta * beta / 8. * (p3 + p4 - 6. + x)
 
     E:float = np.sqrt(s / 4.)
-    # In case of real e+e- pairs are not banned.
-    epemPart:float = 0
-    if(x - 2 * electronMass / E > 0): 
-        epemPart =  alpha * alpha / pi / pi * \
-        ( 1 / 6. / x * pow(x - 2 * electronMass / E, beta) * pow(np.log(s * x * x / electronMass / electronMass) -5./3. , 2.) * \
-        (2 - 2*x + x*x + beta/3.*(np.log(s * x * x / electronMass /electronMass) -5./3)) + \
-        L*L/2. * (2./3.*(1-pow(1-x, 3)) / (1.-x) - (2.-x)*np.log(1./(1.-x)) +x/2.) )
-    return f + epemPart
+
+    # Real e+e- part.
+    if(x - 2 * me / E > 0):
+        p5:float = 1 / 6. / x * (x - 2 * me / E)**beta
+        p6:float = (np.log(s * x * x / me / me) - 5./3.)**2.
+        p7:float = beta/3.*(np.log(s * x**2 / (me**2)) - 5./3)
+        p8:float = L*L/2. * (2./3.*(1-(1-x)**3) / (1.-x) - (2.-x)*np.log(1./(1.-x)) + x/2.)
+
+        elPart:float = (alpha / pi)**2 * (p5 * p6 * (2 - 2*x + x*x + p7) + p8)
+    else:
+        elPart:float = 0
+
+    return phPart + elPart
 
 def SigmaCorrected(s:float)->float:
-    eps:float = (np.sqrt(s) - 2 * kaonMass) / kaonMass
-    sigma:float = integrate.quad(lambda x: SigmaBorn(s * (1-x)) * F(x, s) if x < 1 - 4 * kaonMass * kaonMass / s else 0, 0, eps)[0]
-    return sigma
+    return integrate.quad(lambda x: SigmaBorn(s * (1-x)) * F(x, s) if x < 1 - 4 * mK * mK / s else 0, 0, 1, epsabs = 1e-6, epsrel=1e-4, limit=500)[0]
 
-energy:float = 1010.466
-s:float = energy * energy
-print(SigmaCorrected(s) *1e9)
+def massFunc(s: float, psi: float)->float:
+    eta:float = (1 - 0.9999*0.9999) / (1 + 0.9999*0.9999)
+    # beta piona ^2
+    b:float = 1 - 4 * 139.57 * 139.57 / (s / 4)
+    return (s / 4 * (1 - (1 + (1 - eta**2)**0.5 * np.cos(psi)) * (1 - (1 - eta**2 * (1 - 4 * 139.57 * 139.57 / (s / 4) ))**0.5 )/ eta / eta ))**0.5
+
+def GetMassCorrected(s: float, psi: float)->float:
+    return integrate.quad(lambda x: massFunc(s * (1-x), psi) * SigmaBorn(s * (1-x)) * F(x, s) if x < 1 - 4 * mK * mK / s else 0, 0, 1, epsabs = 1e-6, epsrel=1e-4, limit=500)[0] / SigmaCorrected(s)
+
+energies:float = [1004.066, 1010.466, 1012.955, 1015.068, 1016.105, 1017.155, 1017.156, 1018.046, 1019.118,  1019.214, 1019.421, 1019.902, 
+                    1021.222, 1021.309, 1022.078,  1022.744, 1023.264,  1025.320, 1027.956, 1029.090, 1033.907, 1040.028,  1049.864,  1050.862,  1059.947]
+sList:List = [x**2 for x in energies]
+#print([SigmaCorrected(foo) / SigmaBorn(foo) for foo in sList])
+
+energy:float =  1020
+s:float = energy**2
+print(GetMassCorrected(s, 2.61468) )
