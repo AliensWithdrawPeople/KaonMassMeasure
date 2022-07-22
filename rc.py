@@ -2,6 +2,7 @@ from typing import List
 import numpy as np
 from scipy import integrate
 from scipy.interpolate import make_interp_spline
+from scipy.misc import derivative
 
 pi:float = np.pi
 alpha:float = 1 / 137.035999
@@ -85,22 +86,40 @@ def F(x: float, s: float)->float:
     return phPart + elPart
 
 def SigmaCorrected(s:float)->float:
+    eps:float = (s**0.5 - 2 * mK) / mK
     return integrate.quad(lambda x: SigmaBorn(s * (1-x)) * F(x, s) if x < 1 - 4 * mK * mK / s else 0, 0, 1, epsabs = 1e-6, epsrel=1e-4, limit=500)[0]
 
 def massFunc(s: float, psi: float)->float:
     eta:float = (1 - 0.9999*0.9999) / (1 + 0.9999*0.9999)
     # beta piona ^2
     b:float = 1 - 4 * 139.57 * 139.57 / (s / 4)
-    return (s / 4 * (1 - (1 + (1 - eta**2)**0.5 * np.cos(psi)) * (1 - (1 - eta**2 * (1 - 4 * 139.57 * 139.57 / (s / 4) ))**0.5 )/ eta / eta ))**0.5
+    return (s / 4 * (1 - (1 + (1 - eta**2)**0.5 * np.cos(psi)) * (1 - (1 - eta**2 * b)**0.5 )/ eta / eta ))**0.5
+    #return s**0.5 / 2 *(1 - (1 - 4 * 139.57 * 139.57 / (s / 4) ) * np.cos(psi / 2) * np.cos(psi / 2))**0.5
 
-def GetMassCorrected(s: float, psi: float)->float:
-    return integrate.quad(lambda x: massFunc(s * (1-x), psi) * SigmaBorn(s * (1-x)) * F(x, s) if x < 1 - 4 * mK * mK / s else 0, 0, 1, epsabs = 1e-6, epsrel=1e-4, limit=500)[0] / SigmaCorrected(s)
+def massNc(s: float, psi: float, sigmaPsi: float)->float:
+    return massFunc(s, psi) - sigmaPsi**2 / 2 * derivative(lambda x: massFunc(s, x), psi, 1e-5, 2, order=9)
+
+def GetMassCorrected(s: float, psi: float, sigmaPsi: float)->float:
+    """ Compute mass of Ks with radiative and nonlinearity correction.
+
+    Args:
+        s (float): Mandelstam variable, s = E_cm ^ 2
+        psi (float): critical angle
+        sigmaPsi (float): standard deviation of critical angle
+
+    Returns:
+        float: corrected mass of Ks
+    """        
+    conv:float = integrate.quad(lambda x: massNc(s * (1-x), psi, sigmaPsi) * SigmaBorn(s * (1-x)) * F(x, s) if x < 1 - 4 * mK * mK / s else 0, 0, 1, epsabs = 1e-6, epsrel=1e-4, limit=500)[0]
+    return conv / SigmaCorrected(s)
 
 energies:float = [1004.066, 1010.466, 1012.955, 1015.068, 1016.105, 1017.155, 1017.156, 1018.046, 1019.118,  1019.214, 1019.421, 1019.902, 
                     1021.222, 1021.309, 1022.078,  1022.744, 1023.264,  1025.320, 1027.956, 1029.090, 1033.907, 1040.028,  1049.864,  1050.862,  1059.947]
 sList:List = [x**2 for x in energies]
 #print([SigmaCorrected(foo) / SigmaBorn(foo) for foo in sList])
 
-energy:float =  1020
+energy:float =  2 * 514
 s:float = energy**2
-print(GetMassCorrected(s, 2.61468) )
+sigmaPsi:float = 1.64407e-02
+print(GetMassCorrected(s, 2.56332, sigmaPsi) )
+print(massFunc(s, 2.56332) )
