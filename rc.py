@@ -87,7 +87,7 @@ def F(x: float, s: float)->float:
 
 def SigmaCorrected(s:float)->float:
     eps:float = (s**0.5 - 2 * mK) / mK
-    return integrate.quad(lambda x: SigmaBorn(s * (1-x)) * F(x, s) if x < 1 - 4 * mK * mK / s else 0, 0, 1, epsabs = 1e-6, epsrel=1e-4, limit=500)[0]
+    return integrate.quad(lambda x: SigmaBorn(s * (1-x)) * F(x, s) if x < 1 - 4 * mK * mK / s else 0, 0, eps, epsabs = 1e-6, epsrel=1e-4, limit=500)[0]
 
 def massFunc(s: float, psi: float)->float:
     eta:float = (1 - 0.9999*0.9999) / (1 + 0.9999*0.9999)
@@ -110,7 +110,8 @@ def GetMassCorrected(s: float, psi: float, sigmaPsi: float)->float:
     Returns:
         float: corrected mass of Ks
     """        
-    conv:float = integrate.quad(lambda x: massNc(s * (1-x), psi, sigmaPsi) * SigmaBorn(s * (1-x)) * F(x, s) if x < 1 - 4 * mK * mK / s else 0, 0, 1, epsabs = 1e-6, epsrel=1e-4, limit=500)[0]
+    eps:float = (s**0.5 - 2 * mK) / mK
+    conv:float = integrate.quad(lambda x: massNc(s * (1-x), psi, sigmaPsi) * SigmaBorn(s * (1-x)) * F(x, s) if x < 1 - 4 * mK * mK / s else 0, 0, eps, epsabs = 1e-6, epsrel=1e-4, limit=500)[0]
     return conv / SigmaCorrected(s)
 
 energies:float = [1004.066, 1010.466, 1012.955, 1015.068, 1016.105, 1017.155, 1017.156, 1018.046, 1019.118,  1019.214, 1019.421, 1019.902, 
@@ -118,8 +119,10 @@ energies:float = [1004.066, 1010.466, 1012.955, 1015.068, 1016.105, 1017.155, 10
 sList:List = [x**2 for x in energies]
 #print([SigmaCorrected(foo) / SigmaBorn(foo) for foo in sList])
 
-energy:float =  2 * 514
+energy:float =  2 * 511
 s:float = energy**2
+psi:float = 2.59772
 sigmaPsi:float = 1.64407e-02
-print(GetMassCorrected(s, 2.56332, sigmaPsi) )
-print(massFunc(s, 2.56332) )
+
+print("Corrected Mass = ", GetMassCorrected(s, psi, sigmaPsi) ) #2.73463 (cr angle) 2.7335 (revmass)
+print("Mass = ", massFunc(s, psi) )
