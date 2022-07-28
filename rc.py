@@ -132,13 +132,19 @@ def GetMassCorrected(s: float, psi: float, sigmaPsi: float, eps: float)->float:
     conv: float = integrate.quad(lambda x: massNC(s * (1-x), psi, sigmaPsi) * SigmaBorn(s * (1-x)) * F(x, s), 0, eps, epsabs = 1e-6, epsrel=1e-4, limit=500)[0]
     return conv / SigmaCorrected(s, eps)
 
-
-energy: float =  2 * 511
+energy: float =  2 * 509
 s: float = energy**2
-psi: float = 2.5988
+psi: float =   2.63568
 sigmaPsi: float = 0.0164407
 massUpperLimit: float = 505
+maxPhotonEnergy: float = 10 
 
-eps: float = epsCalc(s, massUpperLimit)
-print("Corrected Mass = ", GetMassCorrected(s, psi, sigmaPsi, eps), "eps =", eps)
-print("Mass = ", massFunc(s, psi) )
+# eps: float = epsCalc(s, massUpperLimit)
+# eps: float = 2 * maxPhotonEnergy / energy
+# print("Corrected Mass = ", GetMassCorrected(s, psi, sigmaPsi, eps), "eps =", eps)
+# print("Mass = ", massFunc(s, psi) )
+
+# {2.73353, 2.65747, 2.63507, 2.61432, 2.5988, 2.56547}
+# {505, 508, 509, 510, 511, 514}
+# {497.652, 497.626, 497.640, 497.628, 497.668, 498.036}
+# {0.004, 0.005, 0.005, 0.004, 0.006, 0.013}

@@ -1,13 +1,14 @@
 #include "TF1.h"
 #include "TGraphErrors.h"
+#include "TLine.h"
 
 int auxFunc()
 {
     double pRatio = 0.99999;
     double psi = 2.56547;
 
-    double energy = 514;
-    double mass = 499.161;
+    double energy = 509;
+    double mass =  497.729;
     double massK = 497.614;
 
 
@@ -29,12 +30,36 @@ int auxFunc()
     std::cout << "At E = " << energy << " and M = " << mass << " Psi = " << revMassFunc->Eval(mass) << std::endl;
 
 
-    std::vector<Float_t> vM = {497.645, 497.64, 497.648, 497.633, 497.676, 497.742};
-    std::vector<Float_t> vMerr = {0.0049, 0.0053, 0.0055, 0.0047, 0.0072, 0.0148};
+    //std::vector<Float_t> vM = {497.645, 497.64, 497.648, 497.633, 497.676, 497.742};
+    //std::vector<Float_t> vMerr = {0.0049, 0.0053, 0.0055, 0.0047, 0.0072, 0.0148};
+
+    //std::vector<Float_t> vM = {497.628, 497.639, 497.637, 497.637, 497.6684, 497.726};
+    //std::vector<Float_t> vMerr = {0.004, 0.005,  0.005, 0.005, 0.007, 0.015};
+
+    std::vector<Float_t> vM = {497.652, 497.626, 497.640, 497.628, 497.668, 498.036};
+    std::vector<Float_t> vMerr = {0.004, 0.005, 0.005, 0.004, 0.006, 0.013};
+
     std::vector<Float_t> vE = {505, 508, 509, 510, 511, 514};
     std::vector<Float_t> zeroes(vM.size(), 0.0);
     TGraphErrors gr(vM.size(), vE.data(), vM.data(), zeroes.data(), vMerr.data());
-    //gr.DrawClone();
+    auto gr1 = new TGraphErrors();
+    gr1->AddPoint(510, 497.619);
+    gr1->SetPointError(0, 0, 0.005);
+    gr1->SetMarkerColor(kGreen);
+
+    auto massKline = new TLine(505, massK, 514, massK);
+    massKline->SetLineColor(kBlue);
+    massKline->SetLineWidth(2);
+
+    auto massKline2 = new TLine(505, 497.619, 514, 497.619);
+    massKline2->SetLineColor(kGreen);
+    massKline2->SetLineWidth(2);
+    gr.DrawClone();
+    massKline->DrawClone("Same");
+    massKline2->DrawClone("Same");
+    gr1->DrawClone("Same");
+    
+    
 
     std::vector<Float_t> vPsi = {2.73532, 2.73491, 2.73476, 2.73462, 2.73463};
     std::vector<Float_t> vPsiErr = {4.07562e-04, 3.35361e-04, 2.88769e-04, 2.57586e-04, 2.35667e-04};
