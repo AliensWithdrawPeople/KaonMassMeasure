@@ -21,7 +21,7 @@ def massFunc(s: float, psi: float)->float:
     return (s / 4 * (1 - (1 + (1 - eta**2)**0.5 * np.cos(psi)) * (1 - (1 - eta**2 * b)**0.5 )/ eta / eta ))**0.5
 
 def massNC(s: float, psi: float, sigmaPsi: float)->float:
-    return massFunc(s, psi) - sigmaPsi**2 / 2 * derivative(lambda x: massFunc(s, x), psi, 1e-5, 2, order=9)
+    return massFunc(s, psi) #- sigmaPsi**2 / 2 * derivative(lambda x: massFunc(s, x), psi, 1e-5, 2, order=9)
 
 def FormFactor(s: float)->complex:
     MPhi = 1.01919e+03
@@ -118,31 +118,34 @@ def epsCalc(s: float, massUpperLimit: float)->float:
 def SigmaCorrected(s:float, eps=1)->float:
     return integrate.quad(lambda x: SigmaBorn(s * (1-x)) * F(x, s), 0, eps, epsabs = 1e-6, epsrel=1e-4, limit=500)[0]
 
-def GetMassCorrected(s: float, psi: float, sigmaPsi: float, eps: float)->float:
+def GetMassCorrected(s: float, psi: float, sigmaPsi: float, eps: float, isNC: bool=True)->float:
     """ Compute mass of Ks with radiative and nonlinearity correction.
 
     Args:
         s (float): Mandelstam variable, s = E_cm ^ 2
         psi (float): critical angle
         sigmaPsi (float): standard deviation of critical angle
+        eps (float): upper limit in integral. For eps << 1 eps is share of energy carried away by photons and pairs.
+        isNC (bool): With or without resolution correction.
 
     Returns:
         float: corrected mass of Ks
     """        
-    conv: float = integrate.quad(lambda x: massNC(s * (1-x), psi, sigmaPsi) * SigmaBorn(s * (1-x)) * F(x, s), 0, eps, epsabs = 1e-6, epsrel=1e-4, limit=500)[0]
+    conv: float = integrate.quad(lambda x: (massNC(s * (1-x), psi, sigmaPsi) if isNC else massFunc(s, psi)) * SigmaBorn(s * (1-x)) * F(x, s), 0, eps, epsabs = 1e-6, epsrel=1e-4, limit=500)[0]
     return conv / SigmaCorrected(s, eps)
 
-energy: float =  2 * 509
+energy: float =  2 * 505
 s: float = energy**2
-psi: float =   2.63568
+psi: float =   2.73353  
 sigmaPsi: float = 0.0164407
 massUpperLimit: float = 505
 maxPhotonEnergy: float = 10 
 
-# eps: float = epsCalc(s, massUpperLimit)
+# print(massNC(s, psi, sigmaPsi))
+eps: float = epsCalc(s, massUpperLimit)
 # eps: float = 2 * maxPhotonEnergy / energy
-# print("Corrected Mass = ", GetMassCorrected(s, psi, sigmaPsi, eps), "eps =", eps)
-# print("Mass = ", massFunc(s, psi) )
+print("Corrected Mass = ", GetMassCorrected(s, psi, sigmaPsi, eps, True), "eps =", eps)
+print("Mass = ", massFunc(s, psi) )
 
 # {2.73353, 2.65747, 2.63507, 2.61432, 2.5988, 2.56547}
 # {505, 508, 509, 510, 511, 514}
