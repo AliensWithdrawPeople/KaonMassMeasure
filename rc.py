@@ -21,7 +21,7 @@ def massFunc(s: float, psi: float)->float:
     return (s / 4 * (1 - (1 + (1 - eta**2)**0.5 * np.cos(psi)) * (1 - (1 - eta**2 * b)**0.5 )/ eta / eta ))**0.5
 
 def massNC(s: float, psi: float, sigmaPsi: float)->float:
-    return massFunc(s, psi) #- sigmaPsi**2 / 2 * derivative(lambda x: massFunc(s, x), psi, 1e-5, 2, order=9)
+    return massFunc(s, psi) - sigmaPsi**2 / 2 * derivative(lambda x: massFunc(s, x), psi, 1e-5, 2, order=9)
 
 def FormFactor(s: float)->complex:
     MPhi = 1.01919e+03
@@ -134,9 +134,9 @@ def GetMassCorrected(s: float, psi: float, sigmaPsi: float, eps: float, isNC: bo
     conv: float = integrate.quad(lambda x: (massNC(s * (1-x), psi, sigmaPsi) if isNC else massFunc(s, psi)) * SigmaBorn(s * (1-x)) * F(x, s), 0, eps, epsabs = 1e-6, epsrel=1e-4, limit=500)[0]
     return conv / SigmaCorrected(s, eps)
 
-energy: float =  2 * 505
+energy: float =  2 * 514
 s: float = energy**2
-psi: float =   2.73353  
+psi: float = 2.56242  
 sigmaPsi: float = 0.0164407
 massUpperLimit: float = 505
 maxPhotonEnergy: float = 10 

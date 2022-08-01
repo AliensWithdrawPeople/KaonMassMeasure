@@ -1,5 +1,5 @@
-#define kskl2bGen_cxx
-#include "kskl2bGen.h"
+#define ksklAltVer_cxx
+#include "ksklAltVer.h"
 #include <TH2.h>
 #include <TH1D.h>
 #include <TStyle.h>
@@ -9,7 +9,7 @@
 #include <TLatex.h>
 #include <TVector3.h>
 
-void kskl2bGen::Loop(std::string histFileName)
+void ksklAltVer::Loop(std::string histFileName)
 {
     //   In a ROOT session, you can do:
     //      root> .L ksklCut_mcgpj.C
@@ -94,6 +94,10 @@ void kskl2bGen::Loop(std::string histFileName)
     hClEdPhi->GetXaxis()->SetTitle("#Delta#phi, rad");
     hClEdPhi->GetYaxis()->SetTitle("Cluster Energy,  MeV");
 
+    TVector3 piPos;
+    TVector3 piNeg;
+
+
     Long64_t nentries = fChain->GetEntriesFast();
 
     Long64_t nbytes = 0, nb = 0;
@@ -115,47 +119,19 @@ void kskl2bGen::Loop(std::string histFileName)
 
         if (NgoodTr == 2)
         { NgoodTrS++; }
-
-      /*   
-        if (NgoodTr == 2 && nks == 1 && is_coll != 1 && ksalign[0] > 0.85 && (tdedx[ksvind[0][0]] + tdedx[ksvind[0][1]]) / 2 < 5000 &&
-            abs(kspith[0][0] - TMath::Pi() / 2) <= 0.9 && abs(kspith[0][1] - TMath::Pi() / 2) <= 0.9 &&
-            //20 - half of the linear size of Drift Chamber
-            //(20 - ksz0[0]) * fabs(TMath::Tan(kspith[0][0])) > 15 && (20 - ksz0[0]) * fabs(TMath::Tan(kspith[0][1])) > 15 &&
-            kspipt[0][0] > 120 && kspipt[0][1] > 120 && 
-            kspipt[0][0] < 350 && kspipt[0][1] < 350 &&
-            
-            tcharge[ksvind[0][0]] * tcharge[ksvind[0][1]] < 0)
-        {
-            if (tcharge[ksvind[0][0]] > 0)
-            {
-                Y = kspipt[0][0] / kspipt[0][1];
-                hist->Fill(kspipt[0][0], kspipt[0][1]);
-                p1 = kspipt[0][0]; p2 = kspipt[0][1];
-            }
-            else
-            {
-                Y = kspipt[0][1] / kspipt[0][0];
-                hist->Fill(kspipt[0][1], kspipt[0][0]);
-                p1 = kspipt[0][1]; p2 = kspipt[0][0];
-            }
-            dpsi = ksdpsi[0];
-            tNew->Fill();
-        }
-      */  
-
-      
+        
         if (NgoodTr == 2 && is_coll != 1 )
         {
             for(int k = 0; k < nks; k++)
             {
                 if(ksalign[k] > 0.85 && (tdedx[ksvind[k][0]] + tdedx[ksvind[k][1]]) / 2 < 5000 &&
-                  abs(kspith[k][0] - TMath::Pi() / 2) <= 0.7 && 
-                  abs(kspith[k][1] - TMath::Pi() / 2) <= 0.7 &&
-                  //20 - half of the linear size of Drift Chamber
-                  //(20 - ksz0[0]) * fabs(TMath::Tan(kspith[0][0])) > 15 && (20 - ksz0[0]) * fabs(TMath::Tan(kspith[0][1])) > 15 &&
-                  //kspipt[k][0] > 120 && kspipt[k][1] > 120 && 
-                  //kspipt[k][0] < 350 && kspipt[k][1] < 350 &&
-                  tcharge[ksvind[k][0]] * tcharge[ksvind[k][1]] < 0 && kstype[k] == 0) // Added kstype[k] == 0.
+                    abs(kspith[k][0] - TMath::Pi() / 2) <= 0.7 && 
+                    abs(kspith[k][1] - TMath::Pi() / 2) <= 0.7 &&
+                    //20 - half of the linear size of Drift Chamber
+                    //(20 - ksz0[0]) * fabs(TMath::Tan(kspith[0][0])) > 15 && (20 - ksz0[0]) * fabs(TMath::Tan(kspith[0][1])) > 15 &&
+                    //kspipt[k][0] > 120 && kspipt[k][1] > 120 && 
+                    //kspipt[k][0] < 350 && kspipt[k][1] < 350 &&
+                    tcharge[ksvind[k][0]] * tcharge[ksvind[k][1]] < 0 && kstype[k] == 0) // Added kstype[k] == 0.
                 {
                     ks.SetMagThetaPhi(1, ksth[k], ksphi[k]);
 
@@ -201,25 +177,42 @@ void kskl2bGen::Loop(std::string histFileName)
             histKsCands->Fill(ksCand.size());
             if(ksCand.size() > 0)
             {
-               if (tcharge[ksvind[0][0]] > 0)
-               {
-                  Y = kspipt[0][0] / kspipt[0][1];
-                  hist->Fill(kspipt[0][0], kspipt[0][1]);
-                  p1 = kspipt[0][0]; p2 = kspipt[0][1];
-               }
-               else
-               {
-                  Y = kspipt[0][1] / kspipt[0][0];
-                  hist->Fill(kspipt[0][1], kspipt[0][0]);
-                  p1 = kspipt[0][1]; p2 = kspipt[0][0];
-               }
-               dpsi = ksdpsi[0];
-               tNew->Fill();
+                if (tcharge[ksvind[0][0]] > 0)
+                {
+                    Y = kspipt[0][0] / kspipt[0][1];
+                    hist->Fill(kspipt[0][0], kspipt[0][1]);
+                    p1 = kspipt[0][0]; p2 = kspipt[0][1];
+                }
+                else
+                {
+                    Y = kspipt[0][1] / kspipt[0][0];
+                    hist->Fill(kspipt[0][1], kspipt[0][0]);
+                    p1 = kspipt[0][1]; p2 = kspipt[0][0];
+                }
+
+                
+                for(int i = 0; i < nsim; i++)
+                {
+                    if(simtype[i] == 211 && simorig[i] == 310)
+                    { 
+                        piPos.SetMagThetaPhi(simmom[i], simtheta[i], simphi[i]);
+
+                    }
+
+                    if(simtype[i] == -211 && simorig[i] == 310)
+                    { 
+                        piNeg.SetMagThetaPhi(simmom[i], simtheta[i], simphi[i]); 
+                        
+                    }
+                }
+                dpsi = piPos.Angle(piNeg);
+                Y = piPos.Mag() / piNeg.Mag();
+                tNew->Fill();
             }
             ksCand.clear();
             ksCand.shrink_to_fit();
         }
-      
+        
 
         NgoodTr = 0;
     }

@@ -1,12 +1,12 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Tue Jul 12 09:39:56 2022 by ROOT version 6.24/06
+// Mon Aug  1 16:55:50 2022 by ROOT version 6.26/04
 // from TTree tr_ph/Tree with the non-collinear events
-// found on file: E:/Science/BINP/Kaon Mass Measure/tr_ph/tr_ph_kskl_2bodygen600k.root
+// found on file: tr_ph_run000000mcgpj.root
 //////////////////////////////////////////////////////////
 
-#ifndef kskl2bGen_h
-#define kskl2bGen_h
+#ifndef ksklAltVer_h
+#define ksklAltVer_h
 
 #include <TROOT.h>
 #include <TChain.h>
@@ -14,7 +14,7 @@
 
 // Header file for the classes stored in the TTree if any.
 
-class kskl2bGen {
+class ksklAltVer {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
@@ -84,7 +84,7 @@ public :
    Float_t         tclth[10];   //[nt]
    Float_t         tclphi[10];   //[nt]
    Float_t         terr[10][3][3];   //[nt]
-   Float_t         terr0[10][5][5];   //[nt]
+   Float_t         terr0[10][6][6];   //[nt]
    Int_t           tindlxe[10];   //[nt]
    Float_t         tzcc[10][2];   //[nt]
    Float_t         txyzatcl[10][3];   //[nt]
@@ -92,24 +92,24 @@ public :
    Int_t           tenconv[10];   //[nt]
    Int_t           nks_total;
    Int_t           nks;
-   Int_t           ksvind[7][2];   //[nks]
-   Int_t           kstype[7];   //[nks]
-   Int_t           ksfstatus[7];   //[nks]
-   Float_t         ksvchi[7];   //[nks]
-   Float_t         ksvxyz[7][3];   //[nks]
-   Float_t         ksminv[7];   //[nks]
-   Float_t         ksalign[7];   //[nks]
-   Float_t         kstlen[7];   //[nks]
-   Float_t         ksdpsi[7];   //[nks]
-   Float_t         kslen[7];   //[nks]
-   Float_t         ksz0[7];   //[nks]
-   Float_t         ksphi[7];   //[nks]
-   Float_t         ksth[7];   //[nks]
-   Float_t         ksptot[7];   //[nks]
-   Float_t         kspiphi[7][2];   //[nks]
-   Float_t         kspith[7][2];   //[nks]
-   Float_t         kspipt[7][2];   //[nks]
-   Float_t         kserr[7][3][3];   //[nks]
+   Int_t           ksvind[6][2];   //[nks]
+   Int_t           kstype[6];   //[nks]
+   Int_t           ksfstatus[6];   //[nks]
+   Float_t         ksvchi[6];   //[nks]
+   Float_t         ksvxyz[6][3];   //[nks]
+   Float_t         ksminv[6];   //[nks]
+   Float_t         ksalign[6];   //[nks]
+   Float_t         kstlen[6];   //[nks]
+   Float_t         ksdpsi[6];   //[nks]
+   Float_t         kslen[6];   //[nks]
+   Float_t         ksz0[6];   //[nks]
+   Float_t         ksphi[6];   //[nks]
+   Float_t         ksth[6];   //[nks]
+   Float_t         ksptot[6];   //[nks]
+   Float_t         kspiphi[6][2];   //[nks]
+   Float_t         kspith[6][2];   //[nks]
+   Float_t         kspipt[6][2];   //[nks]
+   Float_t         kserr[6][3][3];   //[nks]
    Int_t           ntlxe_total;
    Int_t           ntlxe;
    Int_t           ntlxelayers[10];   //[ntlxe]
@@ -162,6 +162,7 @@ public :
    Float_t         antt1[16];   //[nant]
    Float_t         anta0[16];   //[nant]
    Float_t         anta1[16];   //[nant]
+   Float_t         antphi[16];   //[nant]
    Int_t           antst[16];   //[nant]
    Int_t           nmu;
    Int_t           much[9];   //[nmu]
@@ -175,14 +176,14 @@ public :
    Float_t         mua3[9];   //[nmu]
    Int_t           must[9];   //[nmu]
    Int_t           nsim;
-   Int_t           simtype[20];   //[nsim]
-   Int_t           simorig[20];   //[nsim]
-   Float_t         simmom[20];   //[nsim]
-   Float_t         simphi[20];   //[nsim]
-   Float_t         simtheta[20];   //[nsim]
-   Float_t         simvtx[20];   //[nsim]
-   Float_t         simvty[20];   //[nsim]
-   Float_t         simvtz[20];   //[nsim]
+   Int_t           simtype[18];   //[nsim]
+   Int_t           simorig[18];   //[nsim]
+   Float_t         simmom[18];   //[nsim]
+   Float_t         simphi[18];   //[nsim]
+   Float_t         simtheta[18];   //[nsim]
+   Float_t         simvtx[18];   //[nsim]
+   Float_t         simvty[18];   //[nsim]
+   Float_t         simvtz[18];   //[nsim]
    Int_t           ncorr;
    Int_t           idcorr[1];   //[ncorr]
    Int_t           bitcorr[1];   //[ncorr]
@@ -191,6 +192,7 @@ public :
    Int_t           nbadbanks[1];   //[nbadbankg]
    Int_t           nlostbanks;
    Int_t           ncorruptedbanks;
+   Int_t           has_frontend[3];
 
    // List of branches
    TBranch        *b_ebeam;   //!
@@ -333,6 +335,7 @@ public :
    TBranch        *b_antt1;   //!
    TBranch        *b_anta0;   //!
    TBranch        *b_anta1;   //!
+   TBranch        *b_antphi;   //!
    TBranch        *b_antst;   //!
    TBranch        *b_nmu;   //!
    TBranch        *b_much;   //!
@@ -362,9 +365,10 @@ public :
    TBranch        *b_nbadbanks;   //!
    TBranch        *b_nlostbanks;   //!
    TBranch        *b_ncorruptedbanks;   //!
+   TBranch        *b_has_frontend;   //!
 
-   kskl2bGen(TTree *tree=0);
-   virtual ~kskl2bGen();
+   ksklAltVer(TTree *tree=0);
+   virtual ~ksklAltVer();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
@@ -376,15 +380,15 @@ public :
 
 #endif
 
-#ifdef kskl2bGen_cxx
-kskl2bGen::kskl2bGen(TTree *tree) : fChain(0) 
+#ifdef ksklAltVer_cxx
+ksklAltVer::ksklAltVer(TTree *tree) : fChain(0) 
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("E:/Science/BINP/Kaon Mass Measure/tr_ph/New folder/tr_ph_run000006.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("tr_ph_run000005.root");
       if (!f || !f->IsOpen()) {
-         f = new TFile("E:/Science/BINP/Kaon Mass Measure/tr_ph/New folder/tr_ph_run000006.root");
+         f = new TFile("tr_ph_run000005.root");
       }
       f->GetObject("tr_ph",tree);
 
@@ -392,19 +396,19 @@ kskl2bGen::kskl2bGen(TTree *tree) : fChain(0)
    Init(tree);
 }
 
-kskl2bGen::~kskl2bGen()
+ksklAltVer::~ksklAltVer()
 {
    if (!fChain) return;
    delete fChain->GetCurrentFile();
 }
 
-Int_t kskl2bGen::GetEntry(Long64_t entry)
+Int_t ksklAltVer::GetEntry(Long64_t entry)
 {
 // Read contents of entry.
    if (!fChain) return 0;
    return fChain->GetEntry(entry);
 }
-Long64_t kskl2bGen::LoadTree(Long64_t entry)
+Long64_t ksklAltVer::LoadTree(Long64_t entry)
 {
 // Set the environment to read one entry
    if (!fChain) return -5;
@@ -417,7 +421,7 @@ Long64_t kskl2bGen::LoadTree(Long64_t entry)
    return centry;
 }
 
-void kskl2bGen::Init(TTree *tree)
+void ksklAltVer::Init(TTree *tree)
 {
    // The Init() function is called when the selector needs to initialize
    // a new tree or chain. Typically here the branch addresses and branch
@@ -573,6 +577,7 @@ void kskl2bGen::Init(TTree *tree)
    fChain->SetBranchAddress("antt1", antt1, &b_antt1);
    fChain->SetBranchAddress("anta0", anta0, &b_anta0);
    fChain->SetBranchAddress("anta1", anta1, &b_anta1);
+   fChain->SetBranchAddress("antphi", antphi, &b_antphi);
    fChain->SetBranchAddress("antst", antst, &b_antst);
    fChain->SetBranchAddress("nmu", &nmu, &b_nmu);
    fChain->SetBranchAddress("much", much, &b_much);
@@ -602,10 +607,11 @@ void kskl2bGen::Init(TTree *tree)
    fChain->SetBranchAddress("nbadbanks", &nbadbanks, &b_nbadbanks);
    fChain->SetBranchAddress("nlostbanks", &nlostbanks, &b_nlostbanks);
    fChain->SetBranchAddress("ncorruptedbanks", &ncorruptedbanks, &b_ncorruptedbanks);
+   fChain->SetBranchAddress("has_frontend", has_frontend, &b_has_frontend);
    Notify();
 }
 
-Bool_t kskl2bGen::Notify()
+Bool_t ksklAltVer::Notify()
 {
    // The Notify() function is called when a new file is opened. This
    // can be either for a new TTree in a TChain or when when a new TTree
@@ -616,18 +622,18 @@ Bool_t kskl2bGen::Notify()
    return kTRUE;
 }
 
-void kskl2bGen::Show(Long64_t entry)
+void ksklAltVer::Show(Long64_t entry)
 {
 // Print contents of entry.
 // If entry is not specified, print current entry
    if (!fChain) return;
    fChain->Show(entry);
 }
-Int_t kskl2bGen::Cut(Long64_t entry)
+Int_t ksklAltVer::Cut(Long64_t entry)
 {
 // This function may be called from Loop.
 // returns  1 if entry is accepted.
 // returns -1 otherwise.
    return 1;
 }
-#endif // #ifdef kskl2bGen_cxx
+#endif // #ifdef ksklAltVer_cxx
