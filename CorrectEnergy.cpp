@@ -20,14 +20,15 @@ double CorrectEnergy()
     tr->SetBranchAddress("simtype", type);
 
     auto hNph = new TH1D("hNph", "N photons", 20, 0, 20);
-    auto hE = new TH1D("hE", "Corrected energy", 1000, 470, 520);
+    auto hE = new TH1D("hE", "Corrected energy", 100, 480, 520);
     std::vector<ROOT::Math::PxPyPzEVector> ph;
     ROOT::Math::PxPyPzEVector phTot;
+    ROOT::Math::PxPyPzEVector ks;
     ROOT::Math::PxPyPzEVector def; 
     ROOT::Math::PxPyPzEVector newCMsys; 
 
     int nph = 0;
-    for(int j = 0; j < tr->GetEntriesFast(); j++)
+    for(int j = 0; j < 10000; j++)
     {
         tr->GetEntry(j);
         for(int i = 0; i < nsim; i++)
@@ -38,18 +39,24 @@ double CorrectEnergy()
                 nph++;
                 ph.push_back(ROOT::Math::PxPyPzEVector(mom[i] * sin(theta[i]) * cos(phi[i]), mom[i] * sin(theta[i]) * sin(phi[i]), mom[i] * cos(theta[i]), mom[i]));
             }
+            if(type[i] == 310)
+            { ks = ROOT::Math::PxPyPzEVector(mom[i] * sin(theta[i]) * cos(phi[i]), mom[i] * sin(theta[i]) * sin(phi[i]), mom[i] * cos(theta[i]), 0); }
         }
-        
-        for(auto v : ph)
-        { phTot += v; }
-        def = ROOT::Math::PxPyPzEVector(0, 0, 0, 2 * emeas);
-        ROOT::Math::Boost boostToCM((def - phTot).BoostToCM());
-        newCMsys = boostToCM(def - phTot);
-        
-        hE->Fill(newCMsys.E() / 2);
-        hNph->Fill(nph);
-        nph = 0;
-        phTot = ROOT::Math::PxPyPzEVector(0, 0, 0, 0);
+        if(!ph.empty())
+        {
+            for(auto v : ph)
+            { phTot += v; }
+            def = ROOT::Math::PxPyPzEVector(0, 0, 0, 2 * emeas);
+            ROOT::Math::Boost boostToCM((def - phTot).BoostToCM());
+            newCMsys = def - phTot;
+
+            hE->Fill(newCMsys.E() / 2);
+            hNph->Fill(nph);
+            nph = 0;
+            phTot = ROOT::Math::PxPyPzEVector(0, 0, 0, 0);
+        }
+        ph.clear();
+        ph.shrink_to_fit();
     }
     hE->Draw();    
     return 0;

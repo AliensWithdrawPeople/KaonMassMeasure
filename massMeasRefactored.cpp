@@ -95,12 +95,12 @@ EnergyHandler::EnergyHandler(std::string fChargedK, std::string fKsKl, std::vect
     vSigma = sigmas;
 
     // [0] = energy;
-    massCrAngle = new TF1("mass1", "[0] * TMath::Sqrt(1 - (1 - 4 * 139.57 * 139.57 / [0] / [0]) * cos(x / 2) * cos(x / 2))");
+    massCrAngle = new TF1("mass1", "[0] * TMath::Sqrt(1 - (1 - 4 * 139.57018 * 139.57018 / [0] / [0]) * cos(x / 2) * cos(x / 2))");
 
     // [0] = E; [1] = eta = (1 - Y^2) / (1 + Y^2)
     // M = sqrt(E^2[1- 1/eta^2 (1+sqrt(1-eta^2)cosx) * (1 - sqrt(1-eta^2 * [1 - 4 * 139.57 * 139.57 / E^2]))]
     massFullRec = new TF1("MassLnY", 
-    "sqrt([0] * [0] * (1 - (1 + sqrt(1 - [1] *[1]) * cos(x))*(1 - sqrt(1 - [1] * [1] * (1 - 4 * 139.57 * 139.57 / [0] / [0])))/ [1] / [1] ))");
+    "sqrt([0] * [0] * (1 - (1 + sqrt(1 - [1] *[1]) * cos(x))*(1 - sqrt(1 - [1] * [1] * (1 - 4 * 139.57018 * 139.57018 / [0] / [0]) ) )/ [1] / [1] ) )");
 
     kTr->SetBranchAddress("runnum", &runnum_);
     kTr->SetBranchAddress("tdedx", tdedx);
@@ -369,7 +369,7 @@ void EnergyHandler::MassLnY(int drawOpt = 0)
     auto hMlnY = new TH2D("hMlnY", "M(lnY)", 200, -0.4, 0.4, 200, 480, 520);
     auto hMPsi = new TH2D("MPsi", "M(Psi)", 200, 2, TMath::Pi(), 200, 480, 520);
     auto hM_CrAnglelnY = new TH2D("hM_CrAnglelnY", "M_CrAngle(lnY)", 200, -0.3, 0.3, 200, 490, 515);
-    auto hPsilnY = new TH2D("hPsilnY", "Psi(lnY)", 200, -0.4, 0.4, 200, 2.0, 3.15);
+    auto hPsilnY = new TH2D("hPsilnY", "Psi(lnY)", 200, -0.4, 0.4, 200, 2.4, 3.3);
 
     auto hPsilnY1 = new TH2D("hPsilnY1", "Psi1(lnY)", 400, -0.4, 0.4, 400, 2.4, 3.);
     auto hPsilnY2 = new TH2D("hPsilnY2", "Psi2(lnY)", 400, -0.4, 0.4, 400, 2.4, 3.);
@@ -412,8 +412,9 @@ void EnergyHandler::MassLnY(int drawOpt = 0)
                 { sigmaPsi = vSigma[7]; }
             }
 
-            if(massFullRec->Eval(ksdpsi) > 490 && massFullRec->Eval(ksdpsi) < 505)
-            { hMlnY->Fill(log(Y), massFullRec->Eval(ksdpsi) - sigmaPsi * sigmaPsi / 2 * massFullRec->Derivative2(ksdpsi)); }
+            // if(massFullRec->Eval(ksdpsi) > 490 && massFullRec->Eval(ksdpsi) < 505)
+            // { hMlnY->Fill(log(Y), massFullRec->Eval(ksdpsi) - sigmaPsi * sigmaPsi / 2 * massFullRec->Derivative2(ksdpsi)); }
+            hMlnY->Fill(log(Y), massFullRec->Eval(ksdpsi));
 
             hM_CrAnglelnY->Fill(log(Y), massCrAngle->Eval(ksdpsi));
             if(massFullRec->Eval(ksdpsi) > 490 && massFullRec->Eval(ksdpsi) < 505)
@@ -443,6 +444,7 @@ void EnergyHandler::MassLnY(int drawOpt = 0)
             hPsi->Fill(ksdpsi);
         }
     }
+    std::cout << "!!!!!!! = " << massCrAngle->Eval(2.59085) << std::endl;
     TFitResultPtr r;
     std::vector<TH1D *> p;
     p.push_back(hPsilnY1->ProjectionY("py1"));
@@ -469,6 +471,7 @@ void EnergyHandler::MassLnY(int drawOpt = 0)
     std::cout << "Mass_CrAngle = " << r->Parameter(0) << " +/- " << r->ParError(0) << std::endl;
     r = hPsilnY->Fit("pol2", "SQE");
     std::cout << "Psi = " << r->Parameter(0) << " +/- " << r->ParError(0) << std::endl;
+    std::cout << "emeas = " << emeas << std::endl;
     auto canv = new TCanvas("MlnY","Mass(lnY)", 200, 10, 600, 400);
     switch (drawOpt)
     {
@@ -531,13 +534,13 @@ int massMeasRefactored()
     
     //auto eHandler = new EnergyHandler("hists and root files/cuts/kchCut21May.root", "hists and root files/cuts/ksklCut_11May22.root");
 
-    //auto eHandler = new EnergyHandler("hists and root files/cuts/kpkm_2bGen.root", "tr_ph/kskl2bGen514_withKLcut.root", vSigma0);
-    //auto eHandler = new EnergyHandler("hists and root files/cuts/kpkm_2bGen.root", "tr_ph/tr_ph_kskl2bGen600k(diff theta cut).root", vSigma2bGen510);
-    auto eHandler = new EnergyHandler("hists and root files/cuts/kchCut21May.root", "tr_ph/2bGenSimData.root", vSigma0); // with Kl cut
+    // auto eHandler = new EnergyHandler("hists and root files/cuts/kpkm_2bGen.root", "tr_ph/kskl2bGen514_withKLcut.root", vSigma0);
+    // auto eHandler = new EnergyHandler("hists and root files/cuts/kpkm_2bGen.root", "tr_ph/tr_ph_kskl2bGen600k(diff theta cut).root", vSigma2bGen510);
+    auto eHandler = new EnergyHandler("hists and root files/cuts/kchCut21May.root", "tr_ph/New folder/bonkXXL.root", vSigma0); // with Kl cut
     //auto eHandler = new EnergyHandler("hists and root files/cuts/kchCut21May.root", "tr_ph/tr_ph_ksklMCGPJ15Jul14h00m.root", vSigmaMCGPJ510); // with Kl cut
     
     //eHandler->GetMassCriticalAngle();
-    eHandler->MassLnY(0);
+    eHandler->MassLnY(1);
     delete eHandler;
 
     auto end = std::chrono::system_clock::now();
