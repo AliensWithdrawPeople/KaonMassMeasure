@@ -36,6 +36,7 @@ int auxFunc()
     //std::vector<Float_t> vM = {497.628, 497.639, 497.637, 497.637, 497.6684, 497.726};
     //std::vector<Float_t> vMerr = {0.004, 0.005,  0.005, 0.005, 0.007, 0.015};
 
+    // MCGPJ without radcor
     std::vector<Float_t> vM = {497.771, 497.728, 497.714, 497.735,  497.953, 499.159};
     std::vector<Float_t> vMerr = {5.16393e-03, 5.26006e-03, 5.44217e-03, 4.68768e-03, 7.08306e-03, 1.47878e-02};
 
@@ -43,8 +44,9 @@ int auxFunc()
     std::vector<Float_t> zeroes(vM.size(), 0.0);
     TGraphErrors gr(vM.size(), vE.data(), vM.data(), zeroes.data(), vMerr.data());
 
-    std::vector<Float_t> vM1 = {497.614, 497.614, 497.614, 497.619, 497.663,  497.655};
-    std::vector<Float_t> vMerr1 = {0, 0, 0, 0.005, 6.97106e-03, 6.67216e-03};
+    // 2body Gen
+    std::vector<Float_t> vM1 = {497.604, 497.615, 497.608, 0, 497.617,  497.612};
+    std::vector<Float_t> vMerr1 = {4.44086e-03, 5.90347e-03, 6.28059e-03, 0, 5.80474e-03, 6.01228e-03};
     TGraphErrors gr1(vM1.size(), vE.data(), vM1.data(), zeroes.data(), vMerr1.data());
     gr1.SetMarkerColor(kRed);
 
