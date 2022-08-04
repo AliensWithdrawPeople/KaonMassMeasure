@@ -44,6 +44,11 @@ int auxFunc()
     std::vector<Float_t> zeroes(vM.size(), 0.0);
     TGraphErrors gr(vM.size(), vE.data(), vM.data(), zeroes.data(), vMerr.data());
 
+    // MCGPJ with radcor
+    std::vector<Float_t> vMRad = { 4976.13, 497.602, 497.610, 0, 497.608, 497.609};
+    std::vector<Float_t> vMerrRad = {3.32994e-03, 4.51087e-03, 4.76159e-03, 0, 5.09326e-03, 5.65773e-03};
+    TGraphErrors grRad(vM.size(), vE.data(), vM.data(), zeroes.data(), vMerr.data());
+
     // 2body Gen
     std::vector<Float_t> vM1 = {497.604, 497.615, 497.608, 0, 497.617,  497.612};
     std::vector<Float_t> vMerr1 = {4.44086e-03, 5.90347e-03, 6.28059e-03, 0, 5.80474e-03, 6.01228e-03};
