@@ -1,133 +1,137 @@
 #include "TH2D.h"
 #include "TH1D.h"
-#include "TH1.h"
 #include "TCanvas.h"
 #include "TFile.h"
-#include "TF1.h"
 #include "TTree.h"
-#include "TGraphErrors.h"
-#include "TGraph.h"
-#include "TProfile.h"
-#include "TLine.h"
-#include "TArrow.h"
-#include "TText.h"
-#include "TLatex.h"
 #include "TMath.h"
 #include "TVector3.h"
 
 int sandbox()
-{
-    //TFile *file = TFile::Open("E:/Science/BINP/Kaon Mass Measure/tr_ph/scan2018_omphi_tr_ph_fc_e509.5_v8.root");    
-    //TFile *file = TFile::Open("E:/Science/BINP/Kaon Mass Measure/tr_ph/tr_ph_kskl_2bodygen600k.root");    
-    TFile *file = TFile::Open("E:/Science/BINP/Kaon Mass Measure/tr_ph/tr_ph_KsKlsim_mcgpj800k.root");    
+{   
+    // TFile *file = TFile::Open("E:/Science/BINP/Kaon Mass Measure/tr_ph/New folder/tr_ph_run2bGen_511.root");    
+    TFile *file = TFile::Open("E:/Science/BINP/Kaon Mass Measure/tr_ph/tr_ph_run2bGen510NoField.root");    
     auto tr1 = (TTree *)file->Get("tr_ph");
 
-    Float_t ksTheta[10]; Float_t klTheta[30]; Float_t ksZ[30];
-    Float_t ksPhi[10]; Float_t klPhi[30]; Float_t klRho[30];
-    Float_t klEn[30];
-    Int_t nks; Int_t nph;
-    Float_t xbeam; Float_t ybeam;
+    Int_t nks;
+    Int_t tcharge[50];
+    Float_t piTheta[50];
+    Float_t piPhi[50];    
+    Int_t ksTracks[50][50];
 
-    tr1->SetBranchAddress("ksz0", ksZ);
-    tr1->SetBranchAddress("ksth", ksTheta);
-    tr1->SetBranchAddress("ksphi", ksPhi);
-    tr1->SetBranchAddress("phth0", klTheta);
-    tr1->SetBranchAddress("phphi0", klPhi);
-    tr1->SetBranchAddress("phrho", klRho);
-    tr1->SetBranchAddress("phen0", klEn);
+    Float_t simmom[20];
+    Float_t simphi[20];
+    Float_t simtheta[20];
+    Int_t nsim;
+    Int_t simtype[20];
+    Int_t simorig[20];
+    
 
     tr1->SetBranchAddress("nks", &nks); 
-    tr1->SetBranchAddress("nph", &nph);
-    tr1->SetBranchAddress("xbeam", &xbeam);
-    tr1->SetBranchAddress("ybeam", &ybeam);
+    tr1->SetBranchAddress("tcharge", tcharge); 
+    tr1->SetBranchAddress("kspiphi", piPhi); 
+    tr1->SetBranchAddress("kspith", piTheta); 
+    tr1->SetBranchAddress("ksvind", ksTracks); 
+    tr1->SetBranchAddress("simphi", simphi); 
+    tr1->SetBranchAddress("simtheta", simtheta); 
+    tr1->SetBranchAddress("simtype", simtype); 
+    tr1->SetBranchAddress("simorig", simorig); 
+    tr1->SetBranchAddress("simmom", simmom); 
+    tr1->SetBranchAddress("nsim", &nsim); 
 
-    
-    // Theta = kl.Theta()
-    auto hdPhiTheta = new TH2D("hdPhiTheta", "", 600, 0, TMath::Pi(), 600, 0, 2*TMath::Pi());
-    auto hdThetadPhi = new TH2D("hdThetadPhi", "", 600, 0, 2*TMath::Pi(), 600, -TMath::Pi(), TMath::Pi());
-    auto hClEdPhi = new TH2D("hClEdPhi", "", 600, 0, 2*TMath::Pi(), 600, 0, 600);
-    auto hClEnergy = new TH1D("hClEnergy", "", 350, 0, 350);
-    auto hPsi = new TH1D("hPsi", "", 628, 0, 6.28);
-    auto hCosPsi = new TH1D("hCosPsi", "", 2000, -1.1, 1.1);
-    int n = 0;
+    auto hDeltaPhi = new TH1D("hDeltaPhi", "#Delta#phi", 500, 0, 6.28);
+    auto hDeltaPhiGen = new TH1D("hDeltaPhiGen", "#Delta#phi Gen", 250, 0, 6.28);
+    auto hMomentumTotal = new TH1D("hMomentumTotal", "Total momentum", 250, 0, 20);
 
-    auto c1 = new TCanvas("c1", "c1", 200, 10, 800, 600);    
-    //n = tr1->Draw("phen0[0] >> hClEnergy", "nph == 1 && phen[0] > 100 && nks == 1");
-
-    // Spatial angle between Ks and Kl vectors of movements.
-    double cosPsi = 0;
-    TVector3 ks;
-    TVector3 kl;
-    double rotAngle = 0;
+    double phi1 = 0; 
+    double phi2 = 0; 
     int foo = 0;
     double dPhi = 0;
-/*
+
+    TVector3 v1;
+    TVector3 v2;
+
+    TVector3 kl;
+    TVector3 piPos;
+    TVector3 piNeg;
+    int count1 = 0;
+    int count2 = 0;
+    int count3 = 0;
+
     for(int i = 0; i < tr1->GetEntriesFast(); i++)
     {
         tr1->GetEntry(i);
-        
-        for(int k = 0; k < nks; k++)
+        // std::cout << nks << std::endl;
+        if(nks > 0)
         {
-            ks.SetMagThetaPhi(1, ksTheta[k], ksPhi[k]);
-            for(int j = 0; j < nph; j++)
-            {
+            if (tcharge[ksTracks[0][0]] > 0)
+            { 
+                v1.SetMagThetaPhi(1, TMath::Pi() / 2, piPhi[0]);
+                v2.SetMagThetaPhi(1, TMath::Pi() / 2, piPhi[1]);
+            }
+            else
+            { 
+                v1.SetMagThetaPhi(1, TMath::Pi() / 2, piPhi[1]);
+                v2.SetMagThetaPhi(1, TMath::Pi() / 2, piPhi[0]);
+            }
+            hDeltaPhi->Fill(v1.Angle(v2));
 
-                kl.SetMagThetaPhi(klRho[j], klTheta[j], klPhi[j]);
-                kl.SetX(kl.X() - xbeam);
-                kl.SetY(kl.Y() - ybeam);
-                kl.SetZ(kl.Z() - ksZ[k]);
+            // for(int j = 0; j < nsim; j++)
+            // {
+            //     if(simtype[j] == 211 && simorig[j] == 310)
+            //     { 
+            //         phi1 = simphi[j]; 
+            //         v1.SetMagThetaPhi(1, TMath::Pi() / 2, simphi[j]);
+            //     }
 
-                cosPsi = ks.Unit() * kl.Unit();
+            //     if(simtype[j] == -211 && simorig[j] == 310)
+            //     { 
+            //         phi2 = simphi[j]; 
+            //         v2.SetMagThetaPhi(1, TMath::Pi() / 2, phi2);
+            //     }
+            // }
+            // hDeltaPhiGen->Fill(v1.Angle(v2));
+        }
 
-                if(fabs(cosPsi) > 0.8)
-                {
-                    for(int l = 0; l < nph; l++)
-                    { hClEnergy->Fill(klEn[l]); }
-                }
-                
-                hCosPsi->Fill(cosPsi);
-                
-                foo = ks.Phi() - kl.Phi() < 0;
-                if(fabs(ks.Phi() - kl.Phi()) <= TMath::Pi())
-                { 
-                    dPhi = ks.Phi() - kl.Phi() + foo * 2 * TMath::Pi();
-                    hdThetadPhi->Fill(dPhi, ks.Theta() + kl.Theta() - TMath::Pi());
-                    hClEdPhi->Fill(dPhi, klEn[j]); 
-                    hdPhiTheta->Fill(kl.Theta(), dPhi);
-                }
-                else
-                { 
-                    dPhi = std::pow(-1, foo) * 2 * TMath::Pi() - (ks.Phi() - kl.Phi()) + foo * 2 * TMath::Pi();
-                    hdThetadPhi->Fill(dPhi, ks.Theta() + kl.Theta() - TMath::Pi()); 
-                    hClEdPhi->Fill(dPhi, klEn[j]);
-                    hdPhiTheta->Fill(kl.Theta(), dPhi);
-                }
+        for(int j = 0; j < nsim; j++)
+        {
+            if(simtype[j] == 211 && simorig[j] == 310)
+            { 
+                piPos.SetMagThetaPhi(simmom[j], simtheta[j], simphi[j]);
+                phi1 = simphi[j]; 
+                v1.SetMagThetaPhi(1, TMath::Pi() / 2, simphi[j]);
+                count1 = 1;
+            }
 
-                hPsi->Fill(ks.Angle(kl));
+            if(simtype[j] == -211 && simorig[j] == 310)
+            { 
+                piNeg.SetMagThetaPhi(simmom[j], simtheta[j], simphi[j]);
+                phi2 = simphi[j]; 
+                v2.SetMagThetaPhi(1, TMath::Pi() / 2, phi2);
+                count2 = 1;
+            }
+
+            if(simtype[j] == 130)
+            { 
+                kl.SetMagThetaPhi(simmom[j], simtheta[j], simphi[j]); 
+                count3 = 1;
             }
         }
+        // hDeltaPhiGen->Fill(v1.Angle(v2));
+        hDeltaPhiGen->Fill(fabs(phi1 - phi2));
+        if(count1 == 1 && count2 == 1 && count3 == 1)
+        {
+            hMomentumTotal->Fill((kl + piPos + piNeg).Mag());
+            if((kl + piPos + piNeg).Mag() > 1e-4)
+            {   std::cout << (kl + piPos + piNeg).Mag() << std::endl; }
+        }
+        count1 = 0;
+        count2 = 0;
+        count3 = 0;
     }
-    n = hPsi->GetEntries();
-    
-    hClEnergy->SetTitle("Distribution of the enrgy of Kl candidates");
-    hdThetadPhi->GetXaxis()->SetTitle("#Delta#phi, rad");
-    hdThetadPhi->GetYaxis()->SetTitle("#Delta#theta, rad");
+    hDeltaPhiGen->SetLineColor(kRed);
+    // hDeltaPhi->Draw();
+    hDeltaPhiGen->Draw("Same");
+    hMomentumTotal->Draw();
 
-    hdPhiTheta->GetXaxis()->SetTitle("#theta of Kl, rad");
-    hdPhiTheta->GetYaxis()->SetTitle("#Delta#phi, rad");
-
-    hPsi->GetXaxis()->SetTitle("Angle between motion vectors Ks and Kl, rad");
-
-    hClEdPhi->GetXaxis()->SetTitle("#Delta#phi, rad");
-    hClEdPhi->GetYaxis()->SetTitle("Cluster Energy,  MeV");
-
-    hClEnergy->Draw("COL");
-*/
-    auto massFullRec = new TF1("MassLnY", 
-    "sqrt(x * x * (1 - (1 + sqrt(1 - [1] *[1]) * cos([0]))*(1 - sqrt(1 - [1] * [1] * (1 - 4 * 139.57 * 139.57 / x / x)))/ [0] / [0] ))", 400, 600);
-    massFullRec->SetParameter(0, 2.61516);
-    massFullRec->SetParameter(1, 0.99999);
-    std::cout << massFullRec->GetX(490, 450, 570, 1e-3, 10000) << " : " << massFullRec->GetX(505, 450, 570, 1e-3, 10000) << std::endl;
-    massFullRec->Draw();
-    return n;
+    return 0;
 }
