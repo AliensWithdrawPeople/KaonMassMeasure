@@ -1,17 +1,8 @@
 #include "TH2D.h"
 #include "TH1D.h"
-#include "TH1.h"
 #include "TCanvas.h"
 #include "TFile.h"
-#include "TF1.h"
 #include "TTree.h"
-#include "TGraphErrors.h"
-#include "TGraph.h"
-#include "TProfile.h"
-#include "TLine.h"
-#include "TArrow.h"
-#include "TText.h"
-#include "TLatex.h"
 #include "TMath.h"
 #include "TVector3.h"
 
@@ -58,6 +49,9 @@ int anglesBetweenKSKL_Pics()
     double cosPsi = 0;
     TVector3 ks;
     TVector3 kl;
+
+    TVector3 ksPhiVec;
+    TVector3 klPhiVec;
     double rotAngle = 0;
     int foo = 0;
     double dPhi = 0;
@@ -77,6 +71,9 @@ int anglesBetweenKSKL_Pics()
                 kl.SetY(kl.Y() - ybeam);
                 kl.SetZ(kl.Z() - ksZ[k]);
 
+                ksPhiVec.SetMagThetaPhi(1, TMath::Pi() / 2, ks.Phi());
+                klPhiVec.SetMagThetaPhi(1, TMath::Pi() / 2, kl.Phi());
+
                 cosPsi = ks.Unit() * kl.Unit();
 
                 if(fabs(cosPsi) > 0.8)
@@ -90,14 +87,16 @@ int anglesBetweenKSKL_Pics()
                 foo = ks.Phi() - kl.Phi() < 0;
                 if(fabs(ks.Phi() - kl.Phi()) <= TMath::Pi())
                 { 
-                    dPhi = ks.Phi() - kl.Phi() + foo * 2 * TMath::Pi();
+                    dPhi = ks.Phi() - kl.Phi() + foo * 2 * TMath::Pi(); // wrong
+                    dPhi = ksPhiVec.Angle(klPhiVec); // correct
                     hdThetadPhi->Fill(dPhi, ks.Theta() + kl.Theta() - TMath::Pi());
                     hClEdPhi->Fill(dPhi, klEn[j]); 
                     hdPhiTheta->Fill(kl.Theta(), dPhi);
                 }
                 else
                 { 
-                    dPhi = std::pow(-1, foo) * 2 * TMath::Pi() - (ks.Phi() - kl.Phi()) + foo * 2 * TMath::Pi();
+                    dPhi = std::pow(-1, foo) * 2 * TMath::Pi() - (ks.Phi() - kl.Phi()) + foo * 2 * TMath::Pi(); // wrong
+                    dPhi = ksPhiVec.Angle(klPhiVec); // correct
                     hdThetadPhi->Fill(dPhi, ks.Theta() + kl.Theta() - TMath::Pi()); 
                     hClEdPhi->Fill(dPhi, klEn[j]);
                     hdPhiTheta->Fill(kl.Theta(), dPhi);
