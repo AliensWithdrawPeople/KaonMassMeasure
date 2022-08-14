@@ -8,8 +8,8 @@ int auxFunc()
     double psi = 2.56547;
 
     double energy = 514;
-    double mass =  499.118;
-    double massK = 497.614;
+    double mass =  499.069;
+    double massK = 497.611;
 
 
     auto massFunc = new TF1("MassLnY", "sqrt([0] * [0] * (1 - (1 + sqrt(1 - [1] *[1]) * cos(x))*(1 - sqrt(1 - [1] * [1] * (1 - 4 * 139.57 * 139.57 / [0] / [0])))/ [1] / [1] ))");
@@ -37,30 +37,43 @@ int auxFunc()
     //std::vector<Float_t> vMerr = {0.004, 0.005,  0.005, 0.005, 0.007, 0.015};
 
     // MCGPJ without radcor
-    std::vector<Float_t> vM = {497.771, 497.728, 497.714, 497.735,  497.953, 499.159};
-    std::vector<Float_t> vMerr = {5.16393e-03, 5.26006e-03, 5.44217e-03, 4.68768e-03, 7.08306e-03, 1.47878e-02};
+    std::vector<Float_t> vM = {497.704, 497.687, 497.669, 497.735,  497.927, 499.078};
+    std::vector<Float_t> vMerr = {6.81036e-03, 7.11921e-03, 7.26057e-03, 7.75657e-03, 9.52740e-03, 2.02138e-02};
 
     std::vector<Float_t> vE = {505, 508, 509, 510, 511, 514};
     std::vector<Float_t> zeroes(vM.size(), 0.0);
     TGraphErrors gr(vM.size(), vE.data(), vM.data(), zeroes.data(), vMerr.data());
 
-    // MCGPJ with radcor
-    std::vector<Float_t> vMRad = { 4976.13, 497.602, 497.610, 0, 497.608, 497.609};
-    std::vector<Float_t> vMerrRad = {3.32994e-03, 4.51087e-03, 4.76159e-03, 0, 5.09326e-03, 5.65773e-03};
-    TGraphErrors grRad(vM.size(), vE.data(), vM.data(), zeroes.data(), vMerr.data());
+    // MCGPJ with radcor and resolution correction
+    // std::vector<Float_t> vMRad = { 497.613, 497.604, 497.610, 497.615, 497.608, 497.609};
+    // std::vector<Float_t> vMerrRad = {3.32994e-03, 4.84249e-03, 4.76159e-03, 1.01080e-02, 5.09326e-03, 5.65773e-03};
+    std::vector<Float_t> vMRad = { 497.596, 497.594, 497.595, 497.601, 497.633, 497.631};
+    std::vector<Float_t> vMerrRad = {6.81036e-03, 7.11921e-03, 7.26057e-03, 7.75657e-03, 9.52740e-03, 2.02138e-02};
+    TGraphErrors grRCNC(vMRad.size(), vE.data(), vMRad.data(), zeroes.data(), vMerrRad.data());
+    grRCNC.SetMarkerColor(kGreen);
 
-    // 2body Gen
-    std::vector<Float_t> vM1 = {497.604, 497.615, 497.608, 0, 497.617,  497.612};
-    std::vector<Float_t> vMerr1 = {4.44086e-03, 5.90347e-03, 6.28059e-03, 0, 5.80474e-03, 6.01228e-03};
-    TGraphErrors gr1(vM1.size(), vE.data(), vM1.data(), zeroes.data(), vMerr1.data());
-    gr1.SetMarkerColor(kRed);
+
+    // 2body Gen without resolution correction
+    std::vector<Float_t> vM2b = {497.585, 497.594, 497.599, 497.594, 497.615, 497.603};
+    std::vector<Float_t> vMerr2b = {5.01664e-03, 6.86874e-03, 7.28854e-03, 1.02356e-02, 7.93818e-03, 6.48984e-03};
+    TGraphErrors gr2b(vM2b.size(), vE.data(), vM2b.data(), zeroes.data(), vMerr2b.data());
+    gr2b.SetMarkerColor(kGreen);
+
+    // 2body Gen with resolution correction
+    std::vector<Float_t> vM2bCorr = {497.604, 497.615, 497.609, 497.603, 497.622,  497.613};
+    std::vector<Float_t> vMerr2bCorr = {4.44086e-03, 6.99183e-03, 6.28059e-03, 1.02157e-02, 7.56118e-03, 6.01228e-03};
+    TGraphErrors gr2bCorr(vM2bCorr.size(), vE.data(), vM2bCorr.data(), zeroes.data(), vMerr2bCorr.data());
+    gr2bCorr.SetMarkerColor(kRed);
 
     auto massKline = new TLine(505, massK, 514, massK);
     massKline->SetLineColor(kBlue);
     massKline->SetLineWidth(2);
     
-    gr.DrawClone("AP");
-    gr1.DrawClone("Same P");
+    // gr.DrawClone("AP");
+    // gr2bCorr.DrawClone("Same P");
+    // gr2b.DrawClone("Same AP");
+    // gr2bCorr.DrawClone("Same P");
+    grRCNC.DrawClone("same AP");
     massKline->DrawClone("Same");
     
     
