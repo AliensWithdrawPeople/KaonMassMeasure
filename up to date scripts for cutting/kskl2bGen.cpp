@@ -48,8 +48,6 @@ void kskl2bGen::Loop(std::string histFileName)
     tNew->Branch("demeas", &demeas, "demeas/F");
     tNew->Branch("runnum", &runnum, "runnum/I");
     tNew->Branch("ksdpsi", &dpsi, "dpsi/F");
-    tNew->Branch("pi+ mom", &dpsi, "dpsi/F");
-    tNew->Branch("pi- mom", &dpsi, "dpsi/F");
     tNew->Branch("Y", &Y, "Y/F");
 
     Double_t halfPi = TMath::Pi() / 2;
@@ -82,6 +80,10 @@ void kskl2bGen::Loop(std::string histFileName)
     auto hdThetadPhi = new TH2D("hdThetadPhi", "", 600, 0, 2*TMath::Pi(), 600, -TMath::Pi(), TMath::Pi());
     auto hClEdPhi = new TH2D("hClEdPhi", "", 600, 0, 2 * TMath::Pi(), 600, 0, 600);
     auto hPsi = new TH1D("hPsi", "", 628, 0, 6.28);
+    auto hPhi = new TH1D("hPhi", "", 1000, -0.2, 0.2);
+    auto hDeltaMom = new TH1D("hDeltaMom", "Lorentz delta mom", 1000, -0.2, 0.2);
+
+    auto hE = new TH1D("hE", "Corrected energy", 50000, 480, 515);
 
     hdThetadPhi->GetXaxis()->SetTitle("#Delta#phi, rad");
     hdThetadPhi->GetYaxis()->SetTitle("#Delta#theta, rad");
@@ -96,6 +98,9 @@ void kskl2bGen::Loop(std::string histFileName)
 
     TVector3 piPos;
     TVector3 piNeg;
+    TVector3 piPosRec;
+    TVector3 piNegRec;
+    TVector3 field(0., 0., 1.);
     int counter1 = 0;
     int counter2 = 0;
 
@@ -120,34 +125,7 @@ void kskl2bGen::Loop(std::string histFileName)
 
         if (NgoodTr == 2)
         { NgoodTrS++; }
-
-    /*   
-        if (NgoodTr == 2 && nks == 1 && is_coll != 1 && ksalign[0] > 0.85 && (tdedx[ksvind[0][0]] + tdedx[ksvind[0][1]]) / 2 < 5000 &&
-            abs(kspith[0][0] - TMath::Pi() / 2) <= 0.9 && abs(kspith[0][1] - TMath::Pi() / 2) <= 0.9 &&
-            //20 - half of the linear size of Drift Chamber
-            //(20 - ksz0[0]) * fabs(TMath::Tan(kspith[0][0])) > 15 && (20 - ksz0[0]) * fabs(TMath::Tan(kspith[0][1])) > 15 &&
-            kspipt[0][0] > 120 && kspipt[0][1] > 120 && 
-            kspipt[0][0] < 350 && kspipt[0][1] < 350 &&
-            
-            tcharge[ksvind[0][0]] * tcharge[ksvind[0][1]] < 0)
-        {
-            if (tcharge[ksvind[0][0]] > 0)
-            {
-                Y = kspipt[0][0] / kspipt[0][1];
-                hist->Fill(kspipt[0][0], kspipt[0][1]);
-                p1 = kspipt[0][0]; p2 = kspipt[0][1];
-            }
-            else
-            {
-                Y = kspipt[0][1] / kspipt[0][0];
-                hist->Fill(kspipt[0][1], kspipt[0][0]);
-                p1 = kspipt[0][1]; p2 = kspipt[0][0];
-            }
-            dpsi = ksdpsi[0];
-            tNew->Fill();
-        }
-    */  
-
+        
     
         if (NgoodTr == 2 && is_coll != 1 )
         {
@@ -211,12 +189,16 @@ void kskl2bGen::Loop(std::string histFileName)
                     Y = kspipt[0][0] / kspipt[0][1];
                     hist->Fill(kspipt[0][0], kspipt[0][1]);
                     p1 = kspipt[0][0]; p2 = kspipt[0][1];
+                    piPosRec.SetMagThetaPhi(kspipt[0][0], kspith[0][0], kspiphi[0][0]);
+                    piNegRec.SetMagThetaPhi(kspipt[0][1], kspith[0][1], kspiphi[0][1]);
                 }
                 else
                 {
                     Y = kspipt[0][1] / kspipt[0][0];
                     hist->Fill(kspipt[0][1], kspipt[0][0]);
                     p1 = kspipt[0][1]; p2 = kspipt[0][0];
+                    piPosRec.SetMagThetaPhi(kspipt[0][1], kspith[0][1], kspiphi[0][1]);
+                    piNegRec.SetMagThetaPhi(kspipt[0][0], kspith[0][0], kspiphi[0][0]);
                 }
 
                 for(int i = 0; i < nsim; i++)
@@ -235,8 +217,18 @@ void kskl2bGen::Loop(std::string histFileName)
 
                 }
                 dpsi = ksdpsi[0];
-                emeas = sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2());  
-                tNew->Fill();
+                // emeas = sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2());  
+                if(piPos.Cross(field).XYvector().DeltaPhi(piNeg.XYvector()) < TMath::Pi() / 2)
+                { 
+                    piNegRec.SetPhi(piNegRec.Phi() - 5.84e-6);
+                    piPosRec.SetPhi(piPosRec.Phi() + 5.84e-6);
+                    hE->Fill(sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2()));
+                    dpsi = piNegRec.Angle(piPosRec);
+                    tNew->Fill(); 
+                    hPhi->Fill(piPos.Phi() - piPosRec.Phi()); 
+                    hPhi->Fill(piNeg.Phi() - piNegRec.Phi()); 
+                }
+                hDeltaMom->Fill( (piPos.Mag() - piPosRec.Mag()) / piPos.Mag());
             }
             ksCand.clear();
             ksCand.shrink_to_fit();
@@ -250,9 +242,12 @@ void kskl2bGen::Loop(std::string histFileName)
     std::cout << "e_mc = " <<  eff << std::endl;
     std::cout << "NgoodTrS = " << NgoodTrS << std::endl;
 
+    std::cout << "Energy point: " << emeas << "; Mean Energy = " << hE->GetMean() << " +/- " << hE->GetMeanError() << std::endl;
+
     hist->GetYaxis()->SetTitle("P_{#pi^{+}} [MeV/c]");
     hist->GetXaxis()->SetTitle("P_{#pi^{-}} [MeV/c]");
-    hist->Draw("COL");
+    // hist->Draw("COL");
+    hPhi->Draw();
 
     top->Write();
     top->Save();

@@ -7,8 +7,8 @@ int auxFunc()
     double pRatio = 0.99999;
     double psi = 2.56547;
 
-    double energy = 514;
-    double mass =  499.069;
+    double energy = 509;
+    double mass =  497.636;
     double massK = 497.611;
 
 
@@ -37,7 +37,7 @@ int auxFunc()
     //std::vector<Float_t> vMerr = {0.004, 0.005,  0.005, 0.005, 0.007, 0.015};
 
     // MCGPJ without radcor
-    std::vector<Float_t> vM = {497.704, 497.687, 497.669, 497.735,  497.927, 499.078};
+    std::vector<Float_t> vM = {497.704, 497.687, 497.669, 497.710,  497.927, 499.078};
     std::vector<Float_t> vMerr = {6.81036e-03, 7.11921e-03, 7.26057e-03, 7.75657e-03, 9.52740e-03, 2.02138e-02};
 
     std::vector<Float_t> vE = {505, 508, 509, 510, 511, 514};
@@ -45,12 +45,21 @@ int auxFunc()
     TGraphErrors gr(vM.size(), vE.data(), vM.data(), zeroes.data(), vMerr.data());
 
     // MCGPJ with radcor and resolution correction
+    // kaon energy = sum of pions energies
     // std::vector<Float_t> vMRad = { 497.613, 497.604, 497.610, 497.615, 497.608, 497.609};
     // std::vector<Float_t> vMerrRad = {3.32994e-03, 4.84249e-03, 4.76159e-03, 1.01080e-02, 5.09326e-03, 5.65773e-03};
-    std::vector<Float_t> vMRad = { 497.596, 497.594, 497.595, 497.601, 497.633, 497.631};
-    std::vector<Float_t> vMerrRad = {6.81036e-03, 7.11921e-03, 7.26057e-03, 7.75657e-03, 9.52740e-03, 2.02138e-02};
+    
+    // Fadin-Kuraev radcor
+    std::vector<Float_t> vMRad = { 497.596, 497.601, 497.595, 497.603, 497.633, 497.631};
+    std::vector<Float_t> vMerrRad = {6.81036e-03, 7.11921e-03, 7.26057e-03, 8.3e-03, 9.52740e-03, 2.02138e-02};
     TGraphErrors grRCNC(vMRad.size(), vE.data(), vMRad.data(), zeroes.data(), vMerrRad.data());
     grRCNC.SetMarkerColor(kGreen);
+
+    // Avg energy radcor
+    std::vector<Float_t> vMRad2 = { 497.601, 497.604, 497.599, 497.611, 497.616, 497.650};
+    std::vector<Float_t> vMerrRad2 = {6.81036e-03, 7.11921e-03, 7.26057e-03, 8.3e-03, 9.52740e-03, 2.02138e-02};
+    TGraphErrors grRCNC2(vMRad2.size(), vE.data(), vMRad2.data(), zeroes.data(), vMerrRad2.data());
+    grRCNC2.SetMarkerColor(kGreen);
 
 
     // 2body Gen without resolution correction
@@ -68,12 +77,27 @@ int auxFunc()
     auto massKline = new TLine(505, massK, 514, massK);
     massKline->SetLineColor(kBlue);
     massKline->SetLineWidth(2);
+
+    // Without cuts
+    std::vector<Float_t> vERadMean = { 0.104652, 0.0806505, 0.069, 0.0754306, 0.110864, 0.30721, 1.5044};
+    std::vector<Float_t> vERadMeanErr = {0.00126345, 0.00108585, 0.000956731, 0.000943914, 0.00117893, 0.00218002, 0.00639725};
+    
+    // With cuts
+    std::vector<Float_t> vERadMean1 = { 0.088976, 0.0805728, 0.0665978, 0.070706, 0.106681, 0.313561, 1.4743};
+    std::vector<Float_t> vERadMeanErr1 = {0.0025272, 0.00253048, 0.00200995, 0.00195715, 0.00254587, 0.0048777, 0.0141468};
+
+    std::vector<Float_t> vE2 = {505, 508, 509, 509.527, 510, 511, 514};
+    std::vector<Float_t> zeroes3(vERadMean.size(), 0.0);
+    TGraphErrors grDeltaERad(vERadMean.size() - 1, vE2.data(), vERadMean.data(), zeroes3.data(), vERadMeanErr.data());
+    TGraphErrors grDeltaERad1(vERadMean1.size() - 1, vE2.data(), vERadMean1.data(), zeroes3.data(), vERadMeanErr1.data());
+    // grDeltaERad1.SetMarkerColor(kRed);
+    // grDeltaERad.DrawClone("AP");
+    // grDeltaERad1.DrawClone("same P");
     
     // gr.DrawClone("AP");
-    // gr2bCorr.DrawClone("Same P");
     // gr2b.DrawClone("Same AP");
     // gr2bCorr.DrawClone("Same P");
-    grRCNC.DrawClone("same AP");
+    grRCNC2.DrawClone("same AP");
     massKline->DrawClone("Same");
     
     
