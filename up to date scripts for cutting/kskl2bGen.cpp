@@ -65,10 +65,9 @@ void kskl2bGen::Loop(std::string histFileName)
     double cosKlKs = 0;
     TVector3 ks;
     TVector3 kl;
-    // Auxilary var (for dPhi).
-    int foo = 0;
-    // dPhi - angle between Ks and Kl
+    // dPhi and dTheta - phi and theta angle between Ks and Kl respectively
     double dPhi = 0;
+    double dTheta = 0;
     int tmpCounter = 0;
     std::vector<Int_t> ksCand = {};
 
@@ -82,6 +81,9 @@ void kskl2bGen::Loop(std::string histFileName)
     auto hPsi = new TH1D("hPsi", "", 628, 0, 6.28);
     auto hPhi = new TH1D("hPhi", "", 1000, -0.2, 0.2);
     auto hDeltaMom = new TH1D("hDeltaMom", "Lorentz delta mom", 1000, -0.2, 0.2);
+    auto hDeltaMomVsDeltaPhi1 = new TH2D("hDeltaMomVsDeltaPhi1", "delta mom vs delta phi", 1000, -0.1, 0.1, 1000, -10, 10);
+    auto hDeltaMomVsDeltaPhi2 = new TH2D("hDeltaMomVsDeltaPhi2", "delta mom vs delta phi Cowboy", 1000, -0.1, 0.1, 1000, -10, 10);
+    auto hDeltaMomVsDeltaPhi3 = new TH2D("hDeltaMomVsDeltaPhi3", "delta mom vs delta phi Sailor", 1000, -0.1, 0.1, 1000, -10, 10);
 
     auto hE = new TH1D("hE", "Corrected energy", 50000, 480, 515);
 
@@ -153,29 +155,19 @@ void kskl2bGen::Loop(std::string histFileName)
 
                         hPsi->Fill(ks.Angle(kl));
 
-                        foo = ks.Phi() - kl.Phi() < 0;
-                        if(fabs(ks.Phi() - kl.Phi()) <= TMath::Pi())
-                        { 
-                            dPhi = ks.Phi() - kl.Phi() + foo * 2 * TMath::Pi();
-                            hdThetadPhi->Fill(dPhi, ks.Theta() + kl.Theta() - TMath::Pi());
-                            // phen0 - cluster energy. So this is the energy deposition of Kl candidate.
-                            hClEdPhi->Fill(dPhi, phen0[j]); 
-                            hdPhiTheta->Fill(kl.Theta(), dPhi);
-                        }
-                        else
-                        { 
-                            dPhi = std::pow(-1, foo) * 2 * TMath::Pi() - (ks.Phi() - kl.Phi()) + foo * 2 * TMath::Pi();
-                            hdThetadPhi->Fill(dPhi, ks.Theta() + kl.Theta() - TMath::Pi()); 
-                            hClEdPhi->Fill(dPhi, phen0[j]);
-                            hdPhiTheta->Fill(kl.Theta(), dPhi);
-                        }
+                        dPhi = ks.DeltaPhi(kl) + TMath::Pi();
+                        dTheta = ks.Theta() + kl.Theta() - TMath::Pi();
+                        hdThetadPhi->Fill(dPhi, dTheta);
+                        // phen0 - cluster energy. So this is the energy deposition of Kl candidate.
+                        hClEdPhi->Fill(dPhi, phen0[j]); 
+                        hdPhiTheta->Fill(kl.Theta(), dPhi);
 
-                        if(fabs(dPhi - TMath::Pi()) < 0.5 && phen0[j] > 40)
+                        if((dPhi < 1 || dPhi > 2 * TMath::Pi() - 1) && fabs(dTheta) < 1 && phen0[j] > 40)
                         { tmpCounter++; } 
                     }        
         
                     histKlCands->Fill(tmpCounter);
-                    if(tmpCounter > 0)
+                    if(tmpCounter > 0) // '|| 1' if there is no Kl cut
                     { ksCand.push_back(k); }
                     tmpCounter = 0;
                 }
@@ -217,17 +209,32 @@ void kskl2bGen::Loop(std::string histFileName)
 
                 }
                 dpsi = ksdpsi[0];
+                tNew->Fill();
+                hE->Fill(sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2()));
                 // emeas = sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2());  
                 if(piPos.Cross(field).XYvector().DeltaPhi(piNeg.XYvector()) < TMath::Pi() / 2)
                 { 
-                    piNegRec.SetPhi(piNegRec.Phi() - 5.84e-6);
-                    piPosRec.SetPhi(piPosRec.Phi() + 5.84e-6);
-                    hE->Fill(sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2()));
-                    dpsi = piNegRec.Angle(piPosRec);
-                    tNew->Fill(); 
+                    // hE->Fill(sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2()));
+                    // dpsi = piNeg.Angle(piPos);
+                    // tNew->Fill(); 
                     hPhi->Fill(piPos.Phi() - piPosRec.Phi()); 
                     hPhi->Fill(piNeg.Phi() - piNegRec.Phi()); 
+
+                    hDeltaMomVsDeltaPhi2->Fill(piPos.XYvector().DeltaPhi(piNeg.XYvector()) - piPosRec.XYvector().DeltaPhi(piNegRec.XYvector()), 
+                                            (piPos.Mag() - piNeg.Mag()) - (piPosRec.Mag() - piNegRec.Mag()));
                 }
+
+                if(piPos.Cross(field).XYvector().DeltaPhi(piNeg.XYvector()) > TMath::Pi() / 2)
+                {  
+                    hDeltaMomVsDeltaPhi3->Fill(piPos.XYvector().DeltaPhi(piNeg.XYvector()) - piPosRec.XYvector().DeltaPhi(piNegRec.XYvector()), 
+                                            (piPos.Mag() - piNeg.Mag()) - (piPosRec.Mag() - piNegRec.Mag())); 
+                }
+
+                // hDeltaMomVsDeltaPhi2->Fill(piPos.Phi() - piPosRec.Phi(), piPos.Mag() - piPosRec.Mag());
+                // hDeltaMomVsDeltaPhi3->Fill(piNeg.Phi() - piNegRec.Phi(), piNeg.Mag() - piNegRec.Mag());
+                hDeltaMomVsDeltaPhi1->Fill(piPos.XYvector().DeltaPhi(piNeg.XYvector()) - piPosRec.XYvector().DeltaPhi(piNegRec.XYvector()), 
+                                            (piPos.Mag() - piNeg.Mag()) - (piPosRec.Mag() - piNegRec.Mag()));
+
                 hDeltaMom->Fill( (piPos.Mag() - piPosRec.Mag()) / piPos.Mag());
             }
             ksCand.clear();
@@ -246,8 +253,18 @@ void kskl2bGen::Loop(std::string histFileName)
 
     hist->GetYaxis()->SetTitle("P_{#pi^{+}} [MeV/c]");
     hist->GetXaxis()->SetTitle("P_{#pi^{-}} [MeV/c]");
-    // hist->Draw("COL");
-    hPhi->Draw();
+    hist->Draw("COL");
+    hdThetadPhi->Draw("COL");
+
+    // hDeltaMomVsDeltaPhi2->GetYaxis()->SetTitle("#DeltaP_{#pi^{+}} [MeV/c]");
+    // hDeltaMomVsDeltaPhi1->Draw("COL");
+    // auto c = new TCanvas("deltaP vs deltaPhi", "#pi^{-}", 200, 10, 600, 400);
+    // c->Divide(2, 1);
+    // c->cd(1);
+    // hDeltaMomVsDeltaPhi2->Draw("COL");
+    // c->cd(2);
+    // hDeltaMomVsDeltaPhi3->Draw("COL");
+
 
     top->Write();
     top->Save();
