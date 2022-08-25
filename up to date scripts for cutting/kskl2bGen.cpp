@@ -75,9 +75,9 @@ void kskl2bGen::Loop(std::string histFileName)
     auto histKlCands = new TH1D("KlCands", "number of Kl candidates for one Ks candidate", 5, 0, 5);
     auto histKsCands = new TH1D("KsCands", "number of Ks candidates", 5, 0, 5);
     // Theta = kl.Theta()
-    auto hdPhiTheta = new TH2D("hdPhiTheta", "", 600, 0, TMath::Pi(), 600, 0, 2*TMath::Pi());
-    auto hdThetadPhi = new TH2D("hdThetadPhi", "", 600, 0, 2*TMath::Pi(), 600, -TMath::Pi(), TMath::Pi());
-    auto hClEdPhi = new TH2D("hClEdPhi", "", 600, 0, 2 * TMath::Pi(), 600, 0, 600);
+    auto hdPhiTheta = new TH2D("hdPhiTheta", "", 600, 0, TMath::Pi(), 600, -TMath::Pi(), TMath::Pi());
+    auto hdThetadPhi = new TH2D("hdThetadPhi", "", 600, -TMath::Pi(), TMath::Pi(), 600, -TMath::Pi(), TMath::Pi());
+    auto hClEdPhi = new TH2D("hClEdPhi", "", 600, -TMath::Pi(), TMath::Pi(), 600, 0, 600);
     auto hPsi = new TH1D("hPsi", "", 628, 0, 6.28);
     auto hPhi = new TH1D("hPhi", "", 1000, -0.2, 0.2);
     auto hDeltaMom = new TH1D("hDeltaMom", "Lorentz delta mom", 1000, -0.2, 0.2);
@@ -155,19 +155,19 @@ void kskl2bGen::Loop(std::string histFileName)
 
                         hPsi->Fill(ks.Angle(kl));
 
-                        dPhi = ks.DeltaPhi(kl) + TMath::Pi();
+                        dPhi = ks.DeltaPhi(kl);
                         dTheta = ks.Theta() + kl.Theta() - TMath::Pi();
                         hdThetadPhi->Fill(dPhi, dTheta);
                         // phen0 - cluster energy. So this is the energy deposition of Kl candidate.
                         hClEdPhi->Fill(dPhi, phen0[j]); 
                         hdPhiTheta->Fill(kl.Theta(), dPhi);
 
-                        if((dPhi < 1 || dPhi > 2 * TMath::Pi() - 1) && fabs(dTheta) < 1 && phen0[j] > 40)
+                        if((dPhi < -TMath::Pi() + 1 || dPhi > TMath::Pi() - 1) && fabs(dTheta) < 1 && phen0[j] > 40)
                         { tmpCounter++; } 
                     }        
         
                     histKlCands->Fill(tmpCounter);
-                    if(tmpCounter > 0) // '|| 1' if there is no Kl cut
+                    if(tmpCounter > 0 || 1) // '|| 1' if there is no Kl cut
                     { ksCand.push_back(k); }
                     tmpCounter = 0;
                 }
