@@ -3,3 +3,13 @@ Energy point: 508; Mean Energy = 507.937 +/- 0.00188667; e_mc = 0.139567; psi = 
 Energy point: 509; Mean Energy = 508.945 +/- 0.00152347; e_mc = 0.139567; psi = 2.63375 +/- 0.000258598
 Energy point: 510; Mean Energy = 509.911 +/- 0.0020074; e_mc = 0.143307; psi = 2.61352 +/- 0.000250222
 Energy point: 514; Mean Energy = 512.979 +/- 0.0124129; e_mc = 0.127067; psi = 2.55372 +/- 0.000503969
+
+dPhi sigma = 0.32
+dTheta sigma = 0.28
+RadCor: 
+E = 514 sigma_M = 0.017 MeV
+E = 510 sigma_M = 0.004 MeV
+
+NC:
+E = 514 sigmaOfSigmaPsi = 0.00059; ncErr =  0.0011 MeV
+E = 510 sigmaOfSigmaPsi = 0.000466778; ncErr =  0.0006 MeV
