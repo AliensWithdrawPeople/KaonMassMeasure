@@ -134,27 +134,32 @@ def GetMassCorrected(s: float, psi: float, sigmaPsi: float, eps: float, isNC: bo
     conv: float = integrate.quad(lambda x: (massNC(s * (1-x), psi, sigmaPsi) if isNC else massFunc(s * (1-x), psi)) * SigmaBorn(s * (1-x)) * F(x, s), 0, eps, epsabs = 1e-6, epsrel=1e-4, limit=500)[0]
     return conv / SigmaCorrected(s, eps)
 
-energy: float = 508.945
+energy: float = 512.979
 s: float = 4 * energy**2
-psi: float = 2.63375
+psi: float = 2.55372
 sigmaPsi: float = 0.0164407
-sigmaPsi: float = 0.018732
-# sigmaPsi: float = 0.0254503
-massUpperLimit: float = 505
-maxPhotonEnergy: float = 10
+# sigmaPsi: float = 0.0188051
+sigmaPsi: float = 0.0234503
+sigmaOfSigmaPsi: float = 0.00059
 
-psiErr: float = 0.000258598
-energyErr: float = 0.00152347
-psiEnergyCorr: float = -0.987274
+
+psiErr: float = 0.000503969
+energyErr: float = 0.0124129
+psiVsE_correlation: float = -0.987274
 totErr: float = ( derivative(lambda x: massFunc(s, x), psi, 1e-5, 1, order=9) **2 * psiErr**2 + 
                 (derivative(lambda x: massFunc(x, psi), s, 1e-5, 1, order=9) * 8 * energy)**2 * energyErr**2 +
-                derivative(lambda x: massFunc(s, x), psi, 1e-5, 1, order=9) * (derivative(lambda x: massFunc(x, psi), s, 1e-5, 1, order=9) * 8 * energy) * psiErr * energyErr * psiEnergyCorr)**0.5
+                derivative(lambda x: massFunc(s, x), psi, 1e-5, 1, order=9) * (derivative(lambda x: massFunc(x, psi), s, 1e-5, 1, order=9) * 8 * energy) * psiErr * energyErr * psiVsE_correlation)**0.5
 
+ncErr: float = sigmaOfSigmaPsi * sigmaPsi * abs(derivative(lambda x: massFunc(s, x), psi, 1e-5, 2, order=9))
+print("Mass = ", massNC(s, psi, sigmaPsi), "+/-", totErr)
+print("ncErr = ", ncErr)
+
+# massUpperLimit: float = 505
+# maxPhotonEnergy: float = 10
 # eps: float = epsCalc(s, massUpperLimit)
 # # eps: float = 2 * maxPhotonEnergy / (2 * energy)
 # eps = 1
 # print("Corrected Mass = ", GetMassCorrected(s, psi, sigmaPsi, eps, True), "eps =", eps)
-print("Mass = ", massNC(s, psi, sigmaPsi), "+/-", totErr)
 
 # {2.73353, 2.65747, 2.63507, 2.61432, 2.5988, 2.56547}
 # {505, 508, 509, 510, 511, 514}
