@@ -7,8 +7,8 @@ int auxFunc()
     double pRatio = 0.99999;
     double psi = 2.56547;
 
-    double energy = 509;
-    double mass =  497.636;
+    double energy = 514;
+    double mass =  499.109;
     double massK = 497.611;
 
 
@@ -56,10 +56,22 @@ int auxFunc()
     grRCNC.SetMarkerColor(kGreen);
 
     // Avg energy radcor
-    std::vector<Float_t> vMRad2 = { 497.601, 497.604, 497.599, 497.611, 497.616, 497.650};
-    std::vector<Float_t> vMerrRad2 = {6.81036e-03, 7.11921e-03, 7.26057e-03, 8.3e-03, 9.52740e-03, 2.02138e-02};
+
+    // Old Kl cut: (dPhi < 0.5 || dPhi > 2 * TMath::Pi() - 0.5) && phen0[j] > 40
+    // std::vector<Float_t> vMRad2 = { 497.601, 497.604, 497.599, 497.611, 497.616, 497.650};
+    // std::vector<Float_t> vMerrRad2 = {0.008, 0.005, 0.011, 0.011, 0.017, 0.028};
+
+    // New Kl cut: (dPhi < 1 || dPhi > 2 * TMath::Pi() - 1) && fabs(dTheta) < 1 && phen0[j] > 40
+    std::vector<Float_t> vMRad2 = { 497.603, 497.613, 497.606, 497.616, 497.626, 497.616};
+    std::vector<Float_t> vMerrRad2 = {0.009, 0.010, 0.011, 0.011, 0.012, 0.023};
     TGraphErrors grRCNC2(vMRad2.size(), vE.data(), vMRad2.data(), zeroes.data(), vMerrRad2.data());
     grRCNC2.SetMarkerColor(kGreen);
+
+    // Avg energy radcor without Kl cut
+    std::vector<Float_t> vMRad3 = { 497.609, 497.609, 497.610, 497.600, 497.633, 497.678};
+    std::vector<Float_t> vMerrRad3 = {0, 0, 0, 0, 0, 0};
+    TGraphErrors grRCNC3(vMRad3.size(), vE.data(), vMRad3.data(), zeroes.data(), vMerrRad3.data());
+    grRCNC3.SetMarkerColor(kRed);
 
 
     // 2body Gen without resolution correction
@@ -97,6 +109,7 @@ int auxFunc()
     // gr.DrawClone("AP");
     // gr2b.DrawClone("Same AP");
     // gr2bCorr.DrawClone("Same P");
+    // grRCNC3.DrawClone("same AP");
     grRCNC2.DrawClone("same AP");
     massKline->DrawClone("Same");
     
@@ -107,6 +120,11 @@ int auxFunc()
     std::vector<Float_t> vWidth = {0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4};
     std::vector<Float_t> zeroes2(vSigma.size(), 0.0);
     TGraphErrors gr2(vSigma.size(), vWidth.data(), vSigma.data(), zeroes2.data(), vSigmaErr.data());
+
+    std::vector<Float_t> vAngle = { 2.73092, 2.65629, 2.63373, 2.62245, 2.61362, 2.59637, 2.55372};
+    std::vector<Float_t> vEtmp = {505, 508, 509, 509.527, 510, 511, 514};
+    TGraph grAngleVsE(vEtmp.size(), vEtmp.data(), vAngle.data());
+    std::cout << "Psi angle vs Energy correlation factor = " << grAngleVsE.GetCorrelationFactor() << std::endl;
 
     // gr2.DrawClone("AP");
 
