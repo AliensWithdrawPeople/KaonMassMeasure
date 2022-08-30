@@ -369,19 +369,20 @@ double EnergyHandler::GetMassCriticalAngle()
 
 void EnergyHandler::MassLnY(int drawOpt = 0)
 {    
-    auto hMlnY = new TH2D("hMlnY", "M(lnY)", 1000, -0.4, 0.4, 40000, 480, 520);
+    
+    auto hMlnY = new TH2D("hMlnY", "M(lnY)", 200, -0.4, 0.4, 40000, 480, 520);
     auto hMPsi = new TH2D("MPsi", "M(Psi)", 200, 2, TMath::Pi(), 200, 480, 520);
-    auto hM_CrAnglelnY = new TH2D("hM_CrAnglelnY", "M_CrAngle(lnY)", 1000, -0.3, 0.3, 2000, 490, 515);
-    auto hPsilnY = new TH2D("hPsilnY", "Psi(lnY)", 1000, -0.4, 0.4, 1000, 2.4, 3.3);
+    auto hM_CrAnglelnY = new TH2D("hM_CrAnglelnY", "M_CrAngle(lnY)", 400, -0.4, 0.4, 40000, 490, 515);
+    auto hPsilnY = new TH2D("hPsilnY", "Psi(lnY)", 400, -0.4, 0.4, 10000, 2.4, 3.3);
 
-    auto hPsilnY1 = new TH2D("hPsilnY1", "Psi1(lnY)", 1000, -0.4, 0.4, 1000, 2.4, 3.3);
-    auto hPsilnY2 = new TH2D("hPsilnY2", "Psi2(lnY)", 1000, -0.4, 0.4, 1000, 2.4, 3.3);
-    auto hPsilnY3 = new TH2D("hPsilnY3", "Psi3(lnY)", 1000, -0.4, 0.4, 1000, 2.4, 3.3);
-    auto hPsilnY4 = new TH2D("hPsilnY4", "Psi4(lnY)", 1000, -0.4, 0.4, 1000, 2.4, 3.3);
-    auto hPsilnY5 = new TH2D("hPsilnY5", "Psi5(lnY)", 1000, -0.4, 0.4, 1000, 2.4, 3.3);
-    auto hPsilnY6 = new TH2D("hPsilnY6", "Psi6(lnY)", 1000, -0.4, 0.4, 1000, 2.4, 3.3);
-    auto hPsilnY7 = new TH2D("hPsilnY7", "Psi7(lnY)", 1000, -0.4, 0.4, 1000, 2.4, 3.3);
-    auto hPsilnY8 = new TH2D("hPsilnY8", "Psi8(lnY)", 1000, -0.4, 0.4, 1000, 2.4, 3.3);
+    auto hPsilnY1 = new TH2D("hPsilnY1", "Psi1(lnY)", 400, -0.4, 0.4, 10000, 2.4, 3.3);
+    auto hPsilnY2 = new TH2D("hPsilnY2", "Psi2(lnY)", 400, -0.4, 0.4, 10000, 2.4, 3.3);
+    auto hPsilnY3 = new TH2D("hPsilnY3", "Psi3(lnY)", 400, -0.4, 0.4, 10000, 2.4, 3.3);
+    auto hPsilnY4 = new TH2D("hPsilnY4", "Psi4(lnY)", 400, -0.4, 0.4, 10000, 2.4, 3.3);
+    auto hPsilnY5 = new TH2D("hPsilnY5", "Psi5(lnY)", 400, -0.4, 0.4, 10000, 2.4, 3.3);
+    auto hPsilnY6 = new TH2D("hPsilnY6", "Psi6(lnY)", 400, -0.4, 0.4, 10000, 2.4, 3.3);
+    auto hPsilnY7 = new TH2D("hPsilnY7", "Psi7(lnY)", 400, -0.4, 0.4, 10000, 2.4, 3.3);
+    auto hPsilnY8 = new TH2D("hPsilnY8", "Psi8(lnY)", 400, -0.4, 0.4, 10000, 2.4, 3.3);
 
     auto hPsi = new TH1D("hPsi", "Psi", 200, 2.4, 3.3);
 
@@ -417,10 +418,10 @@ void EnergyHandler::MassLnY(int drawOpt = 0)
 
             // if(massFullRec->Eval(ksdpsi) > 490 && massFullRec->Eval(ksdpsi) < 505)
             // { hMlnY->Fill(log(Y), massFullRec->Eval(ksdpsi) - sigmaPsi * sigmaPsi / 2 * massFullRec->Derivative2(ksdpsi)); }
-            hMlnY->Fill(log(Y), massFullRec->Eval(ksdpsi)- sigmaPsi * sigmaPsi / 2 * massFullRec->Derivative2(ksdpsi));
+            hMlnY->Fill(log(Y), massFullRec->Eval(ksdpsi) - sigmaPsi * sigmaPsi / 2 * massFullRec->Derivative2(ksdpsi));
 
 
-            hM_CrAnglelnY->Fill(log(Y), massCrAngle->Eval(ksdpsi));
+            hM_CrAnglelnY->Fill(log(Y), massCrAngle->Eval(ksdpsi) - sigmaPsi * sigmaPsi / 2 * massCrAngle->Derivative2(ksdpsi));
             if(massFullRec->Eval(ksdpsi) > 490 && massFullRec->Eval(ksdpsi) < 505)
             { 
                 hPsilnY->Fill(log(Y), ksdpsi); 
@@ -444,7 +445,7 @@ void EnergyHandler::MassLnY(int drawOpt = 0)
                 }  
             }
 
-            hMPsi->Fill(ksdpsi, massFullRec->Eval(ksdpsi));
+            hMPsi->Fill(ksdpsi, massFullRec->Eval(ksdpsi) - sigmaPsi * sigmaPsi / 2 * massFullRec->Derivative2(ksdpsi));
             hPsi->Fill(ksdpsi);
         }
     }
@@ -461,7 +462,7 @@ void EnergyHandler::MassLnY(int drawOpt = 0)
     std::cout << "Sigmas: " << std::endl;
     for(int i = 0; i < p.size(); i++)
     {
-        r = p[i]->Fit("gaus", "SQE", "goff", p[i]->GetMean() - 0.04, p[i]->GetMean() + 0.04);
+        r = p[i]->Fit("gaus", "SQE", "", p[i]->GetMean() - 0.04, p[i]->GetMean() + 0.04);
         std::cout << r->Parameter(2) << ", ";
     }
     std::cout<<std::endl;
@@ -470,16 +471,16 @@ void EnergyHandler::MassLnY(int drawOpt = 0)
     hMlnY->GetYaxis()->SetTitle("M_{K^{0}_{S}}, #frac{MeV}{c^{2}}");
     hMlnY->GetXaxis()->SetTitle("ln(Y)");
 
-    r = hM_CrAnglelnY->ProfileX()->Fit("pol4", "SQE");
+    r = hM_CrAnglelnY->ProfileX()->Fit("pol4", "SMQE");
     std::cout << "Mass_CrAngle = " << r->Parameter(0) << " +/- " << r->ParError(0) << std::endl;
-    r = hPsilnY->Fit("pol2", "SQE");
+    r = hPsilnY->ProfileX("pfxAng")->Fit("pol2", "SQME", "", -0.3, 0.3);
     std::cout << "Psi = " << r->Parameter(0) << " +/- " << r->ParError(0) << std::endl;
     auto canv = new TCanvas("MlnY","Mass(lnY)", 200, 10, 600, 400);
     switch (drawOpt)
     {
     case 0:
-        hMlnY->GetXaxis()->SetRangeUser(-0.4, 0.4);
-        hMlnY->GetYaxis()->SetRangeUser(490., 505);
+        // hMlnY->GetXaxis()->SetRangeUser(-0.3, 0.3);
+        hMlnY->GetYaxis()->SetRangeUser(490., 505.);
         hMlnY->ProfileX("pfx")->DrawClone();
         // hMlnY->DrawClone();
         break;
@@ -501,6 +502,8 @@ void EnergyHandler::MassLnY(int drawOpt = 0)
     delete hPsilnY;
     delete hMPsi;
     delete hPsi;
+    
+    hPsilnY1->DrawCopy();
 
     delete hPsilnY1;
     delete hPsilnY2;
@@ -530,21 +533,24 @@ int massMeasRefactored()
     std::vector<Float_t> vSigma2bGen505 = {0.0134969, 0.0142392, 0.0154022, 0.0173511, 0.0199569, 0.0251851, 0.0275803, 0.0399681};
     std::vector<Float_t> vSigma2bGen508 = {0.0137332, 0.0140298, 0.0157161, 0.0160138, 0.0176, 0.0207127, 0.0226033, 0.0333739};
     std::vector<Float_t> vSigma2bGen509 = {0.0140662, 0.0143783, 0.0153217, 0.0159238, 0.0183206, 0.0200784, 0.022282, 0.0241693};
-    std::vector<Float_t> vSigma2bGen510 = {0.0167692, 0.0177428, 0.0181819, 0.0197628, 0.0212822, 0.0234363, 0.0262729, 0.029705};
+    std::vector<Float_t> vSigma2bGen510 = {0.012833, 0.0140258, 0.0146077, 0.0158201, 0.0167583, 0.0192569, 0.0224611, 0.0263049};
     std::vector<Float_t> vSigma2bGen511 = {0.013955, 0.0139976, 0.0138187, 0.0155091, 0.0171207, 0.0181919, 0.021311, 0.02493};
     std::vector<Float_t> vSigma2bGen514 = {0.0137028, 0.0141576, 0.0142666, 0.0153213, 0.0168596, 0.0177785, 0.020533, 0.0224221};
 
-    std::vector<Float_t> vSigmaMCGPJ505 = {1.39789e-02, 1.48976e-02, 1.63576e-02,  1.83967e-02, 2.14074e-02, 2.52082e-02, 2.92340e-02, 3.85429e-02};
-    std::vector<Float_t> vSigmaMCGPJ510 = {0.0176344, 0.0187807, 0.0198675, 0.020309, 0.0222395, 0.024432, 0.027991, 0.0309448};
-    std::vector<Float_t> vSigmaMCGPJ514 = {0.164822, 0.172343, 0.159542, 0.158186, 0.171528, 0.176046, 0.202552, 0.199607};
+    std::vector<Float_t> vSigmaMCGPJ505 = {0.0144831, 0.015045, 0.016378, 0.0178303, 0.0208244, 0.024799, 0.0305384, 0.0397608};
+    std::vector<Float_t> vSigmaMCGPJ508 = {0.013898, 0.0148983, 0.0153533, 0.0183795, 0.018041, 0.0218347, 0.0253439, 0.0295706};
+    std::vector<Float_t> vSigmaMCGPJ509 = {0.015222, 0.0144722, 0.0164655, 0.0169522, 0.019459, 0.0209402, 0.0245158, 0.0294989};
+    std::vector<Float_t> vSigmaMCGPJ510 = {0.0133497, 0.0147225, 0.0161305, 0.0160966, 0.0179925, 0.0207361, 0.0216025, 0.0278535};
+    std::vector<Float_t> vSigmaMCGPJ511 = {0.0154065, 0.0165601, 0.015237, 0.0181514, 0.0202281, 0.0205935, 0.0273105, 0.0278831};
+    std::vector<Float_t> vSigmaMCGPJ514 = {1.34860e-02, 1.39373e-02, 1.50249e-02, 1.57885e-02, 1.88224e-02, 2.08974e-02, 2.39290e-02, 2.59919e-02};
     
     //auto eHandler = new EnergyHandler("hists and root files/cuts/kchCut21May.root", "hists and root files/cuts/ksklCut_11May22.root");
 
-    auto eHandler = new EnergyHandler("hists and root files/cuts/kchCut21May.root", "tr_ph/mcgpj514_NewEnergy.root", vSigma0);
-    // auto eHandler = new EnergyHandler("hists and root files/cuts/kchCut21May.root", "tr_ph/2bGen514_NewEnergy.root", vSigma2bGen514);
+    // auto eHandler = new EnergyHandler("hists and root files/cuts/kchCut21May.root", "tr_ph/mcgpj508_NewEnergy.root", vSigmaMCGPJ508);
+    auto eHandler = new EnergyHandler("hists and root files/cuts/kchCut21May.root", "tr_ph/bonk.root", vSigma0);
     
     //eHandler->GetMassCriticalAngle();
-    eHandler->MassLnY(2);
+    eHandler->MassLnY(0);
     delete eHandler;
 
     auto end = std::chrono::system_clock::now();
