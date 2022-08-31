@@ -18,14 +18,11 @@ def massFunc(s: float, psi: float)->float:
     b: float = 1 - 4 * mPi**2 / (s / 4)
     return (s / 4 * (1 - (1 + (1 - eta**2)**0.5 * np.cos(psi)) * (1 - (1 - eta**2 * b)**0.5 )/ eta / eta ))**0.5
 
-def responseFunction(psi: float, avgPsi: float, sigma: float)->float:
-    return np.exp(-(psi - avgPsi)**2 / (2 * sigma**2)) / (2 * pi)**0.5 / sigma
+def massNC(s: float, psi: float, sigmaPsi: float)->float:
+    return massFunc(s, psi) - sigmaPsi**2 / 2 * derivative(lambda x: massFunc(s, x), psi, 1e-5, 2, order=9)
 
-def massNC(s: float, psi: float, sigmaPsi: list)->float:
-    return integrate.quad(lambda x: massFunc(s, x) * responseFunction(x, psi, sigmaPsi) , 0, pi, epsabs = 1e-6, epsrel=1e-4, limit=500)[0]
-
-energy: float =  2 * 510
+energy: float =  2 * 504.895
 s: float = energy**2
-psi: float = 2.61185  
+psi: float = 2.73226
 sigmaPsi: float = 0.0164407
-print("deltaM = ", massFunc(s, psi) - massNC(s, psi, sigmaPsi))
+print("deltaM = ", massNC(s, psi, sigmaPsi))

@@ -134,12 +134,11 @@ def GetMassCorrected(s: float, psi: float, sigmaPsi: float, eps: float, isNC: bo
     conv: float = integrate.quad(lambda x: (massNC(s * (1-x), psi, sigmaPsi) if isNC else massFunc(s * (1-x), psi)) * SigmaBorn(s * (1-x)) * F(x, s), 0, eps, epsabs = 1e-6, epsrel=1e-4, limit=500)[0]
     return conv / SigmaCorrected(s, eps)
 
-energy: float = 512.979
+energy: float = 509.912
 s: float = 4 * energy**2
-psi: float = 2.55372
-sigmaPsi: float = 0.0164407
-# sigmaPsi: float = 0.0188051
-sigmaPsi: float = 0.0234503
+psi: float = 2.61335
+sigmaPsi: float = 0.0189111
+# sigmaPsi: float = 0.0234503
 sigmaOfSigmaPsi: float = 0.00059
 
 
