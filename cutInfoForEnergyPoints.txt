@@ -13,3 +13,10 @@ E = 510 sigma_M = 0.004 MeV
 NC:
 E = 514 sigmaOfSigmaPsi = 0.00059; ncErr =  0.0011 MeV
 E = 510 sigmaOfSigmaPsi = 0.000466778; ncErr =  0.0006 MeV
+
+Cuts' uncertainties:
+1)  abs(kspith[k][0] - TMath::Pi() / 2) <= 0.7 | 
+                                               | => sigma_theta = 21e-3 rad => sigma_M = 0.003 Mev 
+    abs(kspith[k][1] - TMath::Pi() / 2) <= 0.7 |
+2) tnhit[i] > cutNhitMin | => sigma_nhit = 2 => sigma_M = 0.0069 MeV (0.0014 MeV when "- sigma_nhit")
+Other cuts have systematic uncertainty less then 0.0005 Mev so I ignore it.
