@@ -63,7 +63,6 @@ void kskl2bGen::Loop(std::string histFileName)
     double cutZtrack = 12.;
     double cutPtot = 40;
 
-    double cosKlKs = 0;
     TVector3 ks;
     TVector3 kl;
     TVector3 ksGen;
@@ -79,10 +78,11 @@ void kskl2bGen::Loop(std::string histFileName)
     auto histKsCands = new TH1D("histKsCands", "number of Ks candidates", 5, 0, 5);
     // Theta = kl.Theta()
     auto hdPhiTheta = new TH2D("hdPhiTheta", "", 600, 0, TMath::Pi(), 600, -TMath::Pi(), TMath::Pi());
-    auto hdThetadPhi = new TH2D("hdThetadPhi", "", 600, -TMath::Pi(), TMath::Pi(), 600, -TMath::Pi(), TMath::Pi());
-    auto hClEdPhi = new TH2D("hClEdPhi", "", 600, -TMath::Pi(), TMath::Pi(), 600, 0, 600);
+    auto hdThetadPhi = new TH2D("hdThetadPhi", "", 1200, 0, 2*TMath::Pi(), 1200, -TMath::Pi(), TMath::Pi());
+    auto hClEdPhi = new TH2D("hClEdPhi", "", 600, 0, 2 * TMath::Pi(), 600, 0, 600);
     auto hPsiUncutted = new TH1D("hPsiUncutted", "", 628, 0, 3.15);
     auto hPsiCutted = new TH1D("hPsiCutted", "", 628, 0, 3.15);
+    // Phi angle between pions
     auto hPhi = new TH1D("hPhi", "", 1000, -0.2, 0.2);
     auto hDeltaMom = new TH1D("hDeltaMom", "Lorentz delta mom", 1000, -0.2, 0.2);
     auto hDeltaMomVsDeltaPhi1 = new TH2D("hDeltaMomVsDeltaPhi1", "delta mom vs delta phi", 1000, -0.1, 0.1, 1000, -10, 10);
@@ -99,6 +99,10 @@ void kskl2bGen::Loop(std::string histFileName)
 
     auto hEUncutted = new TH1D("hEUncutted", "Uncutted Corrected energy", 3000, 490, 520);
     auto hE = new TH1D("hE", "Corrected energy", 3000, 490, 520);
+
+
+    auto hHit = new TH1D("hHit", "nhits", 40, 0, 40);
+    auto hTrackTheta = new TH1D("hTrackTheta", "hTrackTheta", 250, -TMath::Pi() / 2, TMath::Pi() / 2);
 
     hdThetadPhi->GetXaxis()->SetTitle("#Delta#phi, rad");
     hdThetadPhi->GetYaxis()->SetTitle("#Delta#theta, rad");
@@ -153,14 +157,16 @@ void kskl2bGen::Loop(std::string histFileName)
                 abs(kspith[k][1] - TMath::Pi() / 2) <= 0.7 &&
                 //20 - half of the linear size of Drift Chamber
                 //(20 - ksz0[0]) * fabs(TMath::Tan(kspith[0][0])) > 15 && (20 - ksz0[0]) * fabs(TMath::Tan(kspith[0][1])) > 15 &&
-                //kspipt[k][0] > 120 && kspipt[k][1] > 120 && 
-                //kspipt[k][0] < 350 && kspipt[k][1] < 350 &&
+                // kspipt[k][0] > 120 && kspipt[k][1] > 120 && 
+                // kspipt[k][0] < 350 && kspipt[k][1] < 350 &&
                 tcharge[ksvind[k][0]] * tcharge[ksvind[k][1]] < 0 && kstype[k] == 0) // Added kstype[k] == 0.
                 {
                     ks.SetMagThetaPhi(1, ksth[k], ksphi[k]);
 
                     for(int j = 0; j < nph; j++)
                     {
+                        // if(phen0[j] < 40)
+                        // { continue; }
                         // phth0 and phphi0 are theta and phi respectively angles of KL candidate.
                         kl.SetMagThetaPhi(phrho[j], phth0[j], phphi0[j]);
                         // Shift to the center of phi decay. 
@@ -174,7 +180,7 @@ void kskl2bGen::Loop(std::string histFileName)
                         dTheta = ks.Theta() + kl.Theta() - TMath::Pi();
                         // hdThetadPhi->Fill(dPhi, dTheta);
                         // phen0 - cluster energy. So this is the energy deposition of Kl candidate.
-                        hClEdPhi->Fill(dPhi, phen0[j]); 
+                        // hClEdPhi->Fill(dPhi, phen0[j]); 
                         hdPhiTheta->Fill(kl.Theta(), dPhi);
 
                         for(int i = 0; i < nsim; i++)
@@ -188,6 +194,17 @@ void kskl2bGen::Loop(std::string histFileName)
                         
                         // [1] / ([0] - x) + [2]
                         dPhiVsEcutFunc->SetParameters(emeas - 0.5, 0.1, 0.1);
+                        if(dPhi < 0)
+                        { 
+                            hdThetadPhi->Fill(dPhi + 2*TMath::Pi(), dTheta); 
+                            hClEdPhi->Fill(dPhi + 2*TMath::Pi(), phen0[j]);
+                        }
+                        else
+                        { 
+                            hdThetadPhi->Fill(dPhi, dTheta); 
+                            hClEdPhi->Fill(dPhi, phen0[j]);
+                        }
+
                         trueEnergy = sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2());
                         if((dPhi < -TMath::Pi() + 1 || dPhi > TMath::Pi() - 1) && (fabs(dTheta) - dPhiVsEcutFunc->Eval(trueEnergy) < 0 || trueEnergy > emeas - 0.5) && phen0[j] > 40)
                         // if((dPhi < -TMath::Pi() + 1 || dPhi > TMath::Pi() - 1) && fabs(dTheta) < 0.1 && phen0[j] > 40)
@@ -195,7 +212,7 @@ void kskl2bGen::Loop(std::string histFileName)
                         { 
                             tmpCounter++; 
                             hPsiCutted->Fill(ks.Angle(kl));
-                            hdThetadPhi->Fill(dPhi, dTheta);
+                            // hdThetadPhi->Fill(dPhi, dTheta);
                             if(dPhi < 0)
                             { hKsKlPhi->Fill(dPhi+ TMath::Pi()); }
                             else
@@ -246,7 +263,6 @@ void kskl2bGen::Loop(std::string histFileName)
                         piNeg.SetMagThetaPhi(simmom[i], simtheta[i], simphi[i]); 
                         counter2++;
                     }
-
                 }
                 dpsi = ksdpsi[0];
                 tNew->Fill();
@@ -289,7 +305,6 @@ void kskl2bGen::Loop(std::string histFileName)
             }
             hEUncutted->Fill(sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2()));
         }
-
         NgoodTr = 0;
 
         for(int i = 0; i < nsim; i++)
@@ -304,6 +319,7 @@ void kskl2bGen::Loop(std::string histFileName)
             if(simtype[i] == 130)
             { klGen.SetMagThetaPhi(simmom[i], simtheta[i], simphi[i]); }
         }
+
         if(klGen.DeltaPhi(ksGen) < 0)
         { hKsKlPhiGen->Fill(klGen.DeltaPhi(ksGen) + TMath::Pi()); }
         else
@@ -333,31 +349,98 @@ void kskl2bGen::Loop(std::string histFileName)
         hESmearedUncutted->FillRandom("g", int(hEUncutted->GetBinContent(i)));
     }
 
+    // Drawing hits with cuts
+    fChain->Draw("tnhit>>hHit", "", "goff");
+
+    auto hitCutLine1 = new TLine(10, 0, 10, 10000);
+    hitCutLine1->SetLineColor(kBlue);
+    hitCutLine1->SetLineWidth(4);
+    auto hitCutLine2 = new TLine(30, 0, 30, 10000);
+    hitCutLine2->SetLineColor(kBlue);
+    hitCutLine2->SetLineWidth(4);
+
+    hHit->GetXaxis()->SetTitle("Number of hits");
+    // hHit->Draw();
+    // hitCutLine1->Draw("same");
+    // hitCutLine2->Draw("same");
+    // Drawing hits with cuts 
+
+    // ****************************************************
+
+    // Drawing track theta with cuts' lines 
+    fChain->Draw("tth - TMath::Pi() / 2>>hTrackTheta", "", "goff");
+
+    auto thetaCutLine1 = new TLine(-0.7, 0, -0.7, 1600);
+    thetaCutLine1->SetLineColor(kBlue);
+    thetaCutLine1->SetLineWidth(4);
+    auto thetaCutLine2 = new TLine(0.7, 0, 0.7, 1600);
+    thetaCutLine2->SetLineColor(kBlue);
+    thetaCutLine2->SetLineWidth(4);
+
+    hTrackTheta->GetXaxis()->SetTitle("#theta - #frac{#pi}{2}, rad");
+    // hTrackTheta->Draw();
+    // thetaCutLine1->Draw("same");
+    // thetaCutLine2->Draw("same");
+    // Drawing track theta with cuts' lines 
+
+    // ****************************************************
+
+    // Drawing KsKl dThetadPhi with cuts' lines
+    auto dThetadPhiCutLine1 = new TLine(TMath::Pi() - 1, -0.3, TMath::Pi() + 1, -0.3);
+    auto dThetadPhiCutLine2 = new TLine(TMath::Pi() - 1, -0.3, TMath::Pi() - 1, 0.3);
+    auto dThetadPhiCutLine3 = new TLine(TMath::Pi() + 1, -0.3, TMath::Pi() + 1, 0.3);
+    auto dThetadPhiCutLine4 = new TLine(TMath::Pi() - 1, 0.3, TMath::Pi() + 1, 0.3);
+    dThetadPhiCutLine1->SetLineWidth(4);
+    dThetadPhiCutLine2->SetLineWidth(4);
+    dThetadPhiCutLine3->SetLineWidth(4);
+    dThetadPhiCutLine4->SetLineWidth(4);
+    // hdThetadPhi->Draw("col");
+    // dThetadPhiCutLine1->Draw("same");
+    // dThetadPhiCutLine2->Draw("same");
+    // dThetadPhiCutLine3->Draw("same");
+    // dThetadPhiCutLine4->Draw("same");
+    // Drawing KsKl dThetadPhi with cuts' lines
+
+    // ****************************************************
+
+    // Drawing KsKl Cluster Energy vs dPhi with cuts' lines
+    auto hClEdPhiCutLine1 = new TLine(TMath::Pi() - 1, 40, TMath::Pi() + 1, 40);
+    auto hClEdPhiCutLine2 = new TLine(TMath::Pi() - 1, 40, TMath::Pi() - 1, 600);
+    auto hClEdPhiCutLine3 = new TLine(TMath::Pi() + 1, 40, TMath::Pi() + 1, 600);
+    hClEdPhiCutLine1->SetLineWidth(4);
+    hClEdPhiCutLine2->SetLineWidth(4);
+    hClEdPhiCutLine3->SetLineWidth(4);
+    // hClEdPhi->Draw("col");
+    // hClEdPhiCutLine1->Draw("same");
+    // hClEdPhiCutLine2->Draw("same");
+    // hClEdPhiCutLine3->Draw("same");
+    // Drawing KsKl Cluster Energy vs dPhi with cuts' lines
 
     std::cout << "Energy point: " << emeas << "; Mean Energy = " << hE->GetMean() << " +/- " << hE->GetMeanError() << "; e_mc = " <<  eff << std::endl;
     std::cout << "Mean Smeared Energy = " << hESmeared->GetMean() << " +/- " << hESmeared->GetMeanError() << std::endl;
 
     hist->GetYaxis()->SetTitle("P_{#pi^{+}} [MeV/c]");
     hist->GetXaxis()->SetTitle("P_{#pi^{-}} [MeV/c]");
-    // hist->Draw("COL");
+    hist->Draw("COL");
     // hdThetadPhi->Draw("COL");
     // hPsiUncutted->Draw();
     // hPsiCutted->SetLineColor(kGreen);
     // hPsiCutted->Draw("same");
 
-    hESmeared->Draw();
-    hESmearedUncutted->SetLineColor(kGreen);
-    hESmearedUncutted->DrawNormalized("same", hESmeared->Integral());
+    // hESmeared->Draw();
+    // hESmearedUncutted->SetLineColor(kGreen);
+    // hESmearedUncutted->DrawNormalized("same", hESmeared->Integral());
 
-    auto tmpForm = new TF1("tmpForm", "[1] / ([0] - x) + [2]", 490, 520);
-    tmpForm->SetParameters(emeas - 0.5, 0.1, 0.1);
-    hEVsdTheta->Draw("COL");
-    tmpForm->Draw("same");
+    // auto tmpForm = new TF1("tmpForm", "[1] / ([0] - x) + [2]", 490, 520);
+    // tmpForm->SetParameters(emeas - 0.5, 0.1, 0.1);
+    // hEVsdTheta->Draw("COL");
+    // tmpForm->Draw("same");
 
-    hKsKlThetaGen->SetLineColor(kGreen);
+    // hKsKlThetaGen->SetLineColor(kGreen);
     // hKsKlPhiGen->DrawNormalized("", hKsKlPhi->Integral());
     // hKsKlPhiGen->Draw();
-    hKsKlTheta->Draw();
+    // hKsKlTheta->Draw();
+
 
     // hDeltaMomVsDeltaPhi2->GetYaxis()->SetTitle("#DeltaP_{#pi^{+}} [MeV/c]");
     // hDeltaMomVsDeltaPhi1->Draw("COL");
