@@ -10,6 +10,7 @@
 #include "TProfile.h"
 #include "TFitResultPtr.h"
 #include "TFitResult.h"
+#include "TROOT.h"
 
 #include <vector>
 #include <algorithm>
@@ -373,7 +374,7 @@ void EnergyHandler::MassLnY(int drawOpt = 0)
     auto hMlnY = new TH2D("hMlnY", "M(lnY)", 200, -0.4, 0.4, 40000, 480, 520);
     auto hMPsi = new TH2D("MPsi", "M(Psi)", 200, 2, TMath::Pi(), 200, 480, 520);
     auto hM_CrAnglelnY = new TH2D("hM_CrAnglelnY", "M_CrAngle(lnY)", 400, -0.4, 0.4, 40000, 490, 515);
-    auto hPsilnY = new TH2D("hPsilnY", "Psi(lnY)", 400, -0.4, 0.4, 10000, 2.4, 3.3);
+    auto hPsilnY = new TH2D("hPsilnY", "Psi(lnY)", 1000, -0.5, 0.5, 10000, 2.4, 3.3);
 
     auto hPsilnY1 = new TH2D("hPsilnY1", "Psi1(lnY)", 400, -0.4, 0.4, 10000, 2.4, 3.3);
     auto hPsilnY2 = new TH2D("hPsilnY2", "Psi2(lnY)", 400, -0.4, 0.4, 10000, 2.4, 3.3);
@@ -462,11 +463,11 @@ void EnergyHandler::MassLnY(int drawOpt = 0)
     std::cout << "Sigmas: " << std::endl;
     for(int i = 0; i < p.size(); i++)
     {
-        r = p[i]->Fit("gaus", "SQE", "", p[i]->GetMean() - 0.04, p[i]->GetMean() + 0.04);
+        p[i]->Rebin(16);
+        r = p[i]->Fit("gaus", "SEQ", "", p[i]->GetXaxis()->GetBinCenter(p[i]->GetMaximumBin()) - 0.03, p[i]->GetXaxis()->GetBinCenter(p[i]->GetMaximumBin()) + 0.03);
         std::cout << r->Parameter(2) << ", ";
     }
     std::cout<<std::endl;
-    
 
     hMlnY->GetYaxis()->SetTitle("M_{K^{0}_{S}}, #frac{MeV}{c^{2}}");
     hMlnY->GetXaxis()->SetTitle("ln(Y)");
@@ -503,8 +504,6 @@ void EnergyHandler::MassLnY(int drawOpt = 0)
     delete hMPsi;
     delete hPsi;
     
-    hPsilnY1->DrawCopy();
-
     delete hPsilnY1;
     delete hPsilnY2;
     delete hPsilnY3;
@@ -543,14 +542,17 @@ int massMeasRefactored()
     std::vector<Float_t> vSigmaMCGPJ510 = {0.0133497, 0.0147225, 0.0161305, 0.0160966, 0.0179925, 0.0207361, 0.0216025, 0.0278535};
     std::vector<Float_t> vSigmaMCGPJ511 = {0.0154065, 0.0165601, 0.015237, 0.0181514, 0.0202281, 0.0205935, 0.0273105, 0.0278831};
     std::vector<Float_t> vSigmaMCGPJ514 = {1.34860e-02, 1.39373e-02, 1.50249e-02, 1.57885e-02, 1.88224e-02, 2.08974e-02, 2.39290e-02, 2.59919e-02};
+
+
+    std::vector<Float_t> vSigmaExp509_5 = {0.0145491, 0.0146239, 0.0154868, 0.0166363, 0.0182978, 0.0208075, 0.0233191, 0.028379};
     
     //auto eHandler = new EnergyHandler("hists and root files/cuts/kchCut21May.root", "hists and root files/cuts/ksklCut_11May22.root");
 
-    // auto eHandler = new EnergyHandler("hists and root files/cuts/kchCut21May.root", "tr_ph/mcgpj508_NewEnergy.root", vSigmaMCGPJ508);
-    auto eHandler = new EnergyHandler("hists and root files/cuts/kchCut21May.root", "tr_ph/bonk.root", vSigma0);
+    auto eHandler = new EnergyHandler("hists and root files/cuts/kchCut21May.root", "tr_ph/bonk511.root", vSigma0);
+    // auto eHandler = new EnergyHandler("hists and root files/cuts/kchCut21May.root", "tr_ph/exp509_5_newtry.root", vSigmaExp509_5);
     
     //eHandler->GetMassCriticalAngle();
-    eHandler->MassLnY(0);
+    eHandler->MassLnY(5);
     delete eHandler;
 
     auto end = std::chrono::system_clock::now();

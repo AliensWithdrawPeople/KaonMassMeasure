@@ -62,10 +62,18 @@ int auxFunc()
     // std::vector<Float_t> vMerrRad2 = {0.008, 0.005, 0.011, 0.011, 0.017, 0.028};
 
     // New Kl cut: (dPhi < 1 || dPhi > 2 * TMath::Pi() - 1) && fabs(dTheta) < 1 && phen0[j] > 40
-    std::vector<Float_t> vMRad2 = { 497.603, 497.613, 497.606, 497.616, 497.626, 497.616};
+    // std::vector<Float_t> vMRad2 = { 497.603, 497.613, 497.606, 497.616, 497.626, 497.616};
+    // std::vector<Float_t> vMerrRad2 = {0.009, 0.010, 0.011, 0.011, 0.012, 0.023};
+
+    std::vector<Float_t> vMRad2 = { 497.602, 497.613, 497.606, 497.616, 497.626, 497.616};
     std::vector<Float_t> vMerrRad2 = {0.009, 0.010, 0.011, 0.011, 0.012, 0.023};
     TGraphErrors grRCNC2(vMRad2.size(), vE.data(), vMRad2.data(), zeroes.data(), vMerrRad2.data());
     grRCNC2.SetMarkerColor(kGreen);
+
+    std::vector<Float_t> vDeltaMRad = { 0.101, 0.074, 0.063, 0.094, 0.301, 1.462};
+    std::vector<Float_t> vDeltaMRadErr = { 0.008, 0.007, 0.004, 0.010, 0.013, 0.017};
+    TGraphErrors grRCdeltaM(vDeltaMRad.size(), vE.data(), vDeltaMRad.data(), zeroes.data(), vDeltaMRadErr.data());
+    // grRCdeltaM.SetMarkerColor(kGreen);
 
     // Avg energy radcor without Kl cut
     std::vector<Float_t> vMRad3 = { 497.609, 497.609, 497.610, 497.600, 497.633, 497.678};
@@ -73,7 +81,7 @@ int auxFunc()
     TGraphErrors grRCNC3(vMRad3.size(), vE.data(), vMRad3.data(), zeroes.data(), vMerrRad3.data());
     grRCNC3.SetMarkerColor(kRed);
 
-
+    {
     // 2body Gen without resolution correction
     std::vector<Float_t> vM2b = {497.585, 497.594, 497.599, 497.594, 497.615, 497.603};
     std::vector<Float_t> vMerr2b = {5.01664e-03, 6.86874e-03, 7.28854e-03, 1.02356e-02, 7.93818e-03, 6.48984e-03};
@@ -85,6 +93,7 @@ int auxFunc()
     std::vector<Float_t> vMerr2bCorr = {4.44086e-03, 6.99183e-03, 6.28059e-03, 1.02157e-02, 7.56118e-03, 6.01228e-03};
     TGraphErrors gr2bCorr(vM2bCorr.size(), vE.data(), vM2bCorr.data(), zeroes.data(), vMerr2bCorr.data());
     gr2bCorr.SetMarkerColor(kRed);
+    }
 
     auto massKline = new TLine(505, massK, 514, massK);
     massKline->SetLineColor(kBlue);
@@ -110,8 +119,10 @@ int auxFunc()
     // gr2b.DrawClone("Same AP");
     // gr2bCorr.DrawClone("Same P");
     // grRCNC3.DrawClone("same AP");
-    grRCNC2.DrawClone("same AP");
+    grRCNC2.DrawClone("AP");
     massKline->DrawClone("Same");
+
+    // grRCdeltaM.DrawClone("AP");
     
     
 
@@ -125,6 +136,17 @@ int auxFunc()
     std::vector<Float_t> vEtmp = {505, 508, 509, 509.527, 510, 511, 514};
     TGraph grAngleVsE(vEtmp.size(), vEtmp.data(), vAngle.data());
     std::cout << "Psi angle vs Energy correlation factor = " << grAngleVsE.GetCorrelationFactor() << std::endl;
+
+
+
+    std::vector<Float_t> vMPDG = {497.742, 497.661, 497.625, 497.634, 497.583, 497.607};
+    std::vector<Float_t> vMPDGerr = {0.085, 0.033, 0.031, 0.024, 0.021, 0.017};
+    std::vector<Float_t> vExpNum = {505, 506, 507, 508, 509, 510};
+    std::vector<Float_t> zeroes8(vMPDG.size(), 0.0);
+    TGraphErrors grMPDG(vMPDG.size(), vExpNum.data(), vMPDG.data(), zeroes8.data(), vMPDGerr.data());
+
+    // grMPDG.DrawClone("same AP");
+    // massKline->DrawClone("Same");
 
     // gr2.DrawClone("AP");
 

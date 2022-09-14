@@ -134,29 +134,57 @@ def GetMassCorrected(s: float, psi: float, sigmaPsi: float, eps: float, isNC: bo
     conv: float = integrate.quad(lambda x: (massNC(s * (1-x), psi, sigmaPsi) if isNC else massFunc(s * (1-x), psi)) * SigmaBorn(s * (1-x)) * F(x, s), 0, eps, epsabs = 1e-6, epsrel=1e-4, limit=500)[0]
     return conv / SigmaCorrected(s, eps)
 
-energy: float = 509.912
-s: float = 4 * energy**2
-psi: float = 2.61335
-sigmaPsi: float = 0.0189111
-# sigmaPsi: float = 0.0234503
-sigmaOfSigmaPsi: float = 0.00059
+
+energies:list = [504.932, 507.937, 508.945, 509.911, 510.702, 512.979]
+energErrs:list = [0.00183045, 0.00188667, 0.00152347, 0.0020074, 0.005081, 0.0124129]
+psis:list = [2.73092, 2.65629, 2.63375, 2.61352, 2.59614, 2.55372]
+psiErrs:list = [0.000266617, 0.000246109, 0.000258598, 0.000250222, 0.000284943, 0.000503969]
+
+for i in range(6):
+    energy: float = energies[i]
+    s: float = 4 * energy**2
+    psi: float = psis[i]
+    sigmaPsi: float = 0.0185491
+    # sigmaPsi: float = 0.0234503
+    sigmaOfSigmaPsi: float = 0.00059
 
 
-psiErr: float = 0.000503969
-energyErr: float = 0.0124129
-psiVsE_correlation: float = -0.987274
-totErr: float = ( derivative(lambda x: massFunc(s, x), psi, 1e-5, 1, order=9) **2 * psiErr**2 + 
+    psiErr: float = psiErrs[i]
+    energyErr: float = energErrs[i]
+    psiVsE_correlation: float = -0.987274
+    totErr: float = ( derivative(lambda x: massFunc(s, x), psi, 1e-5, 1, order=9) **2 * psiErr**2 + 
                 (derivative(lambda x: massFunc(x, psi), s, 1e-5, 1, order=9) * 8 * energy)**2 * energyErr**2 +
                 derivative(lambda x: massFunc(s, x), psi, 1e-5, 1, order=9) * (derivative(lambda x: massFunc(x, psi), s, 1e-5, 1, order=9) * 8 * energy) * psiErr * energyErr * psiVsE_correlation)**0.5
+    ncErr: float = sigmaOfSigmaPsi * sigmaPsi * abs(derivative(lambda x: massFunc(s, x), psi, 1e-5, 2, order=9))
+    print(i, "Mass = ", massNC(s, psi, sigmaPsi), "+/-", totErr)
 
-ncErr: float = sigmaOfSigmaPsi * sigmaPsi * abs(derivative(lambda x: massFunc(s, x), psi, 1e-5, 2, order=9))
-print("Mass = ", massNC(s, psi, sigmaPsi), "+/-", totErr)
-print("ncErr = ", ncErr)
+print((0.0069 * 0.0069 + 0.003 * 0.003)**0.5)
+# energy: float = 507.937
+# s: float = 4 * energy**2
+# psi: float = 2.65629
+# sigmaPsi: float = 0.013
+# # sigmaPsi: float = 0.0234503
+# sigmaOfSigmaPsi: float = 0.000503969
+
+
+# psiErr: float = 0.000246109
+# energyErr: float = 0.00188667
+# psiVsE_correlation: float = -0.987274
+# totErr: float = ( derivative(lambda x: massFunc(s, x), psi, 1e-5, 1, order=9) **2 * psiErr**2 + 
+#                 (derivative(lambda x: massFunc(x, psi), s, 1e-5, 1, order=9) * 8 * energy)**2 * energyErr**2 +
+#                 derivative(lambda x: massFunc(s, x), psi, 1e-5, 1, order=9) * (derivative(lambda x: massFunc(x, psi), s, 1e-5, 1, order=9) * 8 * energy) * psiErr * energyErr * psiVsE_correlation +
+#                 # Cuts' uncertainties
+#                 0.0069 * 0.0069 +
+#                 0.003 * 0.003)**0.5
+
+# ncErr: float = sigmaOfSigmaPsi * sigmaPsi * abs(derivative(lambda x: massFunc(s, x), psi, 1e-5, 2, order=9))
+# print("Mass = ", massNC(s, psi, sigmaPsi), "+/-", totErr)
+# print("ncErr = ", ncErr)
 
 # massUpperLimit: float = 505
-# maxPhotonEnergy: float = 10
+# maxPhotonEnergy: float = 7
 # eps: float = epsCalc(s, massUpperLimit)
-# # eps: float = 2 * maxPhotonEnergy / (2 * energy)
+# eps: float = 2 * maxPhotonEnergy / (2 * energy)
 # eps = 1
 # print("Corrected Mass = ", GetMassCorrected(s, psi, sigmaPsi, eps, True), "eps =", eps)
 
