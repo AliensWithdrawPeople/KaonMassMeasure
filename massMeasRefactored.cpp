@@ -548,11 +548,11 @@ int massMeasRefactored()
     
     //auto eHandler = new EnergyHandler("hists and root files/cuts/kchCut21May.root", "hists and root files/cuts/ksklCut_11May22.root");
 
-    auto eHandler = new EnergyHandler("hists and root files/cuts/kchCut21May.root", "tr_ph/bonk511.root", vSigma0);
-    // auto eHandler = new EnergyHandler("hists and root files/cuts/kchCut21May.root", "tr_ph/exp509_5_newtry.root", vSigmaExp509_5);
+    // auto eHandler = new EnergyHandler("hists and root files/cuts/kchCut21May.root", "tr_ph/bonk511.root", vSigma0);
+    auto eHandler = new EnergyHandler("hists and root files/cuts/kchCut21May.root", "tr_ph/exp509_5_newtry.root", vSigmaExp509_5);
     
     //eHandler->GetMassCriticalAngle();
-    eHandler->MassLnY(5);
+    eHandler->MassLnY(3);
     delete eHandler;
 
     auto end = std::chrono::system_clock::now();

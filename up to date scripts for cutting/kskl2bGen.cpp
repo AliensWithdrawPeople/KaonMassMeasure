@@ -9,6 +9,7 @@
 #include <TCanvas.h>
 #include <TLatex.h>
 #include <TVector3.h>
+#include <TLine.h>
 
 void kskl2bGen::Loop(std::string histFileName)
 {
@@ -206,8 +207,8 @@ void kskl2bGen::Loop(std::string histFileName)
                         }
 
                         trueEnergy = sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2());
-                        if((dPhi < -TMath::Pi() + 1 || dPhi > TMath::Pi() - 1) && (fabs(dTheta) - dPhiVsEcutFunc->Eval(trueEnergy) < 0 || trueEnergy > emeas - 0.5) && phen0[j] > 40)
-                        // if((dPhi < -TMath::Pi() + 1 || dPhi > TMath::Pi() - 1) && fabs(dTheta) < 0.1 && phen0[j] > 40)
+                        // if((dPhi < -TMath::Pi() + 1 || dPhi > TMath::Pi() - 1) && (fabs(dTheta) - dPhiVsEcutFunc->Eval(trueEnergy) < 0 || trueEnergy > emeas - 0.5) && phen0[j] > 40)
+                        if((dPhi < -TMath::Pi() + 1 || dPhi > TMath::Pi() - 1) && fabs(dTheta) < 0.1 && phen0[j] > 40)
                         // if(ks.Angle(kl) > TMath::Pi() - 0.25 && phen0[j] > 40)
                         { 
                             tmpCounter++; 
