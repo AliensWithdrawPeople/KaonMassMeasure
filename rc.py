@@ -156,30 +156,30 @@ for i in range(6):
                 (derivative(lambda x: massFunc(x, psi), s, 1e-5, 1, order=9) * 8 * energy)**2 * energyErr**2 +
                 derivative(lambda x: massFunc(s, x), psi, 1e-5, 1, order=9) * (derivative(lambda x: massFunc(x, psi), s, 1e-5, 1, order=9) * 8 * energy) * psiErr * energyErr * psiVsE_correlation)**0.5
     ncErr: float = sigmaOfSigmaPsi * sigmaPsi * abs(derivative(lambda x: massFunc(s, x), psi, 1e-5, 2, order=9))
-    print(i, "Mass = ", massNC(s, psi, sigmaPsi), "+/-", totErr)
-
-print((0.0069 * 0.0069 + 0.003 * 0.003)**0.5)
-# energy: float = 507.937
-# s: float = 4 * energy**2
-# psi: float = 2.65629
-# sigmaPsi: float = 0.013
-# # sigmaPsi: float = 0.0234503
-# sigmaOfSigmaPsi: float = 0.000503969
+    print(i, "Mass = ", massNC(s, psi, sigmaPsi) - massFunc(s, psi), "+/-", ncErr)
 
 
-# psiErr: float = 0.000246109
-# energyErr: float = 0.00188667
-# psiVsE_correlation: float = -0.987274
-# totErr: float = ( derivative(lambda x: massFunc(s, x), psi, 1e-5, 1, order=9) **2 * psiErr**2 + 
-#                 (derivative(lambda x: massFunc(x, psi), s, 1e-5, 1, order=9) * 8 * energy)**2 * energyErr**2 +
-#                 derivative(lambda x: massFunc(s, x), psi, 1e-5, 1, order=9) * (derivative(lambda x: massFunc(x, psi), s, 1e-5, 1, order=9) * 8 * energy) * psiErr * energyErr * psiVsE_correlation +
-#                 # Cuts' uncertainties
-#                 0.0069 * 0.0069 +
-#                 0.003 * 0.003)**0.5
+energy: float = 509.911
+s: float = 4 * energy**2
+psi: float = 2.61352
+sigmaPsi: float = 0.014
+# sigmaPsi: float = 0.0234503
+sigmaOfSigmaPsi: float = 0.000503969
 
-# ncErr: float = sigmaOfSigmaPsi * sigmaPsi * abs(derivative(lambda x: massFunc(s, x), psi, 1e-5, 2, order=9))
-# print("Mass = ", massNC(s, psi, sigmaPsi), "+/-", totErr)
-# print("ncErr = ", ncErr)
+
+psiErr: float = 0.000246109
+energyErr: float = 0.00188667
+psiVsE_correlation: float = -0.987274
+totErr: float = ( derivative(lambda x: massFunc(s, x), psi, 1e-5, 1, order=9) **2 * psiErr**2 + 
+                (derivative(lambda x: massFunc(x, psi), s, 1e-5, 1, order=9) * 8 * energy)**2 * energyErr**2 +
+                derivative(lambda x: massFunc(s, x), psi, 1e-5, 1, order=9) * (derivative(lambda x: massFunc(x, psi), s, 1e-5, 1, order=9) * 8 * energy) * psiErr * energyErr * psiVsE_correlation +
+                # Cuts' uncertainties
+                0.0069 * 0.0069 +
+                0.003 * 0.003)**0.5
+
+ncErr: float = sigmaOfSigmaPsi * sigmaPsi * abs(derivative(lambda x: massFunc(s, x), psi, 1e-5, 2, order=9))
+print("Mass = ", massNC(s, psi, sigmaPsi), "+/-", totErr)
+print("ncErr = ", ncErr)
 
 # massUpperLimit: float = 505
 # maxPhotonEnergy: float = 7

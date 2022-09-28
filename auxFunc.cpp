@@ -9,7 +9,7 @@ int auxFunc()
 
     double energy = 514;
     double mass =  499.109;
-    double massK = 497.611;
+    double massK = 497.614;
 
 
     auto massFunc = new TF1("MassLnY", "sqrt([0] * [0] * (1 - (1 + sqrt(1 - [1] *[1]) * cos(x))*(1 - sqrt(1 - [1] * [1] * (1 - 4 * 139.57 * 139.57 / [0] / [0])))/ [1] / [1] ))");
@@ -65,7 +65,10 @@ int auxFunc()
     // std::vector<Float_t> vMRad2 = { 497.603, 497.613, 497.606, 497.616, 497.626, 497.616};
     // std::vector<Float_t> vMerrRad2 = {0.009, 0.010, 0.011, 0.011, 0.012, 0.023};
 
-    std::vector<Float_t> vMRad2 = { 497.602, 497.613, 497.606, 497.616, 497.626, 497.616};
+    // std::vector<Float_t> vMRad2 = { 497.602, 497.613, 497.606, 497.616, 497.626, 497.616};
+    std::vector<Float_t> vMRad2 = { 497.602 - 0.013, 497.613 - 0.012, 497.606 - 0.013, 497.616 - 0.013, 497.626 - 0.013, 497.616 - 0.014};
+    // std::vector<Float_t> vMRad2 = {   497.700, 497.656, 497.654, 497.686, 497.916, 499.106};
+    // std::vector<Float_t> vMerrRad2 = {0.007, 0.007, 0.007, 0.007, 0.009, 0.017};
     std::vector<Float_t> vMerrRad2 = {0.009, 0.010, 0.011, 0.011, 0.012, 0.023};
     TGraphErrors grRCNC2(vMRad2.size(), vE.data(), vMRad2.data(), zeroes.data(), vMerrRad2.data());
     grRCNC2.SetMarkerColor(kGreen);
