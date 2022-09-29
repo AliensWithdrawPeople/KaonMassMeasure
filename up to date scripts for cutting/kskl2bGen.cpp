@@ -46,7 +46,9 @@ void kskl2bGen::Loop(std::string histFileName)
     Float_t Y;
     Float_t eff;
     Float_t p1; Float_t p2;
+    Float_t etrue;
     tNew->Branch("emeas", &emeas, "emeas/F");
+    tNew->Branch("etrue", &etrue, "etrue/F");
     tNew->Branch("demeas", &demeas, "demeas/F");
     tNew->Branch("runnum", &runnum, "runnum/I");
     tNew->Branch("ksdpsi", &dpsi, "dpsi/F");
@@ -63,6 +65,7 @@ void kskl2bGen::Loop(std::string histFileName)
     double cutRmax = 6.0;
     double cutZtrack = 12.;
     double cutPtot = 40;
+    double cutTrackTheta = 0.7;
 
     TVector3 ks;
     TVector3 kl;
@@ -164,8 +167,8 @@ void kskl2bGen::Loop(std::string histFileName)
             for(int k = 0; k < nks; k++)
             {
                 if(ksalign[k] > 0.85 && (tdedx[ksvind[k][0]] + tdedx[ksvind[k][1]]) / 2 < 5000 &&
-                abs(kspith[k][0] - TMath::Pi() / 2) <= 0.7 && 
-                abs(kspith[k][1] - TMath::Pi() / 2) <= 0.7 &&
+                abs(kspith[k][0] - TMath::Pi() / 2) <= cutTrackTheta && 
+                abs(kspith[k][1] - TMath::Pi() / 2) <= cutTrackTheta &&
                 //20 - half of the linear size of Drift Chamber
                 //(20 - ksz0[0]) * fabs(TMath::Tan(kspith[0][0])) > 15 && (20 - ksz0[0]) * fabs(TMath::Tan(kspith[0][1])) > 15 &&
                 // kspipt[k][0] > 120 && kspipt[k][1] > 120 && 
@@ -281,11 +284,12 @@ void kskl2bGen::Loop(std::string histFileName)
                     piNegRec.SetMagThetaPhi(kspipt[0][0], kspith[0][0], kspiphi[0][0]);
                 }
                 hSumMomTr->Fill(kspipt[0][1] + kspipt[0][0]);
-                dpsi = ksdpsi[0];            
+                dpsi = ksdpsi[0];
+                etrue = sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2());            
 
-                Y = piPos.Mag() / piNeg.Mag();
-                dpsi = piPos.Angle(piNeg);
-                emeas = sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2());
+                // Y = piPos.Mag() / piNeg.Mag();
+                // dpsi = piPos.Angle(piNeg);
+                // emeas = sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2());
                 tNew->Fill();
                 
                 hE->Fill(sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2()));

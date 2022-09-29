@@ -30,6 +30,8 @@ private:
     TF1 *massFullRec;
 
     Float_t emeas; Float_t demeas;
+    // Kaon energy calculated as invariant mass of pi+pi-.
+    Float_t etrue;
     Int_t runnum; Float_t ksdpsi;
 
     // Momentum ratio = P1/P2, where P1 is the momentum of pi+, P2 is the momentum of pi-.
@@ -115,6 +117,7 @@ EnergyHandler::EnergyHandler(std::string fChargedK, std::string fKsKl, std::vect
     TFile *file1 = TFile::Open(fKsKl.c_str());
     ksTr = (TTree *)file1->Get("ksTree");
     ksTr->SetBranchAddress("emeas", &emeas);
+    ksTr->SetBranchAddress("etrue", &etrue);
     ksTr->SetBranchAddress("demeas", &demeas);
     ksTr->SetBranchAddress("runnum", &runnum);
     ksTr->SetBranchAddress("ksdpsi", &ksdpsi);
@@ -377,6 +380,9 @@ void EnergyHandler::MassLnY(int drawOpt = 0)
     auto hMPsi = new TH2D("MPsi", "M(Psi)", 200, 2, TMath::Pi(), 200, 480, 520);
     auto hM_CrAnglelnY = new TH2D("hM_CrAnglelnY", "M_CrAngle(lnY)", 400, -0.4, 0.4, 40000, 490, 515);
     auto hPsilnY = new TH2D("hPsilnY", "Psi(lnY)", 1000, -0.5, 0.5, 10000, 2.4, 3.3);
+    auto hEnergySpectrum = new TH1D("hEnergySpectrum", "", 1000, emeas - 20, emeas + 5);
+    // After profile cut
+    auto hEnergySpectrumCut = new TH1D("hEnergySpectrumCut", "", 1000, emeas - 20, emeas + 5);
 
     std::vector<TH2D *> psilnYs;
     for(int i = 0; i < 16; i++)
@@ -406,10 +412,13 @@ void EnergyHandler::MassLnY(int drawOpt = 0)
                 hPsilnY->Fill(log(Y), ksdpsi); 
                 if(int((abs(log(Y)) + 1e-12) / 0.025) < psilnYs.size())
                 { psilnYs[int((abs(log(Y)) + 1e-12) / 0.025)]->Fill(log(Y), ksdpsi); }  
+                if(fabs(log(Y)) < 0.4)
+                { hEnergySpectrumCut->Fill(etrue); }
             }
 
             hMPsi->Fill(ksdpsi, massFullRec->Eval(ksdpsi) - sigmaPsi * sigmaPsi / 2 * massFullRec->Derivative2(ksdpsi));
             hPsi->Fill(ksdpsi);
+            hEnergySpectrum->Fill(etrue);
         }
     }
 
@@ -469,6 +478,11 @@ void EnergyHandler::MassLnY(int drawOpt = 0)
     case 3:
         hPsi->DrawClone();
         break;
+    case 4:
+        hEnergySpectrumCut->SetMarkerColor(kBlue);
+        hEnergySpectrum->Draw();
+        hEnergySpectrumCut->Draw("same");
+        break;
     default:
         hMlnY->GetXaxis()->SetRangeUser(-0.8, 0.8);
         hMlnY->GetYaxis()->SetRangeUser(480, 510);
@@ -521,7 +535,7 @@ int massMeasRefactored()
     
     //auto eHandler = new EnergyHandler("hists and root files/cuts/kchCut21May.root", "hists and root files/cuts/ksklCut_11May22.root");
 
-    auto eHandler = new EnergyHandler("hists and root files/cuts/kchCut21May.root", "tr_ph/509MCgen.root", vSigma0);
+    auto eHandler = new EnergyHandler("hists and root files/cuts/kchCut21May.root", "tr_ph/509MCnewNhitCut.root", vSigma0);
     // auto eHandler = new EnergyHandler("hists and root files/cuts/kchCut21May.root", "tr_ph/exp509_5_newtry.root", vSigmaExp509_5);
     eHandler->MassLnY(0);
     delete eHandler;
