@@ -159,9 +159,9 @@ for i in range(6):
     print(i, "Mass = ", massNC(s, psi, sigmaPsi) - massFunc(s, psi), "+/-", ncErr)
 
 
-energy: float = 509.911
+energy: float = 504.892
 s: float = 4 * energy**2
-psi: float = 2.61352
+psi: float = 2.73092
 sigmaPsi: float = 0.014
 # sigmaPsi: float = 0.0234503
 sigmaOfSigmaPsi: float = 0.000503969
@@ -181,6 +181,7 @@ ncErr: float = sigmaOfSigmaPsi * sigmaPsi * abs(derivative(lambda x: massFunc(s,
 print("Mass = ", massNC(s, psi, sigmaPsi), "+/-", totErr)
 print("ncErr = ", ncErr)
 
+print(massFunc(s, psi))
 # massUpperLimit: float = 505
 # maxPhotonEnergy: float = 7
 # eps: float = epsCalc(s, massUpperLimit)

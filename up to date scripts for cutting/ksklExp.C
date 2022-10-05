@@ -58,9 +58,10 @@ void ksklExp::Loop(std::string histFileName)
     int cutNhitMin = 10;
     int cutNhitMax = 30;
     double cutRmin = 0.1;
-    double cutRmax = 6.0;
+    double cutRmax = 1.7;
     double cutZtrack = 12.;
     double cutPtot = 40;
+    double cutTrackTheta = 0.7;
 
     TVector3 ks;
     TVector3 kl;
@@ -74,6 +75,8 @@ void ksklExp::Loop(std::string histFileName)
     auto hSumMomTr = new TH1D("hSumMomTr", "Sum of moms", 4000, 0, 1200);
     auto histKlCands = new TH1D("histKlCands", "number of Kl candidates for one Ks candidate", 5, 0, 5);
     auto histKsCands = new TH1D("histKsCands", "number of Ks candidates", 5, 0, 5);
+    // Angles between tracks.
+    auto hTrackColl = new TH2D("hTrackColl", "Angles between pions", 1200, -TMath::Pi(), TMath::Pi(), 1200, -TMath::Pi(), TMath::Pi());
     // Theta = kl.Theta()
     auto hdPhiTheta = new TH2D("hdPhiTheta", "", 600, 0, TMath::Pi(), 600, -TMath::Pi(), TMath::Pi());
     auto hdThetadPhi = new TH2D("hdThetadPhi", "", 1200, 0, 2*TMath::Pi(), 1200, -TMath::Pi(), TMath::Pi());
@@ -81,7 +84,6 @@ void ksklExp::Loop(std::string histFileName)
     auto hPsiUncutted = new TH1D("hPsiUncutted", "", 628, 0, 3.15);
     auto hPsiCutted = new TH1D("hPsiCutted", "", 628, 0, 3.15);
     // Phi angle between pions
-
     auto hKsKlPhi = new TH1D("hKsKlPhi", "", 1000, -1.5, 1.5);
 
     auto hKsKlTheta = new TH1D("hKsKlTheta", "", 1000, -1.5, 1.5);
@@ -91,6 +93,9 @@ void ksklExp::Loop(std::string histFileName)
 
     hdThetadPhi->GetXaxis()->SetTitle("#Delta#phi, rad");
     hdThetadPhi->GetYaxis()->SetTitle("#Delta#theta, rad");
+
+    hTrackColl->GetXaxis()->SetTitle("|#phi_{1} - #phi_{2}| - #pi, rad");
+    hTrackColl->GetYaxis()->SetTitle("#theta_{1} + #theta{2} - #pi, rad");
 
     hdPhiTheta->GetXaxis()->SetTitle("#theta of Kl, rad");
     hdPhiTheta->GetYaxis()->SetTitle("#Delta#phi, rad");
@@ -122,6 +127,8 @@ void ksklExp::Loop(std::string histFileName)
                 tchi2r[i] < cutChi2r && tchi2z[i] < cutChi2z && tnhit[i] > cutNhitMin && tnhit[i] < cutNhitMax)
             { NgoodTr++; }
         }
+        if(nt == 2)
+        { hTrackColl->Fill(fabs(tphi[0] - tphi[1]) - TMath::Pi(), tth[0] + tth[1] - TMath::Pi()); }
 
         if (NgoodTr == 2)
         { NgoodTrS++; }
@@ -138,7 +145,7 @@ void ksklExp::Loop(std::string histFileName)
                 //(20 - ksz0[0]) * fabs(TMath::Tan(kspith[0][0])) > 15 && (20 - ksz0[0]) * fabs(TMath::Tan(kspith[0][1])) > 15 &&
                 // kspipt[k][0] > 120 && kspipt[k][1] > 120 && 
                 // kspipt[k][0] < 350 && kspipt[k][1] < 350 &&
-		(kspipt[k][0]+kspipt[k][1])<500 &&
+		        (kspipt[k][0]+kspipt[k][1]) < 500 &&
                 tcharge[ksvind[k][0]] * tcharge[ksvind[k][1]] < 0 && kstype[k] == 0) // Added kstype[k] == 0.
                 {
                     ks.SetMagThetaPhi(1, ksth[k], ksphi[k]);
@@ -183,7 +190,7 @@ void ksklExp::Loop(std::string histFileName)
                             hClEdPhi->Fill(dPhi, phen0[j]);
                         }
 
-                        if((dPhi < -TMath::Pi() + 1 || dPhi > TMath::Pi() - 1) && fabs(dTheta) < 0.1 && phen0[j] > 40)
+                        if((dPhi < -TMath::Pi() + 1 || dPhi > TMath::Pi() - 1) && fabs(dTheta) < 1 && phen0[j] > 40)
                         { 
                             tmpCounter++; 
                             hPsiCutted->Fill(ks.Angle(kl));
