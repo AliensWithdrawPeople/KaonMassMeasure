@@ -20,3 +20,12 @@ Cuts' uncertainties:
     abs(kspith[k][1] - TMath::Pi() / 2) <= 0.7 |
 2) tnhit[i] > cutNhitMin | => sigma_nhit = 2 => sigma_M = 0.0069 MeV (0.0014 MeV when "- sigma_nhit")
 Other cuts have systematic uncertainty less then 0.0005 Mev so I ignore it.
+New) Nhit -> 15 => deltaM = -2 kev; trackThetaCut -> 0.4 => deltaM = 6 keV; stat sigma_M = 7 keV.
+
+Energy of fitting data:
+505 MeV: E = 504.892
+508 MeV: E = 507.912
+509 MeV: E = 508.931
+510 MeV: E = 509.887
+511 MeV: E = 510.65
+514 MeV: E = 512.402
