@@ -22,10 +22,10 @@ Cuts' uncertainties:
 Other cuts have systematic uncertainty less then 0.0005 Mev so I ignore it.
 New) Nhit -> 15 => deltaM = -2 kev; trackThetaCut -> 0.4 => deltaM = 6 keV; stat sigma_M = 7 keV.
 
-Energy of fitting data:
-505 MeV: E = 504.892
-508 MeV: E = 507.912
-509 MeV: E = 508.931
-510 MeV: E = 509.887
-511 MeV: E = 510.65
-514 MeV: E = 512.402
+Energy of fitting data (cutted spectrum average E; notcutted spectrum average E):
+505 MeV: E = 504.901 + / - 0.00294812; E = 504.892 + / - 0.00405467
+508 MeV: E = 507.912 + / - 0.00330263; E = 507.908 + / - 0.00454593
+509 MeV: E =  508.931 + / - 0.0026938; E = 508.931 + / - 0.00338541
+510 MeV: E = 509.887 + / - 0.00348995; E = 509.88 + / - 0.00472904
+511 MeV: E = 510.65 + / - 0.00686529; E = 510.655 + / - 0.00847754
+514 MeV: E = 512.402 + / - 0.0195157; E = 512.345 + / - 0.0253719
