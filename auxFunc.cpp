@@ -36,18 +36,19 @@ int auxFunc()
     // Full reconstruction
     // Avg energy radcor
     std::vector<Float_t> vMRad2 = { 497.597, 497.593, 497.597, 497.583, 497.617, 497.642};
-    std::vector<Float_t> vMRad2NC = { 497.609, 497.610, 497.608, 497.607, 497.626, 497.673};
-    std::vector<Float_t> vMerrRad2 = {0.007, 0.008, 0.008, 0.008, 0.010, 0.024};
+    std::vector<Float_t> vMRad2NC = {497.609, 497.617, 497.608, 497.611, 497.617, 497.612};
+    std::vector<Float_t> vMerrRad2 = {0.007, 0.009, 0.008, 0.010, 0.010, 0.019};
     TGraphErrors grRC(vMRad2.size(), vE.data(), vMRad2.data(), zeroes.data(), vMerrRad2.data());
     TGraphErrors grRCNC(vMRad2NC.size(), vE.data(), vMRad2NC.data(), zeroes.data(), vMerrRad2.data());
     // grRC2.SetMarkerColor(kRed);
-                                
-    std::vector<Float_t> vM2 = { 497.602, 497.613, 497.606, 497.616, 497.626, 497.616};
-    std::vector<Float_t> vMerr2 = {0, 0, 0, 0, 0, 0};
+    
+    // RMS
+    std::vector<Float_t> vM2 = { 497.597, 497.600, 497.597, 497.587, 497.606, 497.581};
+    std::vector<Float_t> vMerr2 = {0.007, 0.009, 0.008, 0.010, 0.010, 0.019};
     TGraphErrors grRCNCnew(vM2.size(), vE.data(), vM2.data(), zeroes.data(), vMerr2.data());
     grRCNCnew.SetMarkerColor(kBlack);
 
-    std::vector<Float_t> vDeltaMRad = { 0.104, 0.087, 0.063, 0.118, 0.320, 1.467};
+    std::vector<Float_t> vDeltaMRad = {94, 61, 53, 90, 320, 1504};
     std::vector<Float_t> vDeltaMRadErr = { 0.008, 0.007, 0.004, 0.010, 0.013, 0.017};
     TGraphErrors grRCdeltaM(vDeltaMRad.size(), vE.data(), vDeltaMRad.data(), zeroes.data(), vDeltaMRadErr.data());
     // grRCdeltaM.SetMarkerColor(kGreen);
@@ -79,11 +80,10 @@ int auxFunc()
 
     grMCrAngle.SetMarkerColor(kRed);
     grMCrAngleRCNC_Fit.SetMarkerColor(kMagenta);
-    grMCrAngleRCNC_RMS.SetMarkerColor(kBlack);
+    grRCNCnew.SetMarkerColor(kRed);
 
-    // grMCrAngle.DrawClone("AP");
-    grMCrAngleRCNC_Fit.DrawClone("AP");
-    // grMCrAngleRCNC_RMS.DrawClone("P same");
+    grRCNC.DrawClone("AP");
+    // grRCNCnew.DrawClone("P same");
     massKline->DrawClone("Same");
 
     std::vector<Float_t> vSigma = {1.37127e-02, 1.44228e-02, 1.45462e-02, 1.46740e-02, 1.72791e-02, 1.84825e-02,  2.11118e-02, 2.26650e-02};

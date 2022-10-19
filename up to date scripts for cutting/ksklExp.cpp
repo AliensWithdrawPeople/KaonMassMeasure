@@ -8,6 +8,7 @@
 #include <TMath.h>
 #include <TCanvas.h>
 #include <TLatex.h>
+#include <TLine.h>
 #include <TVector3.h>
 
 void ksklExp::Loop(std::string histFileName)
@@ -57,8 +58,8 @@ void ksklExp::Loop(std::string histFileName)
     double cutChi2z = 10.;
     int cutNhitMin = 10;
     int cutNhitMax = 30;
-    double cutRmin = 0.1;
-    double cutRmax = 1.7;
+    double cutRmin = 0.05;
+    double cutRmax = 6;
     double cutZtrack = 12.;
     double cutPtot = 40;
     double cutTrackTheta = 0.7;
@@ -90,6 +91,11 @@ void ksklExp::Loop(std::string histFileName)
 
     auto hHit = new TH1D("hHit", "nhits", 40, 0, 40);
     auto hTrackTheta = new TH1D("hTrackTheta", "hTrackTheta", 250, -TMath::Pi() / 2, TMath::Pi() / 2);
+    auto hKstlenVsMinv = new TH2D("hKstlenVsMinv", "hKstlwnVsMinv", 1000, 420, 580, 1000, 0, 100);
+    auto hRatioClEnMom = new TH1D("hRatioClEnMom", "hRatioClEnMom", 200, 0, 2);
+    auto hGammasTotEn = new TH1D("hGammasTotEn", "hGammasTotEn", 1000, 0, 1000);
+    auto hGammasPi0Angles = new TH2D("hGammasPi0Angles", "hGammasPi0Angles", 2000, -TMath::Pi(), TMath::Pi(), 2000, -TMath::Pi(), TMath::Pi());
+    auto hMissingMom = new TH1D("hMissingMom", "hMissingMom", 700, 0, 700);
 
     hdThetadPhi->GetXaxis()->SetTitle("#Delta#phi, rad");
     hdThetadPhi->GetYaxis()->SetTitle("#Delta#theta, rad");
@@ -107,6 +113,9 @@ void ksklExp::Loop(std::string histFileName)
 
     TVector3 piPos;
     TVector3 piNeg;
+    TVector3 missingMass;
+    TVector3 ph1Vec;
+    TVector3 ph2Vec;
     TVector3 field(0., 0., 1.);
 
     Long64_t nentries = fChain->GetEntriesFast();
@@ -123,12 +132,12 @@ void ksklExp::Loop(std::string histFileName)
 
         for (int i = 0; i < nt; i++)
         {
-            if (tptot[i] > cutPtot && fabs(trho[i]) < cutRmax && fabs(tz[i]) < cutZtrack &&
+	        if (tptot[i] > cutPtot && fabs(trho[i]) < cutRmax && fabs(tz[i]) < cutZtrack &&
                 tchi2r[i] < cutChi2r && tchi2z[i] < cutChi2z && tnhit[i] > cutNhitMin && tnhit[i] < cutNhitMax)
             { NgoodTr++; }
         }
-        if(nt == 2)
-        { hTrackColl->Fill(fabs(tphi[0] - tphi[1]) - TMath::Pi(), tth[0] + tth[1] - TMath::Pi()); }
+        //if(nt == 2)
+        //{ hTrackColl->Fill(fabs(tphi[0] - tphi[1]) - TMath::Pi(), tth[0] + tth[1] - TMath::Pi()); }
 
         if (NgoodTr == 2)
         { NgoodTrS++; }
@@ -145,7 +154,8 @@ void ksklExp::Loop(std::string histFileName)
                 //(20 - ksz0[0]) * fabs(TMath::Tan(kspith[0][0])) > 15 && (20 - ksz0[0]) * fabs(TMath::Tan(kspith[0][1])) > 15 &&
                 // kspipt[k][0] > 120 && kspipt[k][1] > 120 && 
                 // kspipt[k][0] < 350 && kspipt[k][1] < 350 &&
-		        (kspipt[k][0]+kspipt[k][1]) < 500 &&
+		        // (kspipt[k][0]+kspipt[k][1]) > 500 &&
+		        kstlen[k] < 1.7 &&
                 tcharge[ksvind[k][0]] * tcharge[ksvind[k][1]] < 0 && kstype[k] == 0) // Added kstype[k] == 0.
                 {
                     ks.SetMagThetaPhi(1, ksth[k], ksphi[k]);
@@ -169,16 +179,7 @@ void ksklExp::Loop(std::string histFileName)
                         // phen0 - cluster energy. So this is the energy deposition of Kl candidate.
                         // hClEdPhi->Fill(dPhi, phen0[j]); 
                         hdPhiTheta->Fill(kl.Theta(), dPhi);
-
-                        for(int i = 0; i < nsim; i++)
-                        {
-                            if(simtype[i] == 211 && simorig[i] == 310)
-                            { piPos.SetMagThetaPhi(simmom[i], simtheta[i], simphi[i]); }
-                            if(simtype[i] == -211 && simorig[i] == 310)
-                            { piNeg.SetMagThetaPhi(simmom[i], simtheta[i], simphi[i]); }
-                        }
                         
-
                         if(dPhi < 0)
                         { 
                             hdThetadPhi->Fill(dPhi + 2*TMath::Pi(), dTheta); 
@@ -231,9 +232,29 @@ void ksklExp::Loop(std::string histFileName)
                     piNeg.SetMagThetaPhi(kspipt[0][0], kspith[0][0], kspiphi[0][0]);
                 }
                 hSumMomTr->Fill(kspipt[0][1] + kspipt[0][0]);
+                hKstlenVsMinv->Fill(ksminv[0], kstlen[0]); // New hist!!!!!!!!!!!!!!!!!!!!!!!!!
+                hRatioClEnMom->Fill(ten[ksvind[0][0]] / kspipt[0][0]);
+                hRatioClEnMom->Fill(ten[ksvind[0][1]] / kspipt[0][1]);
 
                 dpsi = ksdpsi[0];
+                missingMass = -(piPos + piNeg);
+                if(nph > 1)
+                {
+                    for(int ph1 = 0; ph1 < nph; ph1++)
+                    {
+                        ph1Vec.SetMagThetaPhi(phen[ph1], phth[ph1], phphi[ph1]);
+                        for(int ph2 = ph1 + 1; ph2 < nph; ph2++)
+                        {
+                            ph2Vec.SetMagThetaPhi(phen[ph2], phth[ph2], phphi[ph2]);
+                            hGammasPi0Angles->Fill((ph1Vec + ph2Vec).Phi() - missingMass.Phi(), (ph1Vec + ph2Vec).Theta() - missingMass.Theta());
+                            hGammasTotEn->Fill(phen[ph1] + phen[ph2]);
+                            hMissingMom->Fill(missingMass.Mag());
+                        }
+                    }
+                }
+
                 tNew->Fill();
+		        hTrackColl->Fill(fabs(tphi[0] - tphi[1]) - TMath::Pi(), tth[0] + tth[1] - TMath::Pi());
                 if(piPos.Cross(field).XYvector().DeltaPhi(piNeg.XYvector()) < TMath::Pi() / 2)
                 { 
                     // cowboy
