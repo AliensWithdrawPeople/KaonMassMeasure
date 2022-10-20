@@ -39,7 +39,7 @@ void kskl2bGen::Loop(std::string histFileName)
     if (fChain == 0)
         return;
 
-    TFile *top = new TFile(histFileName.c_str(), "recreate");
+    TFile *top = new TFile(("../tr_ph/" + histFileName).c_str(), "recreate");
     auto tNew = new TTree("ksTree", "Cutted tr_ph (Ks mass meas important data)");
 
     Float_t dpsi;
@@ -145,6 +145,7 @@ void kskl2bGen::Loop(std::string histFileName)
     int counter2 = 0;
     auto dPhiVsEcutFunc = new TF1("dPhiVsEcutFunc", "[1] / ([0] - x) + [2]", 490, 520);
     double trueEnergy = 0;
+    double missingMass = 0;
 
     Long64_t nentries = fChain->GetEntriesFast();
 
@@ -301,13 +302,16 @@ void kskl2bGen::Loop(std::string histFileName)
                 // Y = piPos.Mag() / piNeg.Mag();
                 // dpsi = piPos.Angle(piNeg);
                 // emeas = sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2());
-                
-                hMissingMass->Fill(sqrt(4 * emeas * emeas + 2 * 139.57 * 139.57 
-                - 2 * 2 * emeas * sqrt(139.57 * 139.57 + piPosRec.Mag2()) - 2 * 2 * emeas * sqrt(139.57 * 139.57 + piNegRec.Mag2()) 
-                + 2 * (sqrt(139.57 * 139.57 + piPosRec.Mag2()) * sqrt(139.57 * 139.57 + piNegRec.Mag2()) - piPosRec.Dot(piNegRec))));
-                hFinalStateId->Fill(finalstate_id);
 
-                tNew->Fill();
+                missingMass = sqrt(4 * emeas * emeas + 2 * 139.57 * 139.57 
+                - 2 * 2 * emeas * sqrt(139.57 * 139.57 + piPosRec.Mag2()) - 2 * 2 * emeas * sqrt(139.57 * 139.57 + piNegRec.Mag2()) 
+                + 2 * (sqrt(139.57 * 139.57 + piPosRec.Mag2()) * sqrt(139.57 * 139.57 + piNegRec.Mag2()) - piPosRec.Dot(piNegRec)));
+                hMissingMass->Fill(missingMass);
+                hFinalStateId->Fill(finalstate_id);
+                
+                if(missingMass > 350)
+                { tNew->Fill(); }
+                // tNew->Fill();
                 hTrackCollCutted->Fill(fabs(tphi[0] - tphi[1]) - TMath::Pi(), tth[0] + tth[1] - TMath::Pi());
                 hE->Fill(sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2()));
                 // emeas = sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2());  

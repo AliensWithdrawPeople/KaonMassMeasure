@@ -94,9 +94,9 @@ void ksklExp::Loop(std::string histFileName)
     auto hTrackTheta = new TH1D("hTrackTheta", "hTrackTheta", 250, -TMath::Pi() / 2, TMath::Pi() / 2);
     auto hKstlenVsMinv = new TH2D("hKstlenVsMinv", "hKstlwnVsMinv", 1000, 420, 580, 1000, 0, 100);
     auto hRatioClEnMom = new TH1D("hRatioClEnMom", "hRatioClEnMom", 200, 0, 2);
-    auto hGammasTotEn = new TH1D("hGammasTotEn", "hGammasTotEn", 1000, 0, 1000);
+    auto hTwoPhotonsTotEn = new TH1D("hTwoPhotonsTotEn", "hTwoPhotonsTotEn", 1000, 0, 1000);
     auto hGammasPi0Angles = new TH2D("hGammasPi0Angles", "hGammasPi0Angles", 2000, -TMath::Pi(), TMath::Pi(), 2000, -TMath::Pi(), TMath::Pi());
-    auto hMissingMass = new TH1D("hMissingMass", "hMissingMass", 1500, -500, 1000);
+    auto hMissingMass = new TH1D("hMissingMass", "hMissingMass", 1000, 0, 1000);
     auto hMissingMom = new TH1D("hMissingMom", "hMissingMom", 700, 0, 700);
 
     hdThetadPhi->GetXaxis()->SetTitle("#Delta#phi, rad");
@@ -240,9 +240,9 @@ void ksklExp::Loop(std::string histFileName)
 
                 dpsi = ksdpsi[0];
                 missingMom = -(piPos + piNeg);
-                missingMass = emeas * emeas - 2 * 139.57 * 139.57 - 2 * 2 * emeas * (139.57 * 139.57 - piPos.Mag2()) 
-                            - 2 * 2 * emeas * (139.57 * 139.57 - piNeg.Mag2()) 
-                            - 2 * ((139.57 * 139.57 - piPos.Mag2()) * (139.57 * 139.57 - piNeg.Mag2()) - piPos.Dot(piNeg));
+                missingMass = sqrt(4 * emeas * emeas + 2 * 139.57 * 139.57 
+                - 2 * 2 * emeas * sqrt(139.57 * 139.57 + piPos.Mag2()) - 2 * 2 * emeas * sqrt(139.57 * 139.57 + piNeg.Mag2()) 
+                + 2 * (sqrt(139.57 * 139.57 + piPos.Mag2()) * sqrt(139.57 * 139.57 + piNeg.Mag2()) - piPos.Dot(piNeg)));
                 hMissingMass->Fill(missingMass);
                 if(nph > 1)
                 {
@@ -253,13 +253,13 @@ void ksklExp::Loop(std::string histFileName)
                         {
                             ph2Vec.SetMagThetaPhi(phen[ph2], phth[ph2], phphi[ph2]);
                             hGammasPi0Angles->Fill((ph1Vec + ph2Vec).Phi() - missingMom.Phi(), (ph1Vec + ph2Vec).Theta() - missingMom.Theta());
-                            hGammasTotEn->Fill(phen[ph1] + phen[ph2]);
+                            // hTwoPhotonsTotEn->Fill(phen[ph1] + phen[ph2]);
                             hMissingMom->Fill((missingMom - ph1Vec - ph2Vec).Mag());
                         }
                     }
                 }
-
-                tNew->Fill();
+                if(missingMass > 350)
+                { tNew->Fill(); }
 		        hTrackColl->Fill(fabs(tphi[0] - tphi[1]) - TMath::Pi(), tth[0] + tth[1] - TMath::Pi());
                 if(piPos.Cross(field).XYvector().DeltaPhi(piNeg.XYvector()) < TMath::Pi() / 2)
                 { 

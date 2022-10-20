@@ -43,7 +43,8 @@ int auxFunc()
     // grRC2.SetMarkerColor(kRed);
     
     // RMS
-    std::vector<Float_t> vM2 = { 497.597, 497.600, 497.597, 497.587, 497.606, 497.581};
+    // std::vector<Float_t> vM2 = { 497.597, 497.600, 497.597, 497.587, 497.606, 497.581};
+    std::vector<Float_t> vM2 = {497.620, 497.618, 497.615, 497.610, 497.633, 497.704};
     std::vector<Float_t> vMerr2 = {0.007, 0.009, 0.008, 0.010, 0.010, 0.019};
     TGraphErrors grRCNCnew(vM2.size(), vE.data(), vM2.data(), zeroes.data(), vMerr2.data());
     grRCNCnew.SetMarkerColor(kBlack);
@@ -54,7 +55,7 @@ int auxFunc()
     // grRCdeltaM.SetMarkerColor(kGreen);
 
     // deltaM_NC
-    std::vector<Float_t> vDeltaM_NC_RMS = { 0.022, 0.022, 0.017, 0.033, 0.021, 0.117}; //RMS sigma
+    std::vector<Float_t> vDeltaM_NC_RMS = {0.023, 0.018, 0.018, 0.023, 0.027, 0.123}; //RMS sigma
     std::vector<Float_t> vDeltaM_NC_Fit = { 0.012, 0.017, 0.011, 0.024, 0.011, 0.031}; //Fit sigma
     std::vector<Float_t> vDeltaM_NC_FitErr = {0.0006, 0.0004, 0.0006, 0.0010, 0.0007, 0.0009};
     std::vector<Float_t> vDeltaM_NC_RMSerr = {0.0006, 0.0004, 0.0006, 0.0010, 0.0021, 0.0050};
@@ -79,12 +80,15 @@ int auxFunc()
     massKline->SetLineWidth(2);
 
     grMCrAngle.SetMarkerColor(kRed);
-    grMCrAngleRCNC_Fit.SetMarkerColor(kMagenta);
+    grMCrAngleRCNC_RMS.SetMarkerColor(kRed);
+    grMCrAngleRCNC_Fit.SetMarkerColor(kBlack);
     grRCNCnew.SetMarkerColor(kRed);
 
-    grRCNC.DrawClone("AP");
-    // grRCNCnew.DrawClone("P same");
-    massKline->DrawClone("Same");
+    // grRCNC.DrawClone("AP");
+    // grRCNCnew.DrawClone("AP same");
+    grDeltaM_NC_Fit.DrawClone("AP");
+    grDeltaM_NC_RMS.DrawClone("P same");
+    // massKline->DrawClone("Same");
 
     std::vector<Float_t> vSigma = {1.37127e-02, 1.44228e-02, 1.45462e-02, 1.46740e-02, 1.72791e-02, 1.84825e-02,  2.11118e-02, 2.26650e-02};
     std::vector<Float_t> vSigmaErr = {2.41164e-04, 2.59689e-04, 2.51916e-04, 3.13132e-04, 3.32211e-04, 4.86097e-04, 4.64792e-04, 6.67834e-04};

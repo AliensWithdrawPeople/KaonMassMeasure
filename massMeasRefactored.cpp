@@ -426,7 +426,7 @@ void EnergyHandler::MassLnY(int drawOpt = 0)
                 hPsilnY->Fill(log(Y), ksdpsi); 
                 // if(int((abs(log(Y)) + 1e-12) / 0.05) < psilnYs.size())
                 // { psilnYs[int((abs(log(Y)) + 1e-12) / 0.05)]->Fill(log(Y), ksdpsi); }  
-                if(fabs(log(Y)) < 0.2)
+                if(fabs(log(Y)) < 0.34)
                 { hEnergySpectrumCut->Fill(etrue); }
             }
 
@@ -466,7 +466,7 @@ void EnergyHandler::MassLnY(int drawOpt = 0)
     r = hM_CrAnglelnY->ProfileX()->Fit("pol4", "SMQE", "", -0.2, 0.2);
     std::cout << "Mass_CrAngle = " << r->Parameter(0) << " +/- " << r->ParError(0) 
                 << "; chi2 / ndf = " << r->Chi2() << "/" << r->Ndf() << "; Prob = " << r->Prob() << std::endl;
-    r = hMlnYpfx->Fit("pol0", "SMQE", "", -0.34, 0.34);
+    r = hMlnYpfx->Fit("pol0", "SMQE", "goff", -0.34, 0.34);
     std::cout << "Mass_FullRec = " << r->Parameter(0) << " +/- " << r->ParError(0) 
                 << "; chi2 / ndf = " << r->Chi2() << "/" << r->Ndf() << "; Prob = " << r->Prob() << std::endl;
     r = hPsilnY->ProfileX("pfxAng")->Fit("pol2", "SQME", "", -0.2, 0.2);
@@ -560,17 +560,17 @@ int massMeasRefactored()
     std::vector<Float_t> vSigmaMCGPJ = {0.0148821, 0.0151739, 0.0163453, 0.0178507, 0.0199841, 0.0231457, 0.0260142, 0.0300946};
     std::vector<Float_t> vSigmaExp509_5 = {0.0131431, 0.0148787, 0.014976, 0.0162632, 0.0167996, 0.0211273, 0.0235995, 0.0395321};
     std::vector<Float_t> vSigmaFit514MC = {0.0141507, 0.0145647, 0.0164458, 0.0163694, 0.0183365, 0.0201849, 0.0228716, 0.0266007};
-    std::vector<Float_t> vSigmaFit = {0.0144228, 0.0150513, 0.0163402, 0.0182216, 0.0211845, 0.0252246, 0.0305002, 0.0389213};
-    std::vector<Float_t> vSigmaRMS = {0.0204881, 0.0218389, 0.0256395, 0.027899, 0.0277516, 0.0304337, 0.0372765, 0.0431643};
+    std::vector<Float_t> vSigmaFit = {0.0166089, 0.0181208, 0.0169489, 0.0192532, 0.0205572, 0.0264749, 0.0270654, 0.031376};
+    std::vector<Float_t> vSigmaRMS = {0.0205431, 0.0205728, 0.0209069, 0.0218943, 0.0242307, 0.027587, 0.0314032, 0.0339531};
     
     // std::vector<Float_t> vSigmaFit514MC2 = {0.0139102, 0.0159495, 0.0161846, 0.0163694, 0.0183365, 0.0201849, 0.0228716, 0.0266007};
     //auto eHandler = new EnergyHandler("hists and root files/cuts/kchCut21May.root", "hists and root files/cuts/ksklCut_11May22.root");
-    std::string fileName = "tr_ph/MC505tmp.root";
-    double energy = 504.892;
+    std::string fileName = "tr_ph/MC510tmp.root";
+    double energy = 509.886;
     // auto eHandler = new EnergyHandler("hists and root files/cuts/kchCut21May.root", fileName, vSigma0);
     auto eHandler = new EnergyHandler("hists and root files/cuts/kchCut21May.root", fileName, vSigmaRMS, energy);
     // auto eHandler = new EnergyHandler("hists and root files/cuts/kchCut21May.root", "tr_ph/exp509_5_newtry.root", vSigmaExp509_5);
-    eHandler->MassLnY();
+    eHandler->MassLnY(0);
     delete eHandler;
 
     auto end = std::chrono::system_clock::now();
