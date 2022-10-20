@@ -383,6 +383,7 @@ kskl2bGen::kskl2bGen(TTree *tree) : fChain(0)
 // used to generate this class and read the Tree.
    if (tree == 0) {
       TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("C:/work/Science/BINP/Kaon Mass Measure/tr_ph/mcgpj/tr_ph_run000015.root");
+      // TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("C:/work/Science/BINP/Kaon Mass Measure/tr_ph/mcgpj/tr_ph_run066517.root");
       if (!f || !f->IsOpen()) {
          f = new TFile("C:/work/Science/BINP/Kaon Mass Measure/tr_ph/mcgpj/tr_ph_run000015.root");
       }

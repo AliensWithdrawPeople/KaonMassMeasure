@@ -52,6 +52,7 @@ void ksklExp::Loop(std::string histFileName)
     tNew->Branch("Y", &Y, "Y/F");
 
     Double_t halfPi = TMath::Pi() / 2;
+    double missingMass;
     int NgoodTr = 0;
     int NgoodTrS = 0;
     double cutChi2r = 15.;
@@ -95,6 +96,7 @@ void ksklExp::Loop(std::string histFileName)
     auto hRatioClEnMom = new TH1D("hRatioClEnMom", "hRatioClEnMom", 200, 0, 2);
     auto hGammasTotEn = new TH1D("hGammasTotEn", "hGammasTotEn", 1000, 0, 1000);
     auto hGammasPi0Angles = new TH2D("hGammasPi0Angles", "hGammasPi0Angles", 2000, -TMath::Pi(), TMath::Pi(), 2000, -TMath::Pi(), TMath::Pi());
+    auto hMissingMass = new TH1D("hMissingMass", "hMissingMass", 1500, -500, 1000);
     auto hMissingMom = new TH1D("hMissingMom", "hMissingMom", 700, 0, 700);
 
     hdThetadPhi->GetXaxis()->SetTitle("#Delta#phi, rad");
@@ -113,7 +115,7 @@ void ksklExp::Loop(std::string histFileName)
 
     TVector3 piPos;
     TVector3 piNeg;
-    TVector3 missingMass;
+    TVector3 missingMom;
     TVector3 ph1Vec;
     TVector3 ph2Vec;
     TVector3 field(0., 0., 1.);
@@ -237,7 +239,11 @@ void ksklExp::Loop(std::string histFileName)
                 hRatioClEnMom->Fill(ten[ksvind[0][1]] / kspipt[0][1]);
 
                 dpsi = ksdpsi[0];
-                missingMass = -(piPos + piNeg);
+                missingMom = -(piPos + piNeg);
+                missingMass = emeas * emeas - 2 * 139.57 * 139.57 - 2 * 2 * emeas * (139.57 * 139.57 - piPos.Mag2()) 
+                            - 2 * 2 * emeas * (139.57 * 139.57 - piNeg.Mag2()) 
+                            - 2 * ((139.57 * 139.57 - piPos.Mag2()) * (139.57 * 139.57 - piNeg.Mag2()) - piPos.Dot(piNeg));
+                hMissingMass->Fill(missingMass);
                 if(nph > 1)
                 {
                     for(int ph1 = 0; ph1 < nph; ph1++)
@@ -246,9 +252,9 @@ void ksklExp::Loop(std::string histFileName)
                         for(int ph2 = ph1 + 1; ph2 < nph; ph2++)
                         {
                             ph2Vec.SetMagThetaPhi(phen[ph2], phth[ph2], phphi[ph2]);
-                            hGammasPi0Angles->Fill((ph1Vec + ph2Vec).Phi() - missingMass.Phi(), (ph1Vec + ph2Vec).Theta() - missingMass.Theta());
+                            hGammasPi0Angles->Fill((ph1Vec + ph2Vec).Phi() - missingMom.Phi(), (ph1Vec + ph2Vec).Theta() - missingMom.Theta());
                             hGammasTotEn->Fill(phen[ph1] + phen[ph2]);
-                            hMissingMom->Fill(missingMass.Mag());
+                            hMissingMom->Fill((missingMom - ph1Vec - ph2Vec).Mag());
                         }
                     }
                 }

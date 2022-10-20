@@ -88,10 +88,12 @@ void kskl2bGen::Loop(std::string histFileName)
     auto hClEdPhi = new TH2D("hClEdPhi", "", 600, 0, 2 * TMath::Pi(), 600, 0, 600);
     auto hPsiUncutted = new TH1D("hPsiUncutted", "", 628, 0, 3.15);
     auto hPsiCutted = new TH1D("hPsiCutted", "", 628, 0, 3.15);
+    auto hRho = new TH1D("hRho", "rho of vertex", 1000, 0, 10);
     // Phi angle between pions
     auto hPhi = new TH1D("hPhi", "", 1000, -0.2, 0.2);
     // Angles between tracks.
-    auto hPionColl = new TH2D("hPionColl", "Angles between pions", 1200, -TMath::Pi(), TMath::Pi(), 1200, -TMath::Pi(), TMath::Pi());
+    auto hTrackColl = new TH2D("hTrackColl", "Angles between pions", 1200, -TMath::Pi(), TMath::Pi(), 1200, -TMath::Pi(), TMath::Pi());
+    auto hTrackCollCutted = new TH2D("hTrackCollCutted", "Angles between pions cutted", 1200, -TMath::Pi(), TMath::Pi(), 1200, -TMath::Pi(), TMath::Pi());
     auto hDeltaMom = new TH1D("hDeltaMom", "Lorentz delta mom", 1000, -0.2, 0.2);
     auto hDeltaMomVsDeltaPhi1 = new TH2D("hDeltaMomVsDeltaPhi1", "delta mom vs delta phi", 1000, -0.1, 0.1, 1000, -10, 10);
     auto hDeltaMomVsDeltaPhi2 = new TH2D("hDeltaMomVsDeltaPhi2", "delta mom vs delta phi Cowboy", 1000, -0.1, 0.1, 1000, -10, 10);
@@ -111,12 +113,20 @@ void kskl2bGen::Loop(std::string histFileName)
     auto hEUncutted = new TH1D("hEUncutted", "Uncutted Corrected energy", 3000, 490, 520);
     auto hE = new TH1D("hE", "Corrected energy", 3000, 490, 520);
 
-
     auto hHit = new TH1D("hHit", "nhits", 40, 0, 40);
     auto hTrackTheta = new TH1D("hTrackTheta", "hTrackTheta", 250, -TMath::Pi() / 2, TMath::Pi() / 2);
 
+    auto hMissingMass = new TH1D("hMissingMass", "hMissingMass", 10000, 0, 10000);
+    auto hFinalStateId = new TH1D("hFinalStateId", "hFinalStateId", 1000, 0, 1000);
+
     hdThetadPhi->GetXaxis()->SetTitle("#Delta#phi, rad");
     hdThetadPhi->GetYaxis()->SetTitle("#Delta#theta, rad");
+
+    hTrackColl->GetXaxis()->SetTitle("|#phi_{1} - #phi_{2}| - #pi, rad");
+    hTrackColl->GetYaxis()->SetTitle("#theta_{1} + #theta_{2} - #pi, rad");
+
+    hTrackCollCutted->GetXaxis()->SetTitle("|#phi_{1} - #phi_{2}| - #pi, rad");
+    hTrackCollCutted->GetYaxis()->SetTitle("#theta_{1} + #theta_{2} - #pi, rad");
 
     hdPhiTheta->GetXaxis()->SetTitle("#theta of Kl, rad");
     hdPhiTheta->GetYaxis()->SetTitle("#Delta#phi, rad");
@@ -150,13 +160,14 @@ void kskl2bGen::Loop(std::string histFileName)
 
         for (int i = 0; i < nt; i++)
         {
-            if(nt == 2)
-            { hPionColl->Fill(fabs(tphi[0] - tphi[1]) - TMath::Pi(), tth[0] + tth[1] - TMath::Pi()); }
-
+            hRho->Fill(fabs(trho[i]));
             if (tptot[i] > cutPtot && fabs(trho[i]) < cutRmax && fabs(tz[i]) < cutZtrack &&
                 tchi2r[i] < cutChi2r && tchi2z[i] < cutChi2z && tnhit[i] > cutNhitMin && tnhit[i] < cutNhitMax)
             { NgoodTr++; }
         }
+
+        if(nt == 2)
+        { hTrackColl->Fill(fabs(tphi[0] - tphi[1]) - TMath::Pi(), tth[0] + tth[1] - TMath::Pi()); }
 
         if (NgoodTr == 2)
         { NgoodTrS++; }
@@ -290,8 +301,14 @@ void kskl2bGen::Loop(std::string histFileName)
                 // Y = piPos.Mag() / piNeg.Mag();
                 // dpsi = piPos.Angle(piNeg);
                 // emeas = sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2());
-                tNew->Fill();
                 
+                hMissingMass->Fill(sqrt(4 * emeas * emeas + 2 * 139.57 * 139.57 
+                - 2 * 2 * emeas * sqrt(139.57 * 139.57 + piPosRec.Mag2()) - 2 * 2 * emeas * sqrt(139.57 * 139.57 + piNegRec.Mag2()) 
+                + 2 * (sqrt(139.57 * 139.57 + piPosRec.Mag2()) * sqrt(139.57 * 139.57 + piNegRec.Mag2()) - piPosRec.Dot(piNegRec))));
+                hFinalStateId->Fill(finalstate_id);
+
+                tNew->Fill();
+                hTrackCollCutted->Fill(fabs(tphi[0] - tphi[1]) - TMath::Pi(), tth[0] + tth[1] - TMath::Pi());
                 hE->Fill(sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2()));
                 // emeas = sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2());  
                 if(piPos.Cross(field).XYvector().DeltaPhi(piNeg.XYvector()) < TMath::Pi() / 2)
@@ -348,6 +365,7 @@ void kskl2bGen::Loop(std::string histFileName)
         // Y = piPos.Mag() / piNeg.Mag();
         // dpsi = piPos.Angle(piNeg);
         // emeas = sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2());
+        // etrue = sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2());
         // tNew->Fill();
 
         if(klGen.DeltaPhi(ksGen) < 0)
