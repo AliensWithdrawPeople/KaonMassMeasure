@@ -90,11 +90,17 @@ int auxFunc()
     grDeltaM_NC_RMS.DrawClone("P same");
     // massKline->DrawClone("Same");
 
-    std::vector<Float_t> vSigma = {1.37127e-02, 1.44228e-02, 1.45462e-02, 1.46740e-02, 1.72791e-02, 1.84825e-02,  2.11118e-02, 2.26650e-02};
+    std::vector<Float_t> vSigmaFit = {0.0139273, 0.0142717, 0.0153109, 0.0176764, 0.0188618, 0.0220763, 0.025119, 0.0298211};
+    std::vector<Float_t> vSigmaRMS = {0.0186562, 0.019872, 0.0214141, 0.0219208, 0.0253945, 0.0270087, 0.0295075, 0.0336299};
     std::vector<Float_t> vSigmaErr = {2.41164e-04, 2.59689e-04, 2.51916e-04, 3.13132e-04, 3.32211e-04, 4.86097e-04, 4.64792e-04, 6.67834e-04};
-    std::vector<Float_t> vWidth = {0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4};
-    std::vector<Float_t> zeroes2(vSigma.size(), 0.0);
-    TGraphErrors grSigma(vSigma.size(), vWidth.data(), vSigma.data(), zeroes2.data(), vSigmaErr.data());
+    std::vector<Float_t> vWidth = {0.025, 0.075, 0.125, 0.175, 0.225, 0.275, 0.325, 0.375};
+    std::vector<Float_t> zeroes2(vSigmaFit.size(), 0.025);
+    TGraphErrors grSigmaFit(vSigmaFit.size(), vWidth.data(), vSigmaFit.data(), zeroes2.data(), vSigmaErr.data());
+    TGraphErrors grSigmaRMS(vSigmaRMS.size(), vWidth.data(), vSigmaRMS.data(), zeroes2.data(), vSigmaErr.data());
+
+    // grSigmaRMS.SetMarkerColor(kRed);
+    // grSigmaRMS.DrawClone("AP"); 
+    // grSigmaFit.DrawClone("P same"); 
 
     std::vector<Float_t> vAngle = { 2.73092, 2.65629, 2.63373, 2.62245, 2.61362, 2.59637, 2.55372};
     std::vector<Float_t> vEtmp = {505, 508, 509, 509.527, 510, 511, 514};

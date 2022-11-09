@@ -384,9 +384,9 @@ ksklExp::ksklExp(TTree *tree) : fChain(0)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("C:/work/Science/BINP/Kaon Mass Measure/tr_ph/mcgpj/tr_ph_run066517.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("C:/work/Science/BINP/Kaon Mass Measure/tr_ph/scan2018_omphi_tr_ph_fc_e509.5_v8.root");
       if (!f || !f->IsOpen()) {
-         f = new TFile("C:/work/Science/BINP/Kaon Mass Measure/tr_ph/mcgpj/tr_ph_run066517.root");
+         f = new TFile("C:/work/Science/BINP/Kaon Mass Measure/tr_ph/scan2018_omphi_tr_ph_fc_e509.5_v8.root");
       }
       f->GetObject("tr_ph",tree);
 

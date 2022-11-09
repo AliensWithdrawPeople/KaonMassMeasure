@@ -96,8 +96,11 @@ void kskl2bGen::Loop(std::string histFileName)
     auto hTrackCollCutted = new TH2D("hTrackCollCutted", "Angles between pions cutted", 1200, -TMath::Pi(), TMath::Pi(), 1200, -TMath::Pi(), TMath::Pi());
     auto hDeltaMom = new TH1D("hDeltaMom", "Lorentz delta mom", 1000, -0.2, 0.2);
     auto hDeltaMomVsDeltaPhi1 = new TH2D("hDeltaMomVsDeltaPhi1", "delta mom vs delta phi", 1000, -0.1, 0.1, 1000, -10, 10);
-    auto hDeltaMomVsDeltaPhi2 = new TH2D("hDeltaMomVsDeltaPhi2", "delta mom vs delta phi Cowboy", 1000, -0.1, 0.1, 1000, -10, 10);
-    auto hDeltaMomVsDeltaPhi3 = new TH2D("hDeltaMomVsDeltaPhi3", "delta mom vs delta phi Sailor", 1000, -0.1, 0.1, 1000, -10, 10);
+    auto hDeltaMomVsDeltaPhi2 = new TH2D("hDeltaMomVsDeltaPhi2", "delta mom vs delta phi Cowboy", 1000, -1, 1, 1000, -10, 10);
+    auto hDeltaMomVsDeltaPhi3 = new TH2D("hDeltaMomVsDeltaPhi3", "delta mom vs delta phi Sailor", 1000, -1, 1, 1000, -10, 10);
+    auto hDeltaPhiVsPhi = new TH2D("hDeltaPhiVsPhi", "delta phi vs phi (rec - gen)", 1000, 0, 2 * 3.15, 1000, -1, 1);
+    auto hDeltaPhiRecVsGenCowboy = new TH2D("hDeltaPhiRecVsGenCowboy", "delta phi Rec vs Gen data Cowboy", 1000, 0, 6.3, 1000, 0, 6.3);
+    auto hDeltaPhiRecVsGenSailor = new TH2D("hDeltaPhiRecVsGenSailor", "delta phi Rec vs Gen data Sailor", 2000, 0, 6.3, 2000, 0, 6.3);
 
     auto hKsKlPhi = new TH1D("hKsKlPhi", "", 1000, -1.5, 1.5);
     auto hKsKlPhiGen = new TH1D("hKsKlPhiGen", "", 6000, -1.5, 1.5);
@@ -309,26 +312,39 @@ void kskl2bGen::Loop(std::string histFileName)
                 hMissingMass->Fill(missingMass);
                 hFinalStateId->Fill(finalstate_id);
                 
-                if(missingMass > 350)
-                { tNew->Fill(); }
+                // if(missingMass > 350)
+                // { tNew->Fill(); }
                 // tNew->Fill();
                 hTrackCollCutted->Fill(fabs(tphi[0] - tphi[1]) - TMath::Pi(), tth[0] + tth[1] - TMath::Pi());
-                hE->Fill(sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2()));
+                // hE->Fill(sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2()));
                 // emeas = sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2());  
-                if(piPos.Cross(field).XYvector().DeltaPhi(piNeg.XYvector()) < TMath::Pi() / 2)
+
+                //  Cowboy Type
+                if(piPosRec.Cross(field).XYvector().DeltaPhi(piNegRec.XYvector()) < TMath::Pi() / 2)
                 { 
+                    // if(missingMass > 350)
+                    // { tNew->Fill(); }
                     // hE->Fill(sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2()));
-                    // dpsi = piNeg.Angle(piPos);
-                    // tNew->Fill(); 
+                    // hDeltaPhiVsPhi->Fill(piPos.XYvector().Phi(), piPos.XYvector().DeltaPhi(piPosRec.XYvector()));
+                    hDeltaPhiRecVsGenCowboy->Fill(fabs(piPos.XYvector().DeltaPhi(piNeg.XYvector())), 
+                                                fabs(piPosRec.XYvector().DeltaPhi(piNegRec.XYvector())) );
+
                     hPhi->Fill(piPos.Phi() - piPosRec.Phi()); 
                     hPhi->Fill(piNeg.Phi() - piNegRec.Phi()); 
 
-                    hDeltaMomVsDeltaPhi2->Fill(piPos.XYvector().DeltaPhi(piNeg.XYvector()) - piPosRec.XYvector().DeltaPhi(piNegRec.XYvector()), 
-                                            (piPos.Mag() - piNeg.Mag()) - (piPosRec.Mag() - piNegRec.Mag()));
+                    hDeltaMomVsDeltaPhi2->Fill( (piPos.Mag() - piNeg.Mag()) - (piPosRec.Mag() - piNegRec.Mag()),
+                                                piPos.XYvector().DeltaPhi(piNeg.XYvector()) - piPosRec.XYvector().DeltaPhi(piNegRec.XYvector()));
                 }
-
-                if(piPos.Cross(field).XYvector().DeltaPhi(piNeg.XYvector()) > TMath::Pi() / 2)
+                //  Sailor Type
+                if(piPosRec.Cross(field).XYvector().DeltaPhi(piNegRec.XYvector()) > TMath::Pi() / 2)
                 {  
+                    if(missingMass > 350)
+                    { tNew->Fill(); }
+                    hE->Fill(sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2()));
+                    hDeltaPhiVsPhi->Fill(piPos.XYvector().Phi(), piPos.XYvector().DeltaPhi(piPosRec.XYvector()));
+
+                    hDeltaPhiRecVsGenSailor->Fill(fabs(piPos.XYvector().DeltaPhi(piNeg.XYvector())), 
+                                                fabs(piPosRec.XYvector().DeltaPhi(piNegRec.XYvector())) );
                     hDeltaMomVsDeltaPhi3->Fill(piPos.XYvector().DeltaPhi(piNeg.XYvector()) - piPosRec.XYvector().DeltaPhi(piNegRec.XYvector()), 
                                             (piPos.Mag() - piNeg.Mag()) - (piPosRec.Mag() - piNegRec.Mag())); 
                 }

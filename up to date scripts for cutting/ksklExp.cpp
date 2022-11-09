@@ -52,7 +52,6 @@ void ksklExp::Loop(std::string histFileName)
     tNew->Branch("Y", &Y, "Y/F");
 
     Double_t halfPi = TMath::Pi() / 2;
-    double missingMass;
     int NgoodTr = 0;
     int NgoodTrS = 0;
     double cutChi2r = 15.;
@@ -119,6 +118,10 @@ void ksklExp::Loop(std::string histFileName)
     TVector3 ph1Vec;
     TVector3 ph2Vec;
     TVector3 field(0., 0., 1.);
+
+    double piPosEn = 0;
+    double piNegEn = 0;
+    double missingMass = 0;
 
     Long64_t nentries = fChain->GetEntriesFast();
 
@@ -219,7 +222,7 @@ void ksklExp::Loop(std::string histFileName)
                 if (tcharge[ksvind[0][0]] > 0)
                 {
                     Y = kspipt[0][0] / kspipt[0][1];
-                    hist->Fill(kspipt[0][0], kspipt[0][1]);
+                    // hist->Fill(kspipt[0][0], kspipt[0][1]);
                     p1 = kspipt[0][0]; p2 = kspipt[0][1];
                     
                     piPos.SetMagThetaPhi(kspipt[0][0], kspith[0][0], kspiphi[0][0]);
@@ -228,7 +231,7 @@ void ksklExp::Loop(std::string histFileName)
                 else
                 {
                     Y = kspipt[0][1] / kspipt[0][0];
-                    hist->Fill(kspipt[0][1], kspipt[0][0]);
+                    // hist->Fill(kspipt[0][1], kspipt[0][0]);
                     p1 = kspipt[0][1]; p2 = kspipt[0][0];
                     piPos.SetMagThetaPhi(kspipt[0][1], kspith[0][1], kspiphi[0][1]);
                     piNeg.SetMagThetaPhi(kspipt[0][0], kspith[0][0], kspiphi[0][0]);
@@ -240,37 +243,54 @@ void ksklExp::Loop(std::string histFileName)
 
                 dpsi = ksdpsi[0];
                 missingMom = -(piPos + piNeg);
+                piPosEn = sqrt(139.57 * 139.57 + piPos.Mag2());
+                piNegEn = sqrt(139.57 * 139.57 + piNeg.Mag2());
                 missingMass = sqrt(4 * emeas * emeas + 2 * 139.57 * 139.57 
-                - 2 * 2 * emeas * sqrt(139.57 * 139.57 + piPos.Mag2()) - 2 * 2 * emeas * sqrt(139.57 * 139.57 + piNeg.Mag2()) 
-                + 2 * (sqrt(139.57 * 139.57 + piPos.Mag2()) * sqrt(139.57 * 139.57 + piNeg.Mag2()) - piPos.Dot(piNeg)));
+                - 2 * 2 * emeas * piPosEn - 2 * 2 * emeas * piNegEn
+                + 2 * (piPosEn * piNegEn - piPos.Dot(piNeg)));
                 hMissingMass->Fill(missingMass);
-                if(nph > 1)
-                {
-                    for(int ph1 = 0; ph1 < nph; ph1++)
-                    {
-                        ph1Vec.SetMagThetaPhi(phen[ph1], phth[ph1], phphi[ph1]);
-                        for(int ph2 = ph1 + 1; ph2 < nph; ph2++)
-                        {
-                            ph2Vec.SetMagThetaPhi(phen[ph2], phth[ph2], phphi[ph2]);
-                            hGammasPi0Angles->Fill((ph1Vec + ph2Vec).Phi() - missingMom.Phi(), (ph1Vec + ph2Vec).Theta() - missingMom.Theta());
-                            // hTwoPhotonsTotEn->Fill(phen[ph1] + phen[ph2]);
-                            hMissingMom->Fill((missingMom - ph1Vec - ph2Vec).Mag());
-                        }
-                    }
-                }
-                if(missingMass > 350)
-                { tNew->Fill(); }
+                // if(nph > 1)
+                // {
+                //     for(int ph1 = 0; ph1 < nph; ph1++)
+                //     {
+                //         ph1Vec.SetMagThetaPhi(phen[ph1], phth[ph1], phphi[ph1]);
+                //         for(int ph2 = ph1 + 1; ph2 < nph; ph2++)
+                //         {
+                //             ph2Vec.SetMagThetaPhi(phen[ph2], phth[ph2], phphi[ph2]);
+                //             hGammasPi0Angles->Fill((ph1Vec + ph2Vec).Phi() - missingMom.Phi(), (ph1Vec + ph2Vec).Theta() - missingMom.Theta());
+                //             // hTwoPhotonsTotEn->Fill(phen[ph1] + phen[ph2]);
+                //             hMissingMom->Fill((missingMom - ph1Vec - ph2Vec).Mag());
+                //         }
+                //     }
+                // }
+
+                // if(missingMass > 350)
+                // { 
+                //     tNew->Fill(); 
+                //     hist->Fill(piPos.Mag(), piNeg.Mag());    
+                // }
 		        hTrackColl->Fill(fabs(tphi[0] - tphi[1]) - TMath::Pi(), tth[0] + tth[1] - TMath::Pi());
+
+                // Cowboy
                 if(piPos.Cross(field).XYvector().DeltaPhi(piNeg.XYvector()) < TMath::Pi() / 2)
                 { 
-                    // cowboy
                     // dpsi = piNeg.Angle(piPos);
-                    // tNew->Fill(); 
+                    // tNew->Fill();
+                    if(missingMass > 350)
+                    { 
+                        tNew->Fill(); 
+                        hist->Fill(piPos.Mag(), piNeg.Mag());    
+                    }
                 }
-
+                
+                // Sailor
                 if(piPos.Cross(field).XYvector().DeltaPhi(piNeg.XYvector()) > TMath::Pi() / 2)
                 {  
-                    // sailor
+                    // if(missingMass > 350)
+                    // { 
+                    //     tNew->Fill(); 
+                    //     hist->Fill(piPos.Mag(), piNeg.Mag());    
+                    // }
                 }
             }
             ksCand.clear();

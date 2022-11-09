@@ -115,7 +115,7 @@ def epsCalc(s: float, massUpperLimit: float)->float:
     # (2*enLim - 2 * mK) / mK
     return 1 - 4 * enLim**2 / s if res.converged else 1
 
-def SigmaCorrected(s:float, eps=1)->float:
+def SigmaCorrected(s:float, eps:float=1)->float:
     return integrate.quad(lambda x: SigmaBorn(s * (1-x)) * F(x, s), 0, eps, epsabs = 1e-6, epsrel=1e-4, limit=500)[0]
 
 def GetMassCorrected(s: float, psi: float, sigmaPsi: float, eps: float, isNC: bool=True)->float:
