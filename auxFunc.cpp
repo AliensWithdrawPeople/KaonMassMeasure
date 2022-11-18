@@ -138,8 +138,10 @@ int auxFunc()
     TGraphErrors grDeltaPtotNeg(vDeltaPtot.size(), vPavg.data(), vDeltaPtot.data(), zeroes.data(), vDeltaPtotErr.data());
     TGraphErrors grDeltaPhiNeg(vDeltaPhi.size(), vPavg.data(), vDeltaPhi.data(), zeroes.data(), vDeltaPhiErr.data());
 
-    grDeltaPtotPos.DrawClone();
-    grDeltaPtotPos.DrawClone();
-    // grDeltaPhi.DrawClone();
+    // grDeltaPtotPos.DrawClone();
+    // grDeltaPtotNeg.DrawClone("same");
+    grDeltaPhiPos.SetTitle("Black - #pi^{+}, Red - #pi^{-}");
+    grDeltaPhiPos.DrawClone();
+    grDeltaPhiNeg.DrawClone("same");
     return 0;
 }
