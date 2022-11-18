@@ -1,0 +1,109 @@
+pi+pi- Info
+
+MC E = 295:
+    hPhiColRec:
+        2 * K(1, 2) / K(2, 2) = 1.10234
+        hyperGauss = "[0] * exp([1] * (1 - sqrt(1 + (x - [2]) * (x - [2]) / [3])))" from -0.02 to 0.02;
+        Parameters = 200, 4, 0,  1.5e-4;        
+        FCN=26.192 FROM HESSE     STATUS=OK             23 CALLS        1743 TOTAL
+        chi2 / ndf = 52.8 / 62, Prob = 0.79
+        EDM=2.02262e-07    STRATEGY= 1      ERROR MATRIX ACCURATE
+        EXT PARAMETER                                   STEP         FIRST
+        NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE
+        1  p0           1.35833e+03   9.79266e+00   4.33569e-03  -2.03928e-05
+        2  p1           5.62895e+00   1.31459e+00   2.73567e-05  -1.83820e-03
+        3  p2          -1.49371e-05   3.13830e-05   2.23917e-08  -5.20929e+00
+        4  p3           1.89134e-04   4.95499e-05   1.01338e-09   3.94078e+01
+                                    ERR DEF= 0.5
+
+Exp E = 274 MeV:
+    Pavg = 235 MeV
+    pi+: 
+        deltaPhi_mean = -0.00077 +/- 0.00002
+        deltaPhi_meanFit = -0.00064 +/- 0.00002
+        deltaPhi_RMS = 0.0070 +/- 0.00003
+        deltaPhi_sigmaFit = 0.0053 +/- 0.00003
+
+        deltaPtot_mean = 0.191 +/- 0.006 MeV
+        deltaPtot_meanFit = 0.178 +/- 0.006 MeV
+        deltaPtot_RMS = 1.959 +/- 0.0078 MeV
+        deltaPtot_sigmaFit = 1.46 +/- 0.0078 MeV
+    pi-: 
+        deltaPhi_mean = -0.00012 +/- 0.00002
+        deltaPhi_meanFit = -0.00019 +/- 0.00002
+        deltaPhi_RMS = 0.00643 +/- 0.00003
+        deltaPhi_sigmaFit = 0.00528 +/- 0.00003
+
+        deltaPtot_mean = 0.049 +/- 0.006 MeV
+        deltaPtot_meanFit = 0.047 +/- 0.02 MeV
+        deltaPtot_RMS = 1.969 +/- 0.0098 MeV
+        deltaPtot_sigmaFit = 1.443 +/- 0.0098 MeV
+
+Exp E = 280 MeV:
+    Pavg = 243 MeV
+    pi+: 
+        deltaPhi_mean = -0.0006 +/- 0.000065
+        deltaPhi_meanFit = -0.00058 +/- 0.000065
+        deltaPhi_RMS = 0.0078 +/- 0.000078
+        deltaPhi_sigmaFit = 0.0053 +/- 0.000078
+
+        deltaPtot_mean = 0.209 +/- 0.025 MeV
+        deltaPtot_meanFit = 0.160 +/- 0.025 MeV
+        deltaPtot_RMS = 1.86 +/- 0.04 MeV
+        deltaPtot_sigmaFit = 1.56 +/- 0.04 MeV
+    pi-: 
+        deltaPhi_mean = -0.0001 +/- 0.00002
+        deltaPhi_meanFit = -0.00023 +/- 0.00002
+        deltaPhi_RMS = 0.00667 +/- 0.00007
+        deltaPhi_sigmaFit = 0.00540 +/- 0.00007
+
+        deltaPtot_mean = -0.048 +/- 0.03 MeV
+        deltaPtot_meanFit = -0.063 +/- 0.03 MeV
+        deltaPtot_RMS = 1.865 +/- 0.04 MeV
+        deltaPtot_sigmaFit = 1.28 +/- 0.04 MeV
+
+Exp E = 290 MeV:
+    Pavg = 254 MeV
+    pi+: 
+        deltaPhi_mean = -0.00059 +/- 0.00005
+        deltaPhi_meanFit = -0.00065 +/- 0.00005
+        deltaPhi_RMS = 0.0055 +/- 0.00007
+        deltaPhi_sigmaFit = 0.0048 +/- 0.00007
+
+        deltaPtot_mean = 0.261 +/- 0.017 MeV
+        deltaPtot_meanFit = 0.248 +/- 0.017 MeV
+        deltaPtot_RMS = 2.288 +/- 0.02 MeV
+        deltaPtot_sigmaFit = 1.70 +/- 0.02 MeV
+    pi-: 
+        deltaPhi_mean = -0.00012 +/- 0.00005
+        deltaPhi_meanFit = -0.00019 +/- 0.00005
+        deltaPhi_RMS = 0.00622 +/- 0.00007
+        deltaPhi_sigmaFit = 0.00458 +/- 0.00007
+
+        deltaPtot_mean = -0.066 +/- 0.018 MeV
+        deltaPtot_meanFit = -0.051 +/- 0.018 MeV
+        deltaPtot_RMS = 2.30 +/- 0.03 MeV
+        deltaPtot_sigmaFit = 1.73 +/- 0.03 MeV
+    
+Exp E = 295 MeV:
+    Pavg = 260 MeV
+    pi+: 
+        deltaPhi_mean = -0.00085 +/- 0.00005
+        deltaPhi_meanFit = -0.00083 +/- 0.00005
+        deltaPhi_RMS = 0.00636 +/- 0.00003
+        deltaPhi_sigmaFit = 0.00494 +/- 0.00005
+
+        deltaPtot_mean = 0.37 +/- 0.02 MeV
+        deltaPtot_meanFit = 0.349 +/- 0.018 MeV
+        deltaPtot_RMS = 2.449 +/- 0.013 MeV
+        deltaPtot_sigmaFit = 2.00 +/- 0.03 MeV
+    pi-: 
+        deltaPhi_mean = -0.00044 +/- 0.00005
+        deltaPhi_meanFit = -0.00041 +/- 0.00005
+        deltaPhi_RMS = 0.00612 +/- 0.00003
+        deltaPhi_sigmaFit = 0.00473 +/- 0.00005
+
+        deltaPtot_mean = 0.17 +/- 0.02 MeV
+        deltaPtot_meanFit = 0.15 +/- 0.02 MeV
+        deltaPtot_RMS = 2.439 +/- 0.013 MeV
+        deltaPtot_sigmaFit = 1.91 +/- 0.03 MeV

@@ -11,6 +11,8 @@ int auxFunc()
     double mass =  499.109;
     double massK = 497.614;
 
+    std::vector<Float_t> zeroes(100, 0.0);
+
 
     auto massFunc = new TF1("MassLnY", "sqrt([0] * [0] * (1 - (1 + sqrt(1 - [1] *[1]) * cos(x))*(1 - sqrt(1 - [1] * [1] * (1 - 4 * 139.57 * 139.57 / [0] / [0])))/ [1] / [1] ))");
     massFunc->SetParameter(1, (1 - pRatio*pRatio) / (1 + pRatio*pRatio));
@@ -31,7 +33,6 @@ int auxFunc()
 
 
     std::vector<Float_t> vE = {505, 508, 509, 510, 511, 514};
-    std::vector<Float_t> zeroes(6, 0.0);
 
     // Full reconstruction
     // Avg energy radcor
@@ -94,9 +95,8 @@ int auxFunc()
     std::vector<Float_t> vSigmaRMS = {0.0186562, 0.019872, 0.0214141, 0.0219208, 0.0253945, 0.0270087, 0.0295075, 0.0336299};
     std::vector<Float_t> vSigmaErr = {2.41164e-04, 2.59689e-04, 2.51916e-04, 3.13132e-04, 3.32211e-04, 4.86097e-04, 4.64792e-04, 6.67834e-04};
     std::vector<Float_t> vWidth = {0.025, 0.075, 0.125, 0.175, 0.225, 0.275, 0.325, 0.375};
-    std::vector<Float_t> zeroes2(vSigmaFit.size(), 0.025);
-    TGraphErrors grSigmaFit(vSigmaFit.size(), vWidth.data(), vSigmaFit.data(), zeroes2.data(), vSigmaErr.data());
-    TGraphErrors grSigmaRMS(vSigmaRMS.size(), vWidth.data(), vSigmaRMS.data(), zeroes2.data(), vSigmaErr.data());
+    TGraphErrors grSigmaFit(vSigmaFit.size(), vWidth.data(), vSigmaFit.data(), zeroes.data(), vSigmaErr.data());
+    TGraphErrors grSigmaRMS(vSigmaRMS.size(), vWidth.data(), vSigmaRMS.data(), zeroes.data(), vSigmaErr.data());
 
     // grSigmaRMS.SetMarkerColor(kRed);
     // grSigmaRMS.DrawClone("AP"); 
@@ -110,13 +110,36 @@ int auxFunc()
     std::vector<Float_t> vMPDG = {497.742, 497.661, 497.625, 497.634, 497.583, 497.607};
     std::vector<Float_t> vMPDGerr = {0.085, 0.033, 0.031, 0.024, 0.021, 0.017};
     std::vector<Float_t> vExpNum = {505, 506, 507, 508, 509, 510};
-    std::vector<Float_t> zeroes8(vMPDG.size(), 0.0);
-    TGraphErrors grMPDG(vMPDG.size(), vExpNum.data(), vMPDG.data(), zeroes8.data(), vMPDGerr.data());
+    TGraphErrors grMPDG(vMPDG.size(), vExpNum.data(), vMPDG.data(), zeroes.data(), vMPDGerr.data());
 
     // grMPDG.DrawClone("same AP");
     // massKline->DrawClone("Same");
 
     // gr2.DrawClone("AP");
 
+    // Positive tracks
+    std::vector<Float_t> vDeltaPtot = {0.178, 0.160, 0.248, 0.349};
+    std::vector<Float_t> vDeltaPtotErr = {0.006, 0.025, 0.017, 0.018};
+
+    std::vector<Float_t> vDeltaPhi = {-0.00064, -0.0006, -0.00065, -0.00083};
+    std::vector<Float_t> vDeltaPhiErr = {0.00002, 0.000065, 0.00005, 0.00005};
+
+    std::vector<Float_t> vPavg = {235, 243, 254, 260};
+    TGraphErrors grDeltaPtotPos(vDeltaPtot.size(), vPavg.data(), vDeltaPtot.data(), zeroes.data(), vDeltaPtotErr.data());
+    TGraphErrors grDeltaPhiPos(vDeltaPhi.size(), vPavg.data(), vDeltaPhi.data(), zeroes.data(), vDeltaPhiErr.data());
+
+    // Negative tracks
+    vDeltaPtot = {0.047, -0.063, -0.051, 0.15};
+    vDeltaPtotErr = {0.002, 0.03, 0.018, 0.02};
+
+    vDeltaPhi = {-0.00019, -0.00023, -0.00019, -0.00041};
+    vDeltaPhiErr = {0.00002, 0.00002, 0.00005, 0.00005};
+
+    TGraphErrors grDeltaPtotNeg(vDeltaPtot.size(), vPavg.data(), vDeltaPtot.data(), zeroes.data(), vDeltaPtotErr.data());
+    TGraphErrors grDeltaPhiNeg(vDeltaPhi.size(), vPavg.data(), vDeltaPhi.data(), zeroes.data(), vDeltaPhiErr.data());
+
+    grDeltaPtotPos.DrawClone();
+    grDeltaPtotPos.DrawClone();
+    // grDeltaPhi.DrawClone();
     return 0;
 }
