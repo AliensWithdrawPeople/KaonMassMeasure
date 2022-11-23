@@ -118,22 +118,29 @@ int auxFunc()
     // gr2.DrawClone("AP");
 
     // Positive tracks
-    std::vector<Float_t> vDeltaPtot = {0.178, 0.160, 0.248, 0.349};
-    std::vector<Float_t> vDeltaPtotErr = {0.006, 0.025, 0.017, 0.018};
+    std::vector<Float_t> vDeltaPtot = {0.076, 0.096, 0.126, 0.165, 0.178, 0.209, 0.248, 0.349};
+    std::vector<Float_t> vDeltaPtotErr = {0.012, 0.013, 0.017, 0.015, 0.016, 0.025, 0.017, 0.018};
 
-    std::vector<Float_t> vDeltaPhi = {-0.00064, -0.0006, -0.00065, -0.00083};
-    std::vector<Float_t> vDeltaPhiErr = {0.00002, 0.000065, 0.00005, 0.00005};
+    std::vector<Float_t> vDeltaPhi = {-0.00076, -0.00089, -0.00072, -0.00055, -0.00064, -0.0006, -0.00065, -0.00083};
+    std::vector<Float_t> vDeltaPhiErr = {0.00019, 0.00014, 0.00009, 0.00004, 0.00002, 0.000065, 0.00005, 0.00005};
 
-    std::vector<Float_t> vPavg = {235, 243, 254, 260};
+    std::vector<Float_t> vPavg = {157, 182, 207, 231, 235, 243, 254, 260};
+
+    // for(int i = 0; i < vDeltaPtot.size(); i++)
+    // {
+    //     vDeltaPtot[i] = vDeltaPtot[i] / vPavg[i];
+    //     vDeltaPtotErr[i] = vDeltaPtotErr[i] / vPavg[i];
+    // }
+    
     TGraphErrors grDeltaPtotPos(vDeltaPtot.size(), vPavg.data(), vDeltaPtot.data(), zeroes.data(), vDeltaPtotErr.data());
     TGraphErrors grDeltaPhiPos(vDeltaPhi.size(), vPavg.data(), vDeltaPhi.data(), zeroes.data(), vDeltaPhiErr.data());
 
     // Negative tracks
-    vDeltaPtot = {0.047, -0.063, -0.051, 0.15};
-    vDeltaPtotErr = {0.002, 0.03, 0.018, 0.02};
+    vDeltaPtot = {0.027, 0.059,  0.059, 0.038, 0.047, 0.063, 0.051, 0.15};
+    vDeltaPtotErr = {0.014, 0.016, 0.015, 0.015, 0.002, 0.03, 0.018, 0.02};
 
-    vDeltaPhi = {-0.00019, -0.00023, -0.00019, -0.00041};
-    vDeltaPhiErr = {0.00002, 0.00002, 0.00005, 0.00005};
+    vDeltaPhi = {0.00019, 0.00034, 0.00022, 0.00008, -0.00019, -0.00023, -0.00019, -0.00041};
+    vDeltaPhiErr = {0.00019, 0.00013, 0.00008, 0.00005, 0.00002, 0.00002, 0.00005, 0.00005};
 
     TGraphErrors grDeltaPtotNeg(vDeltaPtot.size(), vPavg.data(), vDeltaPtot.data(), zeroes.data(), vDeltaPtotErr.data());
     TGraphErrors grDeltaPhiNeg(vDeltaPhi.size(), vPavg.data(), vDeltaPhi.data(), zeroes.data(), vDeltaPhiErr.data());
@@ -141,7 +148,7 @@ int auxFunc()
     // grDeltaPtotPos.DrawClone();
     // grDeltaPtotNeg.DrawClone("same");
     grDeltaPhiPos.SetTitle("Black - #pi^{+}, Red - #pi^{-}");
-    grDeltaPhiPos.DrawClone();
-    grDeltaPhiNeg.DrawClone("same");
+    grDeltaPhiNeg.DrawClone();
+    // grDeltaPhiNeg.DrawClone("same");
     return 0;
 }
