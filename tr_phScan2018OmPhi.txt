@@ -1,8 +1,0 @@
-root://cmd//scan2018_omphi/scan2018_omphi_tr_ph_fc_e505_v8.root
-root://cmd//scan2018_omphi/scan2018_omphi_tr_ph_fc_e508_v8.root
-root://cmd//scan2018_omphi/scan2018_omphi_tr_ph_fc_e509.5_v8.root
-root://cmd//scan2018_omphi/scan2018_omphi_tr_ph_fc_e510_v8.root
-root://cmd//scan2018_omphi/scan2018_omphi_tr_ph_fc_e510.5_v8.root
-root://cmd//scan2018_omphi/scan2018_omphi_tr_ph_fc_e511_v8.root
-root://cmd//scan2018_omphi/scan2018_omphi_tr_ph_fc_e514_v8.root
-root://cmd//scan2018_omphi/scan2018_omphi_tr_ph_fc_e530_v8.root

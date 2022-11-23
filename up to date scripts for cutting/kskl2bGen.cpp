@@ -322,15 +322,15 @@ void kskl2bGen::Loop(std::string histFileName)
                 //  Cowboy Type
                 if(piPosRec.Cross(field).XYvector().DeltaPhi(piNegRec.XYvector()) < TMath::Pi() / 2)
                 { 
-                    // if(missingMass > 350)
-                    // { tNew->Fill(); }
-                    // hE->Fill(sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2()));
-                    // hDeltaPhiVsPhi->Fill(piPos.XYvector().Phi(), piPos.XYvector().DeltaPhi(piPosRec.XYvector()));
+                    if(missingMass > 350)
+                    { tNew->Fill(); }
+                    hE->Fill(sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2()));
+                    hDeltaPhiVsPhi->Fill(piPos.XYvector().Phi(), piPos.XYvector().DeltaPhi(piPosRec.XYvector()));
                     hDeltaPhiRecVsGenCowboy->Fill(fabs(piPos.XYvector().DeltaPhi(piNeg.XYvector())), 
                                                 fabs(piPosRec.XYvector().DeltaPhi(piNegRec.XYvector())) );
 
-                    hPhi->Fill(piPos.Phi() - piPosRec.Phi()); 
-                    hPhi->Fill(piNeg.Phi() - piNegRec.Phi()); 
+                    // hPhi->Fill(piPos.Phi() - piPosRec.Phi()); 
+                    // hPhi->Fill(piNeg.Phi() - piNegRec.Phi()); 
 
                     hDeltaMomVsDeltaPhi2->Fill( (piPos.Mag() - piNeg.Mag()) - (piPosRec.Mag() - piNegRec.Mag()),
                                                 piPos.XYvector().DeltaPhi(piNeg.XYvector()) - piPosRec.XYvector().DeltaPhi(piNegRec.XYvector()));
@@ -338,10 +338,10 @@ void kskl2bGen::Loop(std::string histFileName)
                 //  Sailor Type
                 if(piPosRec.Cross(field).XYvector().DeltaPhi(piNegRec.XYvector()) > TMath::Pi() / 2)
                 {  
-                    if(missingMass > 350)
-                    { tNew->Fill(); }
-                    hE->Fill(sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2()));
-                    hDeltaPhiVsPhi->Fill(piPos.XYvector().Phi(), piPos.XYvector().DeltaPhi(piPosRec.XYvector()));
+                    // if(missingMass > 350)
+                    // { tNew->Fill(); }
+                    // hE->Fill(sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2()));
+                    // hDeltaPhiVsPhi->Fill(piPos.XYvector().Phi(), piPos.XYvector().DeltaPhi(piPosRec.XYvector()));
 
                     hDeltaPhiRecVsGenSailor->Fill(fabs(piPos.XYvector().DeltaPhi(piNeg.XYvector())), 
                                                 fabs(piPosRec.XYvector().DeltaPhi(piNegRec.XYvector())) );

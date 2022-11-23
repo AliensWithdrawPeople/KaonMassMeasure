@@ -87,12 +87,16 @@ void pipiCut::Loop(std::string histFileName)
     auto hDeltaPtotVsDeltaPhiNeg = new TH2D("hDeltaPtotVsDeltaPhiNeg", "tptotv - tptot vs tphiv - tphi pi-", 5000, -0.2, 0.2, 5000, -10, 10);
     auto hDeltaPhiVsPhiPos = new TH2D("hDeltaPhiVsPhiPos", "tphiv - tphi vs tphiv pi+", 1000, 0, 2 * TMath::Pi(), 1000, -0.2, 0.2);
     auto hDeltaPhiVsPhiNeg = new TH2D("hDeltaPhiVsPhiNeg", "tphiv - tphi vs tphiv pi-", 1000, 0, 2 * TMath::Pi(), 1000, -0.2, 0.2);
+    auto hDeltaThetaPos = new TH1D("hDeltaThetaPos", "tthv - tth pi+", 1000, -0.02, 0.02);
+    auto hDeltaThetaNeg = new TH1D("hDeltaThetaNeg", "tthv - tth pi-", 1000, -0.02, 0.02);
 
     auto hDeltaPhiVsThetaPos = new TH2D("hDeltaPhiVsThetaPos", "tphiv - tphi vs tthv pi+", 1000, 0, TMath::Pi(), 1000, -0.2, 0.2);
     auto hDeltaPhiVsThetaNeg = new TH2D("hDeltaPhiVsThetaNeg", "tphiv - tphi vs tthv pi-", 1000, 0, TMath::Pi(), 1000, -0.2, 0.2);
     
     TVector3 piPos;
     TVector3 piNeg;
+    TVector3 piPosRecV;
+    TVector3 piNegRecV;
     TVector3 piPosRec;
     TVector3 piNegRec;
     TVector3 field(0., 0., 1.);
@@ -124,8 +128,11 @@ void pipiCut::Loop(std::string histFileName)
             posTrackNumber = tcharge[nTracks[0]] > 0 ? 0 : 1;
             negTrackNumber = posTrackNumber == 1 ? 0 : 1;
 
-            piPosRec.SetMagThetaPhi(tptotv[nTracks[posTrackNumber]], tthv[nTracks[posTrackNumber]], tphiv[nTracks[posTrackNumber]]);
-            piNegRec.SetMagThetaPhi(tptotv[nTracks[negTrackNumber]], tthv[nTracks[negTrackNumber]], tphiv[nTracks[negTrackNumber]]);
+            piPosRecV.SetMagThetaPhi(tptotv[nTracks[posTrackNumber]], tthv[nTracks[posTrackNumber]], tphiv[nTracks[posTrackNumber]]);
+            piNegRecV.SetMagThetaPhi(tptotv[nTracks[negTrackNumber]], tthv[nTracks[negTrackNumber]], tphiv[nTracks[negTrackNumber]]);
+
+            piPosRec.SetMagThetaPhi(tptot[nTracks[posTrackNumber]], tth[nTracks[posTrackNumber]], tphi[nTracks[posTrackNumber]]);
+            piNegRec.SetMagThetaPhi(tptot[nTracks[negTrackNumber]], tth[nTracks[negTrackNumber]], tphi[nTracks[negTrackNumber]]);
 
             hDeltaPtotVsDeltaPhiPos->Fill(tphiv[nTracks[posTrackNumber]] - tphi[nTracks[posTrackNumber]], 
                                             tptotv[nTracks[posTrackNumber]] - tptot[nTracks[posTrackNumber]]);
@@ -141,8 +148,11 @@ void pipiCut::Loop(std::string histFileName)
             hDeltaPhiVsThetaPos->Fill(tthv[nTracks[posTrackNumber]], tphiv[nTracks[posTrackNumber]] - tphi[nTracks[posTrackNumber]]);
             hDeltaPhiVsThetaNeg->Fill(tthv[nTracks[negTrackNumber]], tphiv[nTracks[negTrackNumber]] - tphi[nTracks[negTrackNumber]]);
 
-            hPhiColRec->Fill(fabs(piPosRec.Phi() - piNegRec.Phi()) - TMath::Pi());
-            hPtotRec->Fill(piPosRec.Mag());
+            hDeltaThetaPos->Fill(tthv[nTracks[posTrackNumber]] - tth[nTracks[posTrackNumber]]);
+            hDeltaThetaNeg->Fill(tthv[nTracks[negTrackNumber]] - tth[nTracks[negTrackNumber]]);
+
+            hPhiColRec->Fill(fabs(piPosRecV.Phi() - piNegRecV.Phi()) - TMath::Pi());
+            hPtotRec->Fill(piPosRecV.Mag());
 
             // for(int i = 0; i < nsim; i++)
             // {
@@ -155,32 +165,32 @@ void pipiCut::Loop(std::string histFileName)
         
             // hPtotGen->Fill(piPos.Mag());
             // hPhiColGen->Fill(fabs(piPos.Phi() - piNeg.Phi()) - TMath::Pi());
-            // int mult = piPos.XYvector().DeltaPhi(piNeg.XYvector()) - piPosRec.XYvector().DeltaPhi(piNegRec.XYvector()) < 0;
-            // hDeltaMomVsDeltaPhi->Fill(fabs(piPos.Mag() / piNeg.Mag()) - fabs(piPosRec.Mag() / piNegRec.Mag()),
-            //                         fabs(piPos.XYvector().DeltaPhi(piNeg.XYvector())) - fabs(piPosRec.XYvector().DeltaPhi(piNegRec.XYvector()))
+            // int mult = piPos.XYvector().DeltaPhi(piNeg.XYvector()) - piPosRecV.XYvector().DeltaPhi(piNegRecV.XYvector()) < 0;
+            // hDeltaMomVsDeltaPhi->Fill(fabs(piPos.Mag() / piNeg.Mag()) - fabs(piPosRecV.Mag() / piNegRecV.Mag()),
+            //                         fabs(piPos.XYvector().DeltaPhi(piNeg.XYvector())) - fabs(piPosRecV.XYvector().DeltaPhi(piNegRecV.XYvector()))
             //                         - 0 * TMath::Power(-1, mult) * TMath::Pi() );
             // //  Cowboy Type
-            // if(piPosRec.Cross(field).XYvector().DeltaPhi(piNegRec.XYvector()) < TMath::Pi() / 2)
+            // if(piPosRecV.Cross(field).XYvector().DeltaPhi(piNegRecV.XYvector()) < TMath::Pi() / 2)
             // { 
-            //     hDeltaPhiVsPhiCowboy->Fill(piPos.XYvector().Phi(), piPos.XYvector().DeltaPhi(piPosRec.XYvector()));
+            //     hDeltaPhiVsPhiCowboy->Fill(piPos.XYvector().Phi(), piPos.XYvector().DeltaPhi(piPosRecV.XYvector()));
             //     hDeltaPhiRecVsGenCowboy->Fill(fabs(piPos.XYvector().DeltaPhi(piNeg.XYvector())), 
-            //                                 fabs(piPosRec.XYvector().DeltaPhi(piNegRec.XYvector())) );
+            //                                 fabs(piPosRecV.XYvector().DeltaPhi(piNegRecV.XYvector())) );
 
-            //     // hPhi->Fill(piPos.Phi() - piPosRec.Phi()); 
-            //     // hPhi->Fill(piNeg.Phi() - piNegRec.Phi()); 
-            //     hDeltaMomVsDeltaPhiCowboy->Fill(fabs(piPos.Mag() - piNeg.Mag()) - fabs(piPosRec.Mag() - piNegRec.Mag()),
-            //                         piPos.XYvector().DeltaPhi(piNeg.XYvector()) - piPosRec.XYvector().DeltaPhi(piNegRec.XYvector())
+            //     // hPhi->Fill(piPos.Phi() - piPosRecV.Phi()); 
+            //     // hPhi->Fill(piNeg.Phi() - piNegRecV.Phi()); 
+            //     hDeltaMomVsDeltaPhiCowboy->Fill(fabs(piPos.Mag() - piNeg.Mag()) - fabs(piPosRecV.Mag() - piNegRecV.Mag()),
+            //                         piPos.XYvector().DeltaPhi(piNeg.XYvector()) - piPosRecV.XYvector().DeltaPhi(piNegRecV.XYvector())
             //                         - TMath::Power(-1, mult) * TMath::Pi() );
             // }
             // //  Sailor Type
-            // if(piPosRec.Cross(field).XYvector().DeltaPhi(piNegRec.XYvector()) > TMath::Pi() / 2)
+            // if(piPosRecV.Cross(field).XYvector().DeltaPhi(piNegRecV.XYvector()) > TMath::Pi() / 2)
             // {  
-            //     hDeltaPhiVsPhiSailor->Fill(piPos.XYvector().Phi(), piPos.XYvector().DeltaPhi(piPosRec.XYvector()));
+            //     hDeltaPhiVsPhiSailor->Fill(piPos.XYvector().Phi(), piPos.XYvector().DeltaPhi(piPosRecV.XYvector()));
 
             //     hDeltaPhiRecVsGenSailor->Fill(fabs(piPos.XYvector().DeltaPhi(piNeg.XYvector())), 
-            //                                 fabs(piPosRec.XYvector().DeltaPhi(piNegRec.XYvector())) );
-            //     hDeltaMomVsDeltaPhiSailor->Fill(fabs(piPos.Mag() - piNeg.Mag()) - fabs(piPosRec.Mag() - piNegRec.Mag()),
-            //                         piPos.XYvector().DeltaPhi(piNeg.XYvector()) - piPosRec.XYvector().DeltaPhi(piNegRec.XYvector())
+            //                                 fabs(piPosRecV.XYvector().DeltaPhi(piNegRecV.XYvector())) );
+            //     hDeltaMomVsDeltaPhiSailor->Fill(fabs(piPos.Mag() - piNeg.Mag()) - fabs(piPosRecV.Mag() - piNegRecV.Mag()),
+            //                         piPos.XYvector().DeltaPhi(piNeg.XYvector()) - piPosRecV.XYvector().DeltaPhi(piNegRecV.XYvector())
             //                         - TMath::Power(-1, mult) * TMath::Pi() );
             // }
 

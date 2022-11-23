@@ -389,7 +389,7 @@ void EnergyHandler::MassLnY(int drawOpt = 0)
     auto hEnergySpectrumCut = new TH1D("hEnergySpectrumCut", "", 1000, emeas - 20, emeas + 5);
 
     std::vector<TH2D *> psilnYs;
-    for(int i = 0; i < 8; i++)
+    for(int i = 0; i < 16; i++)
     { psilnYs.push_back(new TH2D(("hPsilnY" + std::to_string(i + 1)).c_str(), ("Psi" + std::to_string(i + 1) + "(lnY)").c_str(), 400, -0.4, 0.4, 10000, 2.4, 3.3)); }
 
     auto hPsi = new TH1D("hPsi", "Psi", 200, 2.4, 3.3);
@@ -398,14 +398,16 @@ void EnergyHandler::MassLnY(int drawOpt = 0)
     double energy = 0;
     double massFullRecWithEmeas = 0;
     double lnY = 0;
+    double psiBinNum = 0;
     for(int i = 0; i < ksTr->GetEntries(); i++)
     {
         ksTr->GetEntry(i);
         if(std::find(badRuns.begin(), badRuns.end(), runnum) == badRuns.end() && abs(Y - 1) > 1e-9)
         {
             lnY = log(Y);
-            if(int((abs(lnY) + 1e-7) / 0.05) < vSigma.size())
-            { sigmaPsi = vSigma[int((abs(lnY) + 1e-7) / 0.05)]; }
+            psiBinNum = lnY > -0.4 ? floor((lnY + 0.4 + 1e-12) / 0.05) : 16;
+            if(psiBinNum < vSigma.size())
+            { sigmaPsi = vSigma[psiBinNum]; }
 
             massFullRec->SetParameters(emeas, (1 - Y*Y) / (1 + Y*Y));
             massFullRecWithEmeas = massFullRec->Eval(ksdpsi) - sigmaPsi * sigmaPsi / 2 * massFullRec->Derivative2(ksdpsi);
@@ -418,15 +420,13 @@ void EnergyHandler::MassLnY(int drawOpt = 0)
             hM_CrAnglelnY->Fill(lnY, massCrAngle->Eval(ksdpsi) - sigmaPsi * sigmaPsi / 2 * massCrAngle->Derivative2(ksdpsi));
             // hPsilnY->Fill(lnY, ksdpsi); 
 
-            // if(int((abs(lnY) + 1e-12) / 0.05) < psilnYs.size())
-            // { psilnYs[int((abs(lnY) + 1e-12) / 0.05)]->Fill(lnY, ksdpsi); }
 
             // if((massFullRecWithEmeas > 490 && massFullRecWithEmeas < 496) || (massFullRecWithEmeas > 500 && massFullRecWithEmeas < 505))
             // if(massFullRecWithEmeas > 496 && massFullRecWithEmeas < 500)
             if(massFullRecWithEmeas > 490 && massFullRecWithEmeas < 505)
             { 
-                if(int((abs(lnY) + 1e-12) / 0.05) < psilnYs.size())
-                { psilnYs[int((abs(lnY) + 1e-12) / 0.05)]->Fill(lnY, ksdpsi); }
+                if(psiBinNum < psilnYs.size())
+                { psilnYs[psiBinNum]->Fill(lnY, ksdpsi); }
                 hDeltaM->Fill(lnY, - sigmaPsi * sigmaPsi / 2 * massFullRec->Derivative2(ksdpsi));
                 hMlnYpfx->Fill(lnY, massFullRec->Eval(ksdpsi) - sigmaPsi * sigmaPsi / 2 * massFullRec->Derivative2(ksdpsi));
                 hPsilnY->Fill(lnY, ksdpsi); 
@@ -560,20 +560,23 @@ int massMeasRefactored()
     gROOT->Reset();
     auto start = std::chrono::system_clock::now();
 
-    std::vector<Float_t> vSigma0(8, 0);
-    std::vector<Float_t> vSigmaFit514MC = {0.0141507, 0.0145647, 0.0164458, 0.0163694, 0.0183365, 0.0201849, 0.0228716, 0.0266007};
-    std::vector<Float_t> vSigmaFit = {0.0150457, 0.0157218, 0.0167191, 0.0180674, 0.0199512, 0.0224721, 0.0259625, 0.0309317};
-    std::vector<Float_t> vSigmaRMS = {0.0210113, 0.0216181, 0.0220604, 0.0237359, 0.0255735, 0.0279509, 0.0309818, 0.0349982,};
+    std::vector<Float_t> vSigma0(16, 0);
+    std::vector<Float_t> vSigmaFit514MC = {0.0141507, 0.0145647, 0.0164458, 0.0163694, 0.0183365, 0.0201849, 0.0228716, 0.0266007, 
+                                            0.0141507, 0.0145647, 0.0164458, 0.0163694, 0.0183365, 0.0201849, 0.0228716, 0.0266007};
+    std::vector<Float_t> vSigmaFit = {0.0293026, 0.0249002, 0.0218265, 0.0199051, 0.0178883, 0.0161711, 0.0157036, 0.0151438, 
+                                    0.0151301, 0.0153275, 0.0161915, 0.0176803, 0.0193616, 0.0221601, 0.0252432, 0.0296633};
+    std::vector<Float_t> vSigmaRMS = {0.0337554, 0.0298463, 0.0275007, 0.0252054, 0.0236981, 0.0216722, 0.0208052, 0.0208054, 
+                                        0.0201532, 0.0207264, 0.0222573, 0.0233773, 0.0255514, 0.027505, 0.0304606, 0.0342696};
     
     // std::vector<Float_t> vSigmaFit514MC2 = {0.0139102, 0.0159495, 0.0161846, 0.0163694, 0.0183365, 0.0201849, 0.0228716, 0.0266007};
 
-    std::string fileName = "tr_ph/MC514tmp.root";
+    std::string fileName = "tr_ph/exp509_5New2.root";
     // std::string fileName = "tr_ph/exp509_5Cowboy.root";
     // std::string fileName = "tr_ph/exp509_MissinMassCut1.root";
-    double energy = 512.393;
-    // auto eHandler = new EnergyHandler("hists and root files/cuts/kchCut21May.root", fileName, vSigma0);
-    auto eHandler = new EnergyHandler("hists and root files/cuts/kchCut21May.root", fileName, vSigmaFit514MC, energy);
-    eHandler->MassLnY(5);
+    double energy = 508.931;
+    auto eHandler = new EnergyHandler("hists and root files/cuts/kchCut21May.root", fileName, vSigmaFit);
+    // auto eHandler = new EnergyHandler("hists and root files/cuts/kchCut21May.root", fileName, vSigmaFit, energy);
+    eHandler->MassLnY(0);
     delete eHandler;
 
     // std::vector<double> y = {5, 7, 9, 10, 16, 53, 99, 142, 138, 138, 131, 153, 146, 146, 142, 169, 116, 119, 139, 143, 150, 133, 143, 138, 111, 85, 37, 16, 6, 6, 6};
