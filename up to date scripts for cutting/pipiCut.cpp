@@ -10,6 +10,7 @@
 #include <TLatex.h>
 #include <TLine.h>
 #include <TVector3.h>
+#include "TProfile.h"
 #include <Math/SpecFuncMathCore.h>
 
 void pipiCut::Loop(std::string histFileName)
@@ -85,14 +86,42 @@ void pipiCut::Loop(std::string histFileName)
     auto hDeltaPhiNeg = new TH1D("hDeltaPhiNeg", "tphiv - tphi pi-", 1000, -0.2, 0.2); 
     auto hDeltaPtotVsDeltaPhiPos = new TH2D("hDeltaPtotVsDeltaPhiPos", "tptotv - tptot vs tphiv - tphi pi+", 5000, -0.2, 0.2, 5000, -10, 10);
     auto hDeltaPtotVsDeltaPhiNeg = new TH2D("hDeltaPtotVsDeltaPhiNeg", "tptotv - tptot vs tphiv - tphi pi-", 5000, -0.2, 0.2, 5000, -10, 10);
-    auto hDeltaPhiVsPhiPos = new TH2D("hDeltaPhiVsPhiPos", "tphiv - tphi vs tphiv pi+", 1000, 0, 2 * TMath::Pi(), 1000, -0.2, 0.2);
-    auto hDeltaPhiVsPhiNeg = new TH2D("hDeltaPhiVsPhiNeg", "tphiv - tphi vs tphiv pi-", 1000, 0, 2 * TMath::Pi(), 1000, -0.2, 0.2);
+    
     auto hDeltaThetaPos = new TH1D("hDeltaThetaPos", "tthv - tth pi+", 1000, -0.02, 0.02);
     auto hDeltaThetaNeg = new TH1D("hDeltaThetaNeg", "tthv - tth pi-", 1000, -0.02, 0.02);
 
     auto hDeltaPhiVsThetaPos = new TH2D("hDeltaPhiVsThetaPos", "tphiv - tphi vs tthv pi+", 1000, 0, TMath::Pi(), 1000, -0.2, 0.2);
     auto hDeltaPhiVsThetaNeg = new TH2D("hDeltaPhiVsThetaNeg", "tphiv - tphi vs tthv pi-", 1000, 0, TMath::Pi(), 1000, -0.2, 0.2);
     
+    // Vector of histograms containing (deltaPhi / deltaPtot vs Phi) info. 
+    // [0], [1] - pi+ and pi+ respectively; 
+    std::vector<TH2D *> vDeltaPhiVsPhi{new TH2D("hDeltaPhiVsPhiPos", "tphiv - tphi vs tphiv pi+", 36, 0, 2 * TMath::Pi(), 1000, -0.2, 0.2), 
+                                        new TH2D("hDeltaPhiVsPhiNeg", "tphiv - tphi vs tphiv pi-", 36, 0, 2 * TMath::Pi(), 1000, -0.2, 0.2)};
+    std::vector<TH2D *> vDeltaPtotVsPhi{new TH2D("hDeltaPtotVsPhiPos", "tptotv - tptotv vs tphiv pi+", 36, 0, 2 * TMath::Pi(), 4000, -20, 20), 
+                                        new TH2D("hDeltaPtotVsPhiNeg", "tptotv - tptotv vs tphiv pi-", 36, 0, 2 * TMath::Pi(), 4000, -20, 20)};
+
+    std::vector<TProfile *> vDeltaPhiVsPhiProfPos;
+    std::vector<TProfile *> vDeltaPhiVsPhiProfNeg;
+    std::vector<TProfile *> vDeltaPtotVsPhiProfPos;
+    std::vector<TProfile *> vDeltaPtotVsPhiProfNeg;
+    int Nchambers = 18;
+    for(int i = 0; i < Nchambers; i++)
+    { 
+        vDeltaPhiVsPhiProfPos.push_back(new TProfile(("hDeltaPhiVsPhiPos_pfx" + std::to_string(i + 1)).c_str(),
+                                                    ("hDeltaPhiVsPhiPos_pfx" + std::to_string(i + 1)).c_str(), 
+                                                    150, 2 * i * TMath::Pi() / Nchambers, 2 * (i + 1) * TMath::Pi() / Nchambers, -0.1, 0.1)); 
+        vDeltaPhiVsPhiProfNeg.push_back(new TProfile(("hDeltaPhiVsPhiNeg_pfx" + std::to_string(i + 1)).c_str(),
+                                                    ("hDeltaPhiVsPhiNeg_pfx" + std::to_string(i + 1)).c_str(), 
+                                                    150, 2 * i * TMath::Pi() / Nchambers, 2 * (i + 1) * TMath::Pi() / Nchambers, -0.1, 0.1));
+
+        vDeltaPtotVsPhiProfPos.push_back(new TProfile(("hDeltaPtotVsPhiPos_pfx" + std::to_string(i + 1)).c_str(),
+                                                    ("hDeltaPtotVsPhiPos_pfx" + std::to_string(i + 1)).c_str(), 
+                                                    150, 2 * i * TMath::Pi() / Nchambers, 2 * (i + 1) * TMath::Pi() / Nchambers, -10, 10)); 
+        vDeltaPtotVsPhiProfNeg.push_back(new TProfile(("hDeltaPtotVsPhiNeg_pfx" + std::to_string(i + 1)).c_str(),
+                                                    ("hDeltaPtotVsPhiNeg_pfx" + std::to_string(i + 1)).c_str(), 
+                                                    150, 2 * i * TMath::Pi() / Nchambers, 2 * (i + 1) * TMath::Pi() / Nchambers, -10, 10));                                                                                      
+    }
+
     TVector3 piPos;
     TVector3 piNeg;
     TVector3 piPosRecV;
@@ -102,6 +131,12 @@ void pipiCut::Loop(std::string histFileName)
     TVector3 field(0., 0., 1.);
     int posTrackNumber = 0;
     int negTrackNumber = 0;
+    int indexPos = 0;
+    int indexNeg = 0;
+    double deltaPhiShiftedPos = 0;
+    double deltaPhiShiftedNeg = 0;
+    double phiShiftedPos = 0;
+    double phiShiftedNeg = 0;
 
     Long64_t nentries = fChain->GetEntriesFast();
 
@@ -127,7 +162,7 @@ void pipiCut::Loop(std::string histFileName)
         {
             posTrackNumber = tcharge[nTracks[0]] > 0 ? 0 : 1;
             negTrackNumber = posTrackNumber == 1 ? 0 : 1;
-
+            
             piPosRecV.SetMagThetaPhi(tptotv[nTracks[posTrackNumber]], tthv[nTracks[posTrackNumber]], tphiv[nTracks[posTrackNumber]]);
             piNegRecV.SetMagThetaPhi(tptotv[nTracks[negTrackNumber]], tthv[nTracks[negTrackNumber]], tphiv[nTracks[negTrackNumber]]);
 
@@ -141,10 +176,7 @@ void pipiCut::Loop(std::string histFileName)
 
             hDeltaPhiPos->Fill(tphiv[nTracks[posTrackNumber]] - tphi[nTracks[posTrackNumber]]);
             hDeltaPhiNeg->Fill(tphiv[nTracks[negTrackNumber]] - tphi[nTracks[negTrackNumber]]);
-
-            hDeltaPhiVsPhiPos->Fill(tphiv[nTracks[posTrackNumber]], tphiv[nTracks[posTrackNumber]] - tphi[nTracks[posTrackNumber]]);
-            hDeltaPhiVsPhiNeg->Fill(tphiv[nTracks[negTrackNumber]], tphiv[nTracks[negTrackNumber]] - tphi[nTracks[negTrackNumber]]);
-
+            
             hDeltaPhiVsThetaPos->Fill(tthv[nTracks[posTrackNumber]], tphiv[nTracks[posTrackNumber]] - tphi[nTracks[posTrackNumber]]);
             hDeltaPhiVsThetaNeg->Fill(tthv[nTracks[negTrackNumber]], tphiv[nTracks[negTrackNumber]] - tphi[nTracks[negTrackNumber]]);
 
@@ -153,6 +185,25 @@ void pipiCut::Loop(std::string histFileName)
 
             hPhiColRec->Fill(fabs(piPosRecV.Phi() - piNegRecV.Phi()) - TMath::Pi());
             hPtotRec->Fill(piPosRecV.Mag());
+            
+            deltaPhiShiftedPos = 0;
+            deltaPhiShiftedNeg = 0;
+            phiShiftedPos = TVector2::Phi_0_2pi(tphiv[nTracks[posTrackNumber]]);
+            phiShiftedNeg = TVector2::Phi_0_2pi(tphiv[nTracks[negTrackNumber]]);
+            indexPos = int(phiShiftedPos / (2 * TMath::Pi() / Nchambers));
+            indexNeg = int(phiShiftedNeg / (2 * TMath::Pi() / Nchambers));
+
+            vDeltaPhiVsPhi[0]->Fill(phiShiftedPos, tphiv[nTracks[posTrackNumber]] - tphi[nTracks[posTrackNumber]]);
+            vDeltaPhiVsPhi[1]->Fill(phiShiftedNeg, tphiv[nTracks[negTrackNumber]] - tphi[nTracks[negTrackNumber]]);
+            
+            vDeltaPtotVsPhi[0]->Fill(phiShiftedPos, tptotv[nTracks[posTrackNumber]] - tptot[nTracks[posTrackNumber]]);
+            vDeltaPtotVsPhi[1]->Fill(phiShiftedNeg, tptotv[nTracks[negTrackNumber]] - tptot[nTracks[negTrackNumber]]);
+
+            vDeltaPhiVsPhiProfPos[indexPos]->Fill(phiShiftedPos, tphiv[nTracks[posTrackNumber]] - tphi[nTracks[posTrackNumber]]);
+            vDeltaPhiVsPhiProfNeg[indexNeg]->Fill(phiShiftedNeg, tphiv[nTracks[negTrackNumber]] - tphi[nTracks[negTrackNumber]]);
+            
+            vDeltaPtotVsPhiProfPos[indexPos]->Fill(phiShiftedPos, tptotv[nTracks[posTrackNumber]] - tptot[nTracks[posTrackNumber]]);
+            vDeltaPtotVsPhiProfNeg[indexNeg]->Fill(phiShiftedNeg, tptotv[nTracks[negTrackNumber]] - tptot[nTracks[negTrackNumber]]);
 
             // for(int i = 0; i < nsim; i++)
             // {
@@ -200,6 +251,51 @@ void pipiCut::Loop(std::string histFileName)
         nTracks.clear();
         nTracks.shrink_to_fit();
     }
+
+    std::vector<TCanvas *> canvs;
+    for(int i = 0; i < 3; i++)
+    { 
+        canvs.push_back(new TCanvas(("canv" + std::to_string(i + 1)).c_str(), ("deltaPhi vs Phi pi+ Part" + std::to_string(i + 1)).c_str() ) ); 
+        canvs[canvs.size() - 1]->Divide(2, 3);
+    }
+
+    std::vector<double> deltaPhiPos;
+    std::vector<double> deltaPhiNeg;
+    std::vector<double> deltaPtotPos;
+    std::vector<double> deltaPtotNeg;
+    for(int i = 0; i < Nchambers; i++)
+    {
+        canvs[int(i / 6)]->cd(i - 6 * int(i / 6) + 1);
+        vDeltaPhiVsPhiProfPos[i]->Draw();
+
+        deltaPhiPos.push_back(vDeltaPhiVsPhiProfPos[i]->GetMean(2));
+        deltaPhiNeg.push_back(vDeltaPhiVsPhiProfNeg[i]->GetMean(2));
+
+        deltaPtotPos.push_back(vDeltaPtotVsPhiProfPos[i]->GetMean(2));
+        deltaPtotNeg.push_back(vDeltaPtotVsPhiProfNeg[i]->GetMean(2));
+    }
+    for(auto canv : canvs)
+    { canv->Write(); }
+
+    std::cout << "deltaPhiPos = {";
+    for(auto elem : deltaPhiPos)
+    { std::cout << elem << ", "; }
+    std::cout << "}" << std::endl;
+
+    std::cout << "deltaPhiNeg = {";
+    for(auto elem : deltaPhiNeg)
+    { std::cout << elem << ", "; }
+    std::cout << "}" << std::endl;
+
+    std::cout << "deltaPtotPos = {";
+    for(auto elem : deltaPtotPos)
+    { std::cout << elem << ", "; }
+    std::cout << "}" << std::endl;
+
+    std::cout << "deltaPtotNeg = {";
+    for(auto elem : deltaPtotNeg)
+    { std::cout << elem << ", "; }
+    std::cout << "}" << std::endl;
 
     auto hyperGauss = new TF1("HyperGauss", "[0] * exp([1] * (1 - sqrt(1 + (x - [2]) * (x - [2]) / [3])))", -1000, 1000);
     // 2 * K(1, 2) / K(2, 2) = 1.10234; [3]_0 = sigma^2 * 2 * K(1, 2) / K(2, 2)
