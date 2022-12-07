@@ -1,5 +1,6 @@
 from typing import List
 import numpy as np
+import numpy.typing as npt
 from scipy import integrate
 from scipy.interpolate import make_interp_spline
 from scipy.misc import derivative
@@ -14,14 +15,14 @@ me: float = 0.511
 mPi: float = 139.570
 """Charged pion mass (Mev)"""
 
-def massFunc(s: float, psi: float)->float:
-    eta: float = (1 - 0.9999*0.9999) / (1 + 0.9999*0.9999)
+def massFunc(s: float, psi: float, eta:float)->float:
+    # eta: float = (1 - 0.9999*0.9999) / (1 + 0.9999*0.9999)
     # pions' beta ^2
     b: float = 1 - 4 * mPi**2 / (s / 4)
     return (s / 4 * (1 - (1 + (1 - eta**2)**0.5 * np.cos(psi)) * (1 - (1 - eta**2 * b)**0.5 )/ eta / eta ))**0.5
 
-def massNC(s: float, psi: float, sigmaPsi: float)->float:
-    return massFunc(s, psi) - sigmaPsi**2 / 2 * derivative(lambda x: massFunc(s, x), psi, 1e-5, 2, order=9)
+def massNC(s: float, psi: float, sigmaPsi: float, eta:float)->float:
+    return massFunc(s, psi, eta) - sigmaPsi**2 / 2 * derivative(lambda x: massFunc(s, x, eta), psi, 1e-5, 2, order=9)
 
 def FormFactor(s: float)->complex:
     MPhi = 1.01919e+03
@@ -69,6 +70,7 @@ def SigmaBorn(s:float)->float:
 
 def F(x: float, s: float)->float:
     """ F is radiator (see Fadin-Kuraev and Achasov's presentation)
+
     Args:
         x (float): variable of integration in integral for corrected cross-section; For x << 1 x is energy carried away by photons and pairs.
         s (float): Mandelstam variable, s = E_cm ^ 2
@@ -105,8 +107,8 @@ def F(x: float, s: float)->float:
 
     return phPart + elPart
 
-def epsCalc(s: float, massUpperLimit: float)->float:
-    res: RootResults = root_scalar(lambda psi: massFunc(s, psi) - massUpperLimit, xtol=1e-5, x0=2, x1=3)
+def epsCalc(s: float, massUpperLimit: float, eta: float = (1 - 0.9999*0.9999) / (1 + 0.9999*0.9999))->float:
+    res: RootResults = root_scalar(lambda psi: massFunc(s, psi, eta) - massUpperLimit, xtol=1e-5, x0=2, x1=3)
     print("Root finding is", str(res.converged) + "; number of iteration =", res.function_calls)
     psiCr: float = res.root
     enLim: float = (mK**2 - 4 * (mPi * np.cos(psiCr / 2))**2)**0.5 / np.sin(psiCr / 2)
@@ -118,7 +120,7 @@ def epsCalc(s: float, massUpperLimit: float)->float:
 def SigmaCorrected(s:float, eps:float=1)->float:
     return integrate.quad(lambda x: SigmaBorn(s * (1-x)) * F(x, s), 0, eps, epsabs = 1e-6, epsrel=1e-4, limit=500)[0]
 
-def GetMassCorrected(s: float, psi: float, sigmaPsi: float, eps: float, isNC: bool=True)->float:
+def GetMassCorrected(s: float, psi: float, eta: float, sigmaPsi: float, eps: float, isNC: bool=True)->float:
     """ Compute mass of Ks with radiative and nonlinearity correction.
 
     Args:
@@ -131,32 +133,29 @@ def GetMassCorrected(s: float, psi: float, sigmaPsi: float, eps: float, isNC: bo
     Returns:
         float: corrected mass of Ks
     """        
-    conv: float = integrate.quad(lambda x: (massNC(s * (1-x), psi, sigmaPsi) if isNC else massFunc(s * (1-x), psi)) * SigmaBorn(s * (1-x)) * F(x, s), 0, eps, epsabs = 1e-6, epsrel=1e-4, limit=500)[0]
+    conv: float = integrate.quad(lambda x: (massNC(s * (1-x), psi, sigmaPsi, eta) if isNC else massFunc(s * (1-x), psi, eta)) * SigmaBorn(s * (1-x)) * F(x, s), 0, eps, epsabs = 1e-6, epsrel=1e-4, limit=500)[0]
     return conv / SigmaCorrected(s, eps)
 
+def full_distribution(
+        energy: float, x: float, dpsi: float,
+        avg_energy: float, energy_sigma: float, 
+        avg_dpsi: float, dpsi_sigma: float)->float:
+    s = 4 * energy**2
+    return 1 /(np.sqrt(2 * np.pi) * energy_sigma) * np.exp(-(energy - avg_energy)**2 / (2 * energy_sigma**2)) \
+            * 1 /(np.sqrt(2 * np.pi) * dpsi_sigma) * np.exp(-(dpsi - avg_dpsi)**2 / (2 * dpsi_sigma**2)) \
+            * SigmaBorn(s * (1-x)) * F(x, s)
 
-energies:list = [504.932, 507.937, 508.945, 509.911, 510.702, 512.979]
-energErrs:list = [0.00183045, 0.00188667, 0.00152347, 0.0020074, 0.005081, 0.0124129]
-psis:list = [2.73092, 2.65629, 2.63375, 2.61352, 2.59614, 2.55372]
-psiErrs:list = [0.000266617, 0.000246109, 0.000258598, 0.000250222, 0.000284943, 0.000503969]
-
-for i in range(6):
-    energy: float = energies[i]
-    s: float = 4 * energy**2
-    psi: float = psis[i]
-    sigmaPsi: float = 0.0185491
-    # sigmaPsi: float = 0.0234503
-    sigmaOfSigmaPsi: float = 0.00059
-
-
-    psiErr: float = psiErrs[i]
-    energyErr: float = energErrs[i]
-    psiVsE_correlation: float = -0.987274
-    totErr: float = ( derivative(lambda x: massFunc(s, x), psi, 1e-5, 1, order=9) **2 * psiErr**2 + 
-                (derivative(lambda x: massFunc(x, psi), s, 1e-5, 1, order=9) * 8 * energy)**2 * energyErr**2 +
-                derivative(lambda x: massFunc(s, x), psi, 1e-5, 1, order=9) * (derivative(lambda x: massFunc(x, psi), s, 1e-5, 1, order=9) * 8 * energy) * psiErr * energyErr * psiVsE_correlation)**0.5
-    ncErr: float = sigmaOfSigmaPsi * sigmaPsi * abs(derivative(lambda x: massFunc(s, x), psi, 1e-5, 2, order=9))
-    print(i, "Mass = ", massNC(s, psi, sigmaPsi) - massFunc(s, psi), "+/-", ncErr)
+def joint_correction(
+        avg_energy: float, energy_sigma: float, 
+        avg_dpsi: float, dpsi_sigma: float)->float:
+    eps = 15  / avg_energy
+    eta = (1 - 0.9999*0.9999) / (1 + 0.9999*0.9999)
+    conv = integrate.tplquad(
+        lambda z, y, x: massFunc(4 * x**2 * (1-y), z, eta) 
+        * full_distribution(x, y, z, avg_energy, energy_sigma, avg_dpsi, dpsi_sigma), 
+        a=avg_energy - 7 * energy_sigma, b=avg_energy + 7 * energy_sigma, 
+        gfun=0, hfun=eps, qfun=0, rfun=np.pi)[0] # Change qfun (minimal dpsi as a function of energy)
+    return conv / SigmaCorrected(s, eps)
 
 
 energy: float = 504.892
@@ -165,31 +164,20 @@ psi: float = 2.73092
 sigmaPsi: float = 0.014
 # sigmaPsi: float = 0.0234503
 sigmaOfSigmaPsi: float = 0.000503969
-
+eta = (1 - 0.9999*0.9999) / (1 + 0.9999*0.9999)
 
 psiErr: float = 0.000246109
 energyErr: float = 0.00188667
 psiVsE_correlation: float = -0.987274
-totErr: float = ( derivative(lambda x: massFunc(s, x), psi, 1e-5, 1, order=9) **2 * psiErr**2 + 
-                (derivative(lambda x: massFunc(x, psi), s, 1e-5, 1, order=9) * 8 * energy)**2 * energyErr**2 +
-                derivative(lambda x: massFunc(s, x), psi, 1e-5, 1, order=9) * (derivative(lambda x: massFunc(x, psi), s, 1e-5, 1, order=9) * 8 * energy) * psiErr * energyErr * psiVsE_correlation +
+totErr: float = ( derivative(lambda x: massFunc(s, x, eta), psi, 1e-5, 1, order=9) **2 * psiErr**2 + 
+                (derivative(lambda x: massFunc(x, psi, eta), s, 1e-5, 1, order=9) * 8 * energy)**2 * energyErr**2 +
+                derivative(lambda x: massFunc(s, x, eta), psi, 1e-5, 1, order=9) * (derivative(lambda x: massFunc(x, psi, eta), s, 1e-5, 1, order=9) * 8 * energy) * psiErr * energyErr * psiVsE_correlation +
                 # Cuts' uncertainties
                 0.0069 * 0.0069 +
                 0.003 * 0.003)**0.5
 
-ncErr: float = sigmaOfSigmaPsi * sigmaPsi * abs(derivative(lambda x: massFunc(s, x), psi, 1e-5, 2, order=9))
-print("Mass = ", massNC(s, psi, sigmaPsi), "+/-", totErr)
+ncErr: float = sigmaOfSigmaPsi * sigmaPsi * abs(derivative(lambda x: massFunc(s, x, eta), psi, 1e-5, 2, order=9))
+print("Mass = ", massNC(s, psi, sigmaPsi, eta), "+/-", totErr)
 print("ncErr = ", ncErr)
 
-print(massFunc(s, psi))
-# massUpperLimit: float = 505
-# maxPhotonEnergy: float = 7
-# eps: float = epsCalc(s, massUpperLimit)
-# eps: float = 2 * maxPhotonEnergy / (2 * energy)
-# eps = 1
-# print("Corrected Mass = ", GetMassCorrected(s, psi, sigmaPsi, eps, True), "eps =", eps)
-
-# {2.73353, 2.65747, 2.63507, 2.61432, 2.5988, 2.56547}
-# {505, 508, 509, 510, 511, 514}
-# {497.652, 497.626, 497.640, 497.628, 497.668, 498.036}
-# {0.004, 0.005, 0.005, 0.004, 0.006, 0.013}
+print(massFunc(s, psi, eta))
