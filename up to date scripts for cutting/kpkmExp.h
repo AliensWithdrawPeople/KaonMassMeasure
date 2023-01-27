@@ -1,12 +1,12 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Fri May 20 20:31:10 2022 by ROOT version 6.24/06
+// Fri Jan 27 09:48:42 2023 by ROOT version 6.22/08
 // from TTree tr_ph/Tree with the non-collinear events
-// found on file: E:/Science/BINP/Kaon Mass Measure/tr_ph/scan2018_omphi_tr_ph_fc_e509.5_v8.root
+// found on file: root://cmd//scan2018_omphi/scan2018_omphi_tr_ph_fc_e509_v9.root
 //////////////////////////////////////////////////////////
 
-#ifndef kpkmCut_h
-#define kpkmCut_h
+#ifndef kpkmExp_h
+#define kpkmExp_h
 
 #include <TROOT.h>
 #include <TChain.h>
@@ -14,7 +14,7 @@
 
 // Header file for the classes stored in the TTree if any.
 
-class kpkmCut {
+class kpkmExp {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
@@ -92,24 +92,24 @@ public :
    Int_t           tenconv[10];   //[nt]
    Int_t           nks_total;
    Int_t           nks;
-   Int_t           ksvind[7][2];   //[nks]
-   Int_t           kstype[7];   //[nks]
-   Int_t           ksfstatus[7];   //[nks]
-   Float_t         ksvchi[7];   //[nks]
-   Float_t         ksvxyz[7][3];   //[nks]
-   Float_t         ksminv[7];   //[nks]
-   Float_t         ksalign[7];   //[nks]
-   Float_t         kstlen[7];   //[nks]
-   Float_t         ksdpsi[7];   //[nks]
-   Float_t         kslen[7];   //[nks]
-   Float_t         ksz0[7];   //[nks]
-   Float_t         ksphi[7];   //[nks]
-   Float_t         ksth[7];   //[nks]
-   Float_t         ksptot[7];   //[nks]
-   Float_t         kspiphi[7][2];   //[nks]
-   Float_t         kspith[7][2];   //[nks]
-   Float_t         kspipt[7][2];   //[nks]
-   Float_t         kserr[7][3][3];   //[nks]
+   Int_t           ksvind[6][2];   //[nks]
+   Int_t           kstype[6];   //[nks]
+   Int_t           ksfstatus[6];   //[nks]
+   Float_t         ksvchi[6];   //[nks]
+   Float_t         ksvxyz[6][3];   //[nks]
+   Float_t         ksminv[6];   //[nks]
+   Float_t         ksalign[6];   //[nks]
+   Float_t         kstlen[6];   //[nks]
+   Float_t         ksdpsi[6];   //[nks]
+   Float_t         kslen[6];   //[nks]
+   Float_t         ksz0[6];   //[nks]
+   Float_t         ksphi[6];   //[nks]
+   Float_t         ksth[6];   //[nks]
+   Float_t         ksptot[6];   //[nks]
+   Float_t         kspiphi[6][2];   //[nks]
+   Float_t         kspith[6][2];   //[nks]
+   Float_t         kspipt[6][2];   //[nks]
+   Float_t         kserr[6][3][3];   //[nks]
    Int_t           ntlxe_total;
    Int_t           ntlxe;
    Int_t           ntlxelayers[10];   //[ntlxe]
@@ -126,21 +126,22 @@ public :
    Float_t         tlxesen_layers[10][14];   //[ntlxe]
    Int_t           nph_total;
    Int_t           nph;
-   Float_t         phen[26];   //[nph]
-   Float_t         phth[26];   //[nph]
-   Float_t         phphi[26];   //[nph]
-   Float_t         phrho[26];   //[nph]
-   Float_t         phen0[26];   //[nph]
-   Float_t         phth0[26];   //[nph]
-   Float_t         phphi0[26];   //[nph]
-   Float_t         phlxe[26];   //[nph]
-   Float_t         phslxe_layers[26][14];   //[nph]
-   Float_t         pherr[26][3];   //[nph]
-   Float_t         phcsi[26];   //[nph]
-   Float_t         phbgo[26];   //[nph]
-   Int_t           phflag[26];   //[nph]
-   Int_t           phconv[26];   //[nph]
-   Int_t           phfc[26];   //[nph]
+   Float_t         phen[34];   //[nph]
+   Float_t         phth[34];   //[nph]
+   Float_t         phphi[34];   //[nph]
+   Float_t         phrho[34];   //[nph]
+   Float_t         phrad[34];   //[nph]
+   Float_t         phen0[34];   //[nph]
+   Float_t         phth0[34];   //[nph]
+   Float_t         phphi0[34];   //[nph]
+   Float_t         phlxe[34];   //[nph]
+   Float_t         phslxe_layers[34][14];   //[nph]
+   Float_t         pherr[34][3];   //[nph]
+   Float_t         phcsi[34];   //[nph]
+   Float_t         phbgo[34];   //[nph]
+   Int_t           phflag[34];   //[nph]
+   Int_t           phconv[34];   //[nph]
+   Int_t           phfc[34];   //[nph]
    Int_t           nzcs_total;
    Int_t           nzcs;
    Int_t           zcsch[1];   //[nzcs]
@@ -185,13 +186,14 @@ public :
    Float_t         simvty[1];   //[nsim]
    Float_t         simvtz[1];   //[nsim]
    Int_t           ncorr;
-   Int_t           idcorr[7];   //[ncorr]
-   Int_t           bitcorr[7];   //[ncorr]
+   Int_t           idcorr[6];   //[ncorr]
+   Int_t           bitcorr[6];   //[ncorr]
    Int_t           nbadbank;
    Int_t           nbadbankg;
-   Int_t           nbadbanks[240];   //[nbadbankg]
+   Int_t           nbadbanks[60];   //[nbadbankg]
    Int_t           nlostbanks;
    Int_t           ncorruptedbanks;
+   Int_t           has_frontend[3];
 
    // List of branches
    TBranch        *b_ebeam;   //!
@@ -302,6 +304,7 @@ public :
    TBranch        *b_phth;   //!
    TBranch        *b_phphi;   //!
    TBranch        *b_phrho;   //!
+   TBranch        *b_phrad;   //!
    TBranch        *b_phen0;   //!
    TBranch        *b_phth0;   //!
    TBranch        *b_phphi0;   //!
@@ -364,29 +367,30 @@ public :
    TBranch        *b_nbadbanks;   //!
    TBranch        *b_nlostbanks;   //!
    TBranch        *b_ncorruptedbanks;   //!
+   TBranch        *b_has_frontend;   //!
 
-   kpkmCut(TTree *tree=0);
-   virtual ~kpkmCut();
+   kpkmExp(TTree *tree=0);
+   virtual ~kpkmExp();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree);
-   virtual void     Loop();
+   virtual void     Loop(std::string histFileName);
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
 };
 
 #endif
 
-#ifdef kpkmCut_cxx
-kpkmCut::kpkmCut(TTree *tree) : fChain(0) 
+#ifdef kpkmExp_cxx
+kpkmExp::kpkmExp(TTree *tree) : fChain(0) 
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("E:/Science/BINP/Kaon Mass Measure/tr_ph/scan2018_omphi_tr_ph_fc_e509.5_v8.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("root://cmd//scan2018_omphi/scan2018_omphi_tr_ph_fc_e509_v9.root");
       if (!f || !f->IsOpen()) {
-         f = new TFile("E:/Science/BINP/Kaon Mass Measure/tr_ph/scan2018_omphi_tr_ph_fc_e509.5_v8.root");
+         f = new TFile("root://cmd//scan2018_omphi/scan2018_omphi_tr_ph_fc_e509_v9.root");
       }
       f->GetObject("tr_ph",tree);
 
@@ -394,19 +398,19 @@ kpkmCut::kpkmCut(TTree *tree) : fChain(0)
    Init(tree);
 }
 
-kpkmCut::~kpkmCut()
+kpkmExp::~kpkmExp()
 {
    if (!fChain) return;
    delete fChain->GetCurrentFile();
 }
 
-Int_t kpkmCut::GetEntry(Long64_t entry)
+Int_t kpkmExp::GetEntry(Long64_t entry)
 {
 // Read contents of entry.
    if (!fChain) return 0;
    return fChain->GetEntry(entry);
 }
-Long64_t kpkmCut::LoadTree(Long64_t entry)
+Long64_t kpkmExp::LoadTree(Long64_t entry)
 {
 // Set the environment to read one entry
    if (!fChain) return -5;
@@ -419,7 +423,7 @@ Long64_t kpkmCut::LoadTree(Long64_t entry)
    return centry;
 }
 
-void kpkmCut::Init(TTree *tree)
+void kpkmExp::Init(TTree *tree)
 {
    // The Init() function is called when the selector needs to initialize
    // a new tree or chain. Typically here the branch addresses and branch
@@ -543,6 +547,7 @@ void kpkmCut::Init(TTree *tree)
    fChain->SetBranchAddress("phth", phth, &b_phth);
    fChain->SetBranchAddress("phphi", phphi, &b_phphi);
    fChain->SetBranchAddress("phrho", phrho, &b_phrho);
+   fChain->SetBranchAddress("phrad", phrad, &b_phrad);
    fChain->SetBranchAddress("phen0", phen0, &b_phen0);
    fChain->SetBranchAddress("phth0", phth0, &b_phth0);
    fChain->SetBranchAddress("phphi0", phphi0, &b_phphi0);
@@ -605,10 +610,11 @@ void kpkmCut::Init(TTree *tree)
    fChain->SetBranchAddress("nbadbanks", nbadbanks, &b_nbadbanks);
    fChain->SetBranchAddress("nlostbanks", &nlostbanks, &b_nlostbanks);
    fChain->SetBranchAddress("ncorruptedbanks", &ncorruptedbanks, &b_ncorruptedbanks);
+   fChain->SetBranchAddress("has_frontend", has_frontend, &b_has_frontend);
    Notify();
 }
 
-Bool_t kpkmCut::Notify()
+Bool_t kpkmExp::Notify()
 {
    // The Notify() function is called when a new file is opened. This
    // can be either for a new TTree in a TChain or when when a new TTree
@@ -619,18 +625,18 @@ Bool_t kpkmCut::Notify()
    return kTRUE;
 }
 
-void kpkmCut::Show(Long64_t entry)
+void kpkmExp::Show(Long64_t entry)
 {
 // Print contents of entry.
 // If entry is not specified, print current entry
    if (!fChain) return;
    fChain->Show(entry);
 }
-Int_t kpkmCut::Cut(Long64_t entry)
+Int_t kpkmExp::Cut(Long64_t entry)
 {
 // This function may be called from Loop.
 // returns  1 if entry is accepted.
 // returns -1 otherwise.
    return 1;
 }
-#endif // #ifdef kpkmCut_cxx
+#endif // #ifdef kpkmExp_cxx

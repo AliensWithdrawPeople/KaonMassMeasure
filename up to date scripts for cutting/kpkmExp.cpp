@@ -1,14 +1,19 @@
-#define kpkmCut_cxx
-#include "kpkmCut.h"
+#define kpkmExp_cxx
+#include "kpkmExp.h"
 #include <TH2.h>
+#include <TH1D.h>
+#include <TF1.h>
 #include <TStyle.h>
+#include <TTree.h>
+#include <TMath.h>
 #include <TCanvas.h>
+#include <TVector3.h>
 
-void kpkmCut::Loop()
+void kpkmExp::Loop(std::string histFileName)
 {
 //   In a ROOT session, you can do:
-//      root> .L kpkmCut.C
-//      root> kpkmCut t
+//      root> .L kpkmExp.C
+//      root> kpkmExp t
 //      root> t.GetEntry(12); // Fill t data members with entry number 12
 //      root> t.Show();       // Show values of entry 12
 //      root> t.Show(16);     // Read and show values of entry 16
@@ -32,15 +37,18 @@ void kpkmCut::Loop()
    if (fChain == 0)
         return;
 
-   TFile *top = new TFile("kchCut21May.root", "recreate");
+   TFile *top = new TFile(histFileName.c_str(), "recreate");
    auto tNew = new TTree("kChargedTree", "Cutted tr_ph (Kch Energy stability important data)");
 
-   auto hist1 = new TH2D("histPlus", "a", 1000, 0, 500, 1000, 0, 20000);
-   auto hist2 = new TH2D("histMinus", "a", 1000, 0, 500, 1000, 0, 20000);
+   auto hist1 = new TH2D("hKp", "K+", 5000, 0, 1000, 5000, 0, 40000);
+   auto hist2 = new TH2D("hKm", "K-", 5000, 0, 1000, 5000, 0, 40000);
+
+   auto hMomentums =  new TH2D("hMoms", "K+ mom vs K- mom", 1000, 0, 1000, 1000, 0, 1000);
 
    Float_t dpsi;
    Float_t Y;
    Float_t eff;
+   tNew->Branch("ebeam", &ebeam, "ebeam/F");
    tNew->Branch("emeas", &emeas0, "emeas/F");
    tNew->Branch("demeas", &demeas0, "demeas/F");
    tNew->Branch("runnum", &runnum, "runnum/I");
@@ -53,10 +61,8 @@ void kpkmCut::Loop()
    double cutChi2r = 15.;
    double cutChi2z = 10.;
    int cutNhitMin = 10;
-   int cutNhitMax = 30;
-   double cutRmin = 0.1;
-   double cutRmax = 6.0;
-   double cutZtrack = 12.;
+   double cutRmax = 1.0;
+   double cutZtrack = 10.;
    double cutPtot = 40;
 
    Long64_t nentries = fChain->GetEntriesFast();
@@ -74,7 +80,7 @@ void kpkmCut::Loop()
       for (int i = 0; i < nt; i++)
       {
          if (tptot[i] > cutPtot && fabs(trho[i]) < cutRmax && fabs(tz[i]) < cutZtrack &&
-               tchi2r[i] < cutChi2r && tchi2z[i] < cutChi2z && tnhit[i] > cutNhitMin && tnhit[i] < cutNhitMax)
+               tchi2r[i] < cutChi2r && tchi2z[i] < cutChi2z && tnhit[i] > cutNhitMin)
          { NgoodTr++; }
       }
 
@@ -84,20 +90,25 @@ void kpkmCut::Loop()
       if (NgoodTr == 2 && is_coll==1 && tnhit[0]>10 && tnhit[1]>10 && tcharge[0]*tcharge[1] < 0 &&
          (tth[0]*tcharge[0] + tth[1]*tcharge[1] + TMath::Pi()) / 2 < TMath::Pi() - 1 && 
          (tth[0]*tcharge[0] + tth[1]*tcharge[1] + TMath::Pi()) / 2 > 1 && 
-         abs(tth[1] - TMath::Pi()/2) <= 0.7 && abs(tth[1] - TMath::Pi()/2) <= 0.7 &&
-         (tdedx[0]+tdedx[1])/2 > 7000 &&
+         abs(tth[1] - TMath::Pi()/2) <= 0.6 && 
+         abs(tth[0] - TMath::Pi()/2) <= 0.6 &&
+         tdedx[0] > 40 * exp(-(tptot[0] - 60) / 40) + 7000 &&
+         tdedx[1] > 40 * exp(-(tptot[1] - 60) / 40) + 7000 &&
          fabs(tptot[0]-tptot[1])/(tptot[0]+tptot[1]) < 0.3 &&
-         tcharge[0] * tcharge[1] < 0)
+         tptot[0] > 60 && tptot[0] < 150 &&
+         tptot[1] > 60 && tptot[1] < 150)
       {
          tNew->Fill();
 
          if(tcharge[0] > 0)
          {
+            hMomentums->Fill(tptot[1], tptot[0]);
             hist1->Fill(tptot[0],tdedx[0]);
             hist2->Fill(tptot[1],tdedx[1]);
          }
          else
          {
+            hMomentums->Fill(tptot[1], tptot[0]);
             hist2->Fill(tptot[0],tdedx[0]);
             hist1->Fill(tptot[1],tdedx[1]);
          }
