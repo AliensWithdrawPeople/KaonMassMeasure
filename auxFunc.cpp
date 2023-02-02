@@ -1,6 +1,8 @@
 #include "TF1.h"
 #include "TGraphErrors.h"
 #include "TLine.h"
+#include "TGaxis.h"
+#include "TAxis.h"
 
 int auxFunc()
 {
@@ -200,26 +202,50 @@ int auxFunc()
     std::vector<Float_t> vDeltaPtotNeg;
     std::vector<Float_t> vDeltaPhiPos;
     std::vector<Float_t> vDeltaPhiNeg;
-
+    
+    int a = 3;
     for(int i = 0; i < dPtotPos.size(); i++)
     {
-        vDeltaPtotPos.push_back(dPtotPos[i][0]);
-        vDeltaPtotNeg.push_back(dPtotNeg[i][0]);
-        vDeltaPhiPos.push_back(dPhiPos[i][1]);
-        vDeltaPhiNeg.push_back(dPhiNeg[i][1]);
+        vDeltaPtotPos.push_back(dPtotPos[i][a] - dPtotNeg[i][a]);
+        vDeltaPtotNeg.push_back(dPtotNeg[i][a]);
+        vDeltaPhiPos.push_back(dPhiPos[i][a] - dPhiNeg[i][a]);
+        vDeltaPhiNeg.push_back(dPhiNeg[i][a]);
     }
-    
-    TGraphErrors grDeltaPtotPos1(vDeltaPtotPos.size(), vPavg.data(), vDeltaPtotPos.data(), zeroes.data(), zeroes.data());
-    TGraphErrors grDeltaPtotNeg1(vDeltaPtotNeg.size(), vPavg.data(), vDeltaPtotNeg.data(), zeroes.data(), zeroes.data());
+    std::vector<Float_t> vCellNums = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18};
+    std::vector<Float_t> vErrs1 = {0.0475, 0.05, 0.061, 0.0864, 0.02, 0.04, 0.05, 0.06 };
+    std::vector<Float_t> vErrs2 = {0.0002, 0.0003, 0.0005, 0.0009, 0.0001, 0.0002, 0.0003, 0.0004 };
+    auto grDeltaPtotPos1 = new TGraphErrors(vDeltaPtotPos.size(), vPavg.data(), vDeltaPtotPos.data(), zeroes.data(), vErrs1.data());
+    auto grDeltaPtotNeg1 = new TGraphErrors(vDeltaPtotNeg.size(), vPavg.data(), vDeltaPtotNeg.data(), zeroes.data(), zeroes.data());
 
-    TGraphErrors grDeltaPhiPos1(vDeltaPhiPos.size(), vPavg.data(), vDeltaPhiPos.data(), zeroes.data(), zeroes.data());
-    TGraphErrors grDeltaPhiNeg1(vDeltaPhiNeg.size(), vPavg.data(), vDeltaPhiNeg.data(), zeroes.data(), zeroes.data());
+    auto grDeltaPhiPos1 = new TGraphErrors(vDeltaPhiPos.size(), vPavg.data(), vDeltaPhiPos.data(), zeroes.data(), vErrs2.data());
+    auto grDeltaPhiNeg1 = new TGraphErrors(vDeltaPhiNeg.size(), vPavg.data(), vDeltaPhiNeg.data(), zeroes.data(), zeroes.data());
     
-    grDeltaPhiPos1.SetMarkerColor(kRed);
-    grDeltaPhiNeg1.SetMarkerColor(kBlue);
-    grDeltaPhiPos1.SetTitle("Red - #pi^{+}, Blue - #pi^{-}");
-    grDeltaPhiPos1.DrawClone("AP");
-    grDeltaPhiNeg1.DrawClone("same");
+    grDeltaPtotPos1->SetMarkerColor(kRed);
+    grDeltaPtotNeg1->SetMarkerColor(kBlue);
 
+    grDeltaPhiPos1->SetMarkerColor(kRed);
+    grDeltaPhiNeg1->SetMarkerColor(kBlue);
+    auto fstScaleDeltaPhi = grDeltaPhiPos1->GetYaxis();
+    auto sndScaleDeltaPhi = new TGaxis(270, -0.003, 270, 0.001, -0.030, 0.01, 50010, "+");
+    sndScaleDeltaPhi->SetTitleOffset(1.2);
+    sndScaleDeltaPhi->SetLabelOffset(0.06);
+    sndScaleDeltaPhi->SetTitle("#DeltaM^{(CrAngle)}, #frac{MeV}{c^{2}}");
+    // grDeltaPtotPos1->SetTitle("#pi^{+} - red, #pi^{-} - blue;Cell num;#DeltaP_{tr}, #frac{MeV}{c}");
+    // grDeltaPhiPos1->SetTitle("#pi^{+} - red, #pi^{-} - blue;Cell num;#Delta#phi, rad");
+    grDeltaPtotPos1->SetTitle("#pi^{+} - #pi^{-};P_{avg}, #frac{MeV}{c};#DeltaP_{#pi^{+}} - #DeltaP_{#pi^{-}}, #frac{MeV}{c}");
+    grDeltaPhiPos1->SetTitle("#pi^{+} - #pi^{-};P_{avg}, #frac{MeV}{c};#Delta#phi_{#pi^{+}} - #Delta#phi_{#pi^{-}}, rad");
+    // grDeltaPtotPos1->SetTitle("Red - #pi^{+}, Blue - #pi^{-}");
+    grDeltaPhiPos1->DrawClone("AP");
+    sndScaleDeltaPhi->DrawClone("same");
+    // grDeltaPtotNeg1->DrawClone("P same");
+
+    std::vector<Float_t> vM_Exp = {497.59, 497.578, 497.569, 497.59, 497.573, 497.556};
+    std::vector<Float_t> vMerrExp = {0.0258545, 0.00895756, 0.00402005, 0.00247398, 0.00670656, 0.0283649};
+    vE = {505, 508, 509, 510, 511, 514};
+    TGraphErrors grRCNC_exp(vM_Exp.size(), vE.data(), vM_Exp.data(), zeroes.data(), vMerrExp.data());
+    // grRCNC_exp.DrawClone("AP");
+
+
+    // grDeltaPtotPos1.DrawClone("AP");
     return 0;
 }
