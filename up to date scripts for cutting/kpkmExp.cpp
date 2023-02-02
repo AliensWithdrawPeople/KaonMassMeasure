@@ -64,6 +64,8 @@ void kpkmExp::Loop(std::string histFileName)
    double cutRmax = 1.0;
    double cutZtrack = 10.;
    double cutPtot = 40;
+   
+   int counter = 0;
 
    Long64_t nentries = fChain->GetEntriesFast();
 
@@ -99,7 +101,7 @@ void kpkmExp::Loop(std::string histFileName)
          tptot[1] > 60 && tptot[1] < 150)
       {
          tNew->Fill();
-
+         counter++;
          if(tcharge[0] > 0)
          {
             hMomentums->Fill(tptot[1], tptot[0]);
@@ -116,7 +118,7 @@ void kpkmExp::Loop(std::string histFileName)
 
       NgoodTr = 0;
    }
-
+   std::cout << "efficiency = " << double(counter) / nentries << std::endl;
    top->Write();
    top->Save();
 }

@@ -13,6 +13,14 @@
 #include "TProfile.h"
 #include <Math/SpecFuncMathCore.h>
 
+void printVector(std::vector<double> &vec, std::string name)
+{
+    std::cout << name + " = {";
+    for(auto elem : vec)
+    { std::cout << elem << ", "; }
+    std::cout << "}" << std::endl;
+}
+
 void pipiCut::Loop(std::string histFileName)
 {
 //   In a ROOT session, you can do:
@@ -104,6 +112,11 @@ void pipiCut::Loop(std::string histFileName)
     std::vector<TProfile *> vDeltaPhiVsPhiProfNeg;
     std::vector<TProfile *> vDeltaPtotVsPhiProfPos;
     std::vector<TProfile *> vDeltaPtotVsPhiProfNeg;
+    auto hDeltaPhiVsPhiPosFull_pfx = new TProfile("hDeltaPhiVsPhiPos_pfx_Full2pi", "hDeltaPhiVsPhiPos_pfx_Full2pi", 18*150, 0, 2 * TMath::Pi(), -0.2, 0.2);
+    auto hDeltaPhiVsPhiNegFull_pfx = new TProfile("hDeltaPhiVsPhiNeg_pfx_Full2pi", "hDeltaPhiVsPhiNeg_pfx_Full2pi", 18*150, 0, 2 * TMath::Pi(), -0.2, 0.2);
+    auto hDeltaPtotVsPhiPosFull_pfx = new TProfile("hDeltaPtotVsPhiPos_pfx_Full2pi", "hDeltaPtotVsPhiPos_pfx_Full2pi", 18*150, 0, 2 * TMath::Pi(), -0.2, 0.2);
+    auto hDeltaPtotVsPhiNegFull_pfx = new TProfile("hDeltaPtotVsPhiNeg_pfx_Full2pi", "hDeltaPtotVsPhiNeg_pfx_Full2pi", 18*150, 0, 2 * TMath::Pi(), -0.2, 0.2);
+    
     int Nchambers = 18;
     for(int i = 0; i < Nchambers; i++)
     { 
@@ -205,6 +218,12 @@ void pipiCut::Loop(std::string histFileName)
             vDeltaPtotVsPhiProfPos[indexPos]->Fill(phiShiftedPos, tptotv[nTracks[posTrackNumber]] - tptot[nTracks[posTrackNumber]]);
             vDeltaPtotVsPhiProfNeg[indexNeg]->Fill(phiShiftedNeg, tptotv[nTracks[negTrackNumber]] - tptot[nTracks[negTrackNumber]]);
 
+            hDeltaPhiVsPhiPosFull_pfx->Fill(phiShiftedPos, tphiv[nTracks[posTrackNumber]] - tphi[nTracks[posTrackNumber]]);
+            hDeltaPhiVsPhiNegFull_pfx->Fill(phiShiftedNeg, tphiv[nTracks[negTrackNumber]] - tphi[nTracks[negTrackNumber]]);
+            
+            hDeltaPtotVsPhiPosFull_pfx->Fill(phiShiftedPos, tptotv[nTracks[posTrackNumber]] - tptot[nTracks[posTrackNumber]]);
+            hDeltaPtotVsPhiNegFull_pfx->Fill(phiShiftedNeg, tptotv[nTracks[negTrackNumber]] - tptot[nTracks[negTrackNumber]]);
+
             // for(int i = 0; i < nsim; i++)
             // {
             //     if(simtype[i] == 211)
@@ -263,6 +282,11 @@ void pipiCut::Loop(std::string histFileName)
     std::vector<double> deltaPhiNeg;
     std::vector<double> deltaPtotPos;
     std::vector<double> deltaPtotNeg;
+
+    std::vector<double> deltaPhiPosErr;
+    std::vector<double> deltaPhiNegErr;
+    std::vector<double> deltaPtotPosErr;
+    std::vector<double> deltaPtotNegErr;
     for(int i = 0; i < Nchambers; i++)
     {
         canvs[int(i / 6)]->cd(i - 6 * int(i / 6) + 1);
@@ -273,29 +297,26 @@ void pipiCut::Loop(std::string histFileName)
 
         deltaPtotPos.push_back(vDeltaPtotVsPhiProfPos[i]->GetMean(2));
         deltaPtotNeg.push_back(vDeltaPtotVsPhiProfNeg[i]->GetMean(2));
+
+        deltaPhiPosErr.push_back(vDeltaPhiVsPhiProfPos[i]->GetMeanError(2));
+        deltaPhiNegErr.push_back(vDeltaPhiVsPhiProfNeg[i]->GetMeanError(2));
+
+        deltaPtotPosErr.push_back(vDeltaPtotVsPhiProfPos[i]->GetMeanError(2));
+        deltaPtotNegErr.push_back(vDeltaPtotVsPhiProfNeg[i]->GetMeanError(2));
     }
     for(auto canv : canvs)
     { canv->Write(); }
 
-    std::cout << "deltaPhiPos = {";
-    for(auto elem : deltaPhiPos)
-    { std::cout << elem << ", "; }
-    std::cout << "}" << std::endl;
+    
+    printVector(deltaPhiPos, "deltaPhiPos");
+    printVector(deltaPhiNeg, "deltaPhiNeg");
+    printVector(deltaPtotPos, "deltaPtotPos");
+    printVector(deltaPtotNeg, "deltaPtotNeg");
 
-    std::cout << "deltaPhiNeg = {";
-    for(auto elem : deltaPhiNeg)
-    { std::cout << elem << ", "; }
-    std::cout << "}" << std::endl;
-
-    std::cout << "deltaPtotPos = {";
-    for(auto elem : deltaPtotPos)
-    { std::cout << elem << ", "; }
-    std::cout << "}" << std::endl;
-
-    std::cout << "deltaPtotNeg = {";
-    for(auto elem : deltaPtotNeg)
-    { std::cout << elem << ", "; }
-    std::cout << "}" << std::endl;
+    printVector(deltaPhiPosErr, "deltaPhiPosErr");
+    printVector(deltaPhiNegErr, "deltaPhiNegErr");
+    printVector(deltaPtotPosErr, "deltaPtotPosErr");
+    printVector(deltaPtotNegErr, "deltaPtotNegErr");
 
     auto hyperGauss = new TF1("HyperGauss", "[0] * exp([1] * (1 - sqrt(1 + (x - [2]) * (x - [2]) / [3])))", -1000, 1000);
     // 2 * K(1, 2) / K(2, 2) = 1.10234; [3]_0 = sigma^2 * 2 * K(1, 2) / K(2, 2)

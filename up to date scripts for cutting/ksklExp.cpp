@@ -65,8 +65,8 @@ void ksklExp::Loop(std::string histFileName)
     Float_t dpsi;
     Float_t Y;
     Float_t p1; Float_t p2;
-    tNew->Branch("emeas", &emeas, "emeas/F");
-    tNew->Branch("demeas", &demeas, "demeas/F");
+    tNew->Branch("emeas", &emeas0, "emeas/F");
+    tNew->Branch("demeas", &demeas0, "demeas/F");
     tNew->Branch("runnum", &runnum, "runnum/I");
     tNew->Branch("ksdpsi", &dpsi, "dpsi/F");
     tNew->Branch("Y", &Y, "Y/F");
@@ -339,7 +339,6 @@ void ksklExp::Loop(std::string histFileName)
                     if(piPos.Cross(field).XYvector().DeltaPhi(piNeg.XYvector()) < TMath::Pi() / 2)
                     { 
                         // dpsi = piNeg.Angle(piPos);
-                        // tNew->Fill();
                         // tNew->Fill(); 
                         // hist->Fill(piPos.Mag(), piNeg.Mag());    
                     }
@@ -347,11 +346,8 @@ void ksklExp::Loop(std::string histFileName)
                     // Sailor
                     if(piPos.Cross(field).XYvector().DeltaPhi(piNeg.XYvector()) > TMath::Pi() / 2)
                     {  
-                        // if(missingMass > 350)
-                        // { 
-                        //     tNew->Fill(); 
-                        //     hist->Fill(piPos.Mag(), piNeg.Mag());    
-                        // }
+                        // tNew->Fill(); 
+                        // hist->Fill(piPos.Mag(), piNeg.Mag());    
                     }
                 }
             }
@@ -398,10 +394,10 @@ void ksklExp::Loop(std::string histFileName)
     // ****************************************************
 
     // Drawing KsKl dThetadPhi with cuts' lines
-    auto dThetadPhiCutLine1 = new TLine(TMath::Pi() - 1, -0.3, TMath::Pi() + 1, -0.3);
-    auto dThetadPhiCutLine2 = new TLine(TMath::Pi() - 1, -0.3, TMath::Pi() - 1, 0.3);
-    auto dThetadPhiCutLine3 = new TLine(TMath::Pi() + 1, -0.3, TMath::Pi() + 1, 0.3);
-    auto dThetadPhiCutLine4 = new TLine(TMath::Pi() - 1, 0.3, TMath::Pi() + 1, 0.3);
+    auto dThetadPhiCutLine1 = new TLine(TMath::Pi() - 1, -1, TMath::Pi() + 1, -1);
+    auto dThetadPhiCutLine2 = new TLine(TMath::Pi() - 1, -1, TMath::Pi() - 1, 1);
+    auto dThetadPhiCutLine3 = new TLine(TMath::Pi() + 1, -1, TMath::Pi() + 1, 1);
+    auto dThetadPhiCutLine4 = new TLine(TMath::Pi() - 1, 1, TMath::Pi() + 1, 1);
     dThetadPhiCutLine1->SetLineWidth(4);
     dThetadPhiCutLine2->SetLineWidth(4);
     dThetadPhiCutLine3->SetLineWidth(4);
@@ -422,10 +418,10 @@ void ksklExp::Loop(std::string histFileName)
     hClEdPhiCutLine1->SetLineWidth(4);
     hClEdPhiCutLine2->SetLineWidth(4);
     hClEdPhiCutLine3->SetLineWidth(4);
-    // hClEdPhi->Draw("col");
-    // hClEdPhiCutLine1->Draw("same");
-    // hClEdPhiCutLine2->Draw("same");
-    // hClEdPhiCutLine3->Draw("same");
+    // hClEdPhi->DrawClone("col");
+    // hClEdPhiCutLine1->DrawClone("same");
+    // hClEdPhiCutLine2->DrawClone("same");
+    // hClEdPhiCutLine3->DrawClone("same");
     // Drawing KsKl Cluster Energy vs dPhi with cuts' lines
 
     std::cout << "nentries " << nentries << std::endl;
@@ -444,4 +440,37 @@ void ksklExp::Loop(std::string histFileName)
 
     top->Write();
     top->Save();
+
+    delete tNew;
+    delete top;
+    delete hitCutLine1;
+    delete hitCutLine2;
+    delete thetaCutLine1;
+    delete thetaCutLine2;
+    delete hClEdPhiCutLine1;
+    delete hClEdPhiCutLine2;
+    delete hClEdPhiCutLine3;
+    delete dThetadPhiCutLine1;
+    delete dThetadPhiCutLine2;
+    delete dThetadPhiCutLine3;
+    delete dThetadPhiCutLine4;
+
+    delete hist;
+    delete histKlCands;
+    delete histKsCands;
+    delete hTrackColl;
+    delete hdPhiTheta;
+    delete hdThetadPhi;
+    delete hClEdPhi;
+    delete hPsiUncutted;
+    delete hPsiCutted;
+    delete hKsKlPhi;
+    delete hKsKlTheta;
+    delete hHit;
+    delete hTrackTheta;
+    delete hKstlenVsMinv;
+    delete hTwoPhotonsTotEn;
+    delete hGammasPi0Angles;
+    delete hMissingMass;
+    delete hMissingMom;
 }
