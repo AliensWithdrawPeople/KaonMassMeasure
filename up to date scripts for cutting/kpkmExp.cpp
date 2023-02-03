@@ -42,7 +42,6 @@ void kpkmExp::Loop(std::string histFileName)
 
    auto hist1 = new TH2D("hKp", "K+", 5000, 0, 1000, 5000, 0, 40000);
    auto hist2 = new TH2D("hKm", "K-", 5000, 0, 1000, 5000, 0, 40000);
-
    auto hMomentums =  new TH2D("hMoms", "K+ mom vs K- mom", 1000, 0, 1000, 1000, 0, 1000);
 
    Float_t dpsi;
@@ -52,7 +51,7 @@ void kpkmExp::Loop(std::string histFileName)
    tNew->Branch("emeas", &emeas0, "emeas/F");
    tNew->Branch("demeas", &demeas0, "demeas/F");
    tNew->Branch("runnum", &runnum, "runnum/I");
-   tNew->Branch("tptot", tptot, "tptot[2]/F");
+   tNew->Branch("tptot", tptotv, "tptot[2]/F");
    tNew->Branch("tdedx", tdedx, "tdedx[2]/F");
 
    Double_t halfPi = TMath::Pi() / 2;
@@ -61,7 +60,6 @@ void kpkmExp::Loop(std::string histFileName)
    double cutChi2r = 15.;
    double cutChi2z = 10.;
    int cutNhitMin = 10;
-   double cutRmax = 1.0;
    double cutZtrack = 10.;
    double cutPtot = 40;
    
@@ -81,7 +79,7 @@ void kpkmExp::Loop(std::string histFileName)
 
       for (int i = 0; i < nt; i++)
       {
-         if (tptot[i] > cutPtot && fabs(trho[i]) < cutRmax && fabs(tz[i]) < cutZtrack &&
+         if (tptotv[i] > cutPtot && fabs(tz[i]) < cutZtrack &&
                tchi2r[i] < cutChi2r && tchi2z[i] < cutChi2z && tnhit[i] > cutNhitMin)
          { NgoodTr++; }
       }
@@ -90,34 +88,34 @@ void kpkmExp::Loop(std::string histFileName)
       { NgoodTrS++; }
 
       if (NgoodTr == 2 && is_coll==1 && tnhit[0]>10 && tnhit[1]>10 && tcharge[0]*tcharge[1] < 0 &&
-         (tth[0]*tcharge[0] + tth[1]*tcharge[1] + TMath::Pi()) / 2 < TMath::Pi() - 1 && 
-         (tth[0]*tcharge[0] + tth[1]*tcharge[1] + TMath::Pi()) / 2 > 1 && 
-         abs(tth[1] - TMath::Pi()/2) <= 0.6 && 
-         abs(tth[0] - TMath::Pi()/2) <= 0.6 &&
-         tdedx[0] > 40 * exp(-(tptot[0] - 60) / 40) + 7000 &&
-         tdedx[1] > 40 * exp(-(tptot[1] - 60) / 40) + 7000 &&
-         fabs(tptot[0]-tptot[1])/(tptot[0]+tptot[1]) < 0.3 &&
-         tptot[0] > 60 && tptot[0] < 150 &&
-         tptot[1] > 60 && tptot[1] < 150)
+         tth[0] > 1 && tth[0] < TMath::Pi() - 1 &&
+         tth[1] > 1 && tth[1] < TMath::Pi() - 1 &&
+         tdedx[0] > 40 * exp(-(tptotv[0] - 60) / 40) + 7000 &&
+         tdedx[1] > 40 * exp(-(tptotv[1] - 60) / 40) + 7000 &&
+         fabs(tptotv[0]-tptotv[1])/(tptotv[0]+tptotv[1]) < 0.3 &&
+         tptotv[0] > 60 && tptotv[0] < 150 &&
+         tptotv[1] > 60 && tptotv[1] < 150)
       {
          tNew->Fill();
          counter++;
          if(tcharge[0] > 0)
          {
-            hMomentums->Fill(tptot[1], tptot[0]);
-            hist1->Fill(tptot[0],tdedx[0]);
-            hist2->Fill(tptot[1],tdedx[1]);
+            hMomentums->Fill(tptotv[1], tptotv[0]);
+            hist1->Fill(tptotv[0],tdedx[0]);
+            hist2->Fill(tptotv[1],tdedx[1]);
          }
          else
          {
-            hMomentums->Fill(tptot[1], tptot[0]);
-            hist2->Fill(tptot[0],tdedx[0]);
-            hist1->Fill(tptot[1],tdedx[1]);
+            hMomentums->Fill(tptotv[1], tptotv[0]);
+            hist2->Fill(tptotv[0],tdedx[0]);
+            hist1->Fill(tptotv[1],tdedx[1]);
          }
       }
 
       NgoodTr = 0;
    }
+   std::cout << "Number of events in the tree = " << nentries << std::endl;
+   std::cout << "Number of good tracks = " << NgoodTrS << std::endl;
    std::cout << "efficiency = " << double(counter) / nentries << std::endl;
    top->Write();
    top->Save();
