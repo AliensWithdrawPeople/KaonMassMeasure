@@ -8,11 +8,15 @@
 
 #include "TROOT.h"
 #include "TH2D.h"
+#include "TH1D.h"
+#include "TFitResult.h"
+#include "TFitResultPtr.h"
 #include "TCanvas.h"
 #include "TFile.h"
 #include "TTree.h"
 #include "TGraph.h"
 #include "TGraphErrors.h"
+#include "TLine.h"
 
 
 class Energy
@@ -30,6 +34,8 @@ private:
     std::vector<std::vector<int>> emeasRunGroups; // Runs grouped by emeas.
     std::vector<std::vector<int>> enRunGroups; // Runs grouped by Kch avg energy.
     double energyShift;
+    double comptonEnergyMean;
+    double comptonEnergyError;
 
     std::vector<double> runs;
     Int_t runnum;
@@ -53,21 +59,24 @@ private:
     * Return pair<energy, energy error>.
     */
     std::pair<double, double> Eval(int run); 
+    std::pair<double, double> Eval(std::vector<int> &runGroup); 
 
 public:
     int GetGroupsNum();
     void PrintGroups();
     void DrawGraph(int graphNum = -1);
 
-    Energy(std::string fChargedK, double shiftToKchEnergy = 4.);
+    Energy(std::string fChargedK, double comptonEnergyMean, double comptonEnergyError, int maxGroupSize = 4, double shiftToKchEnergy = 4.);
     ~Energy();
 };
 
-Energy::Energy(std::string fChargedK, double shiftToKchEnergy = 4.)
+Energy::Energy(std::string fChargedK, double comptonEnergyMean, double comptonEnergyError, int maxGroupSize = 4, double shiftToKchEnergy = 4.)
 {
     TFile *file = TFile::Open(fChargedK.c_str());
     kTr = (TTree *)file->Get("kChargedTree");
     energyShift = shiftToKchEnergy;
+    this->comptonEnergyMean = comptonEnergyMean;
+    this->comptonEnergyError = comptonEnergyError;
     kTr->SetBranchAddress("ebeam", &ebeam);
     kTr->SetBranchAddress("emeas", &emeas);
     kTr->SetBranchAddress("demeas", &demeas);
@@ -76,7 +85,7 @@ Energy::Energy(std::string fChargedK, double shiftToKchEnergy = 4.)
     kTr->SetBranchAddress("tptot", tptot);
 
     FillHists();
-    DivideIntoGroups();
+    DivideIntoGroups(maxGroupSize);
 }
 
 Energy::~Energy()
@@ -93,6 +102,8 @@ int Energy::FillHists()
     for(int i = 0; i < kTr->GetEntriesFast(); i++)
     {
         kTr->GetEntry(i);
+        if(fabs(demeas) < 1e-8 || emeas < 100)
+        { continue; }
         runs_.insert(double(runnum));
         if(enHists.count(runnum) <= 0)
         { 
@@ -113,8 +124,40 @@ int Energy::FillHists()
 std::pair<double, double> Energy::Eval(int run)
 {
     if(enHists.count(run) > 0)
-    { return std::make_pair(enHists[run]->GetMean(), enHists[run]->GetMeanError()); }
-    return std::make_pair(0., 0.);
+    { 
+        auto tmpHist = new TH1D(*enHists[run]);
+        tmpHist->Rebin(8);
+        auto res = tmpHist->Fit("gaus", "SEQM", "", tmpHist->GetBinCenter(tmpHist->GetMaximumBin()) - tmpHist->GetRMS(), 
+                                                    tmpHist->GetBinCenter(tmpHist->GetMaximumBin()) + 2 * tmpHist->GetRMS());
+        res = tmpHist->Fit("gaus", "SEQM", "", res->Parameter(1) - res->Parameter(2), res->Parameter(1) + 2 * res->Parameter(2));
+        if(res->Chi2()/res->Ndf() > 1.5)
+        { std::cout << run << " run: chi2 / ndf = " << res->Chi2()/res->Ndf() << std::endl; }
+        delete tmpHist;
+        return std::make_pair(res->Parameter(1), res->ParError(1)); 
+        // return std::make_pair(enHists[run]->GetMean(), enHists[run]->GetMeanError()); 
+    }
+    return std::make_pair(-1, 0.);
+}
+
+std::pair<double, double> Energy::Eval(std::vector<int> &runGroup)
+{
+    if(runGroup.size() == 0)
+    { return std::make_pair(-1, 0.); }
+    auto tmpHist = new TH1D(("tmpHist" + std::to_string(runGroup[0])).c_str(), 
+                            (std::to_string(runGroup[0]) + "-" + std::to_string(runGroup.back())).c_str(), 3000, 490, 520);
+    for(int i = 0; i < tmpHist->GetNbinsX(); i++)
+    {
+        for(auto run : runGroup)
+        { tmpHist->SetBinContent(i, tmpHist->GetBinContent(i) + enHists[run]->GetBinContent(i)); }
+    }
+    tmpHist->Rebin(8);
+    auto res = tmpHist->Fit("gaus", "SEQM", "", tmpHist->GetBinCenter(tmpHist->GetMaximumBin()) - tmpHist->GetRMS(), 
+                                                tmpHist->GetBinCenter(tmpHist->GetMaximumBin()) + 1.5 * tmpHist->GetRMS());
+    res = tmpHist->Fit("gaus", "SEQM", "", res->Parameter(1) - res->Parameter(2), res->Parameter(1) + 1.5 * res->Parameter(2));
+    if(res->Chi2()/res->Ndf() > 1.5)
+    { std::cout << runGroup[0] << "-" << runGroup.back() << " runs: chi2 / ndf = " << res->Chi2()/res->Ndf() << std::endl; }
+    // delete tmpHist;
+    return std::make_pair(res->Parameter(1), res->ParError(1)); 
 }
 
 int Energy::DivideIntoGroups(int maxGroupSize)
@@ -153,15 +196,18 @@ std::map<int, std::pair<Float_t, Float_t>> Energy::AverageKchEnergy()
     Float_t tmpEnergyErr = 0;
     for(auto &group : enRunGroups)
     {
-        tmpEnergy = 0;
-        tmpEnergyErr = 0;
-        for(auto run : group)
-        {
-            tmpEnergy += runAvgEval[run].first;
-            tmpEnergyErr += 1 / runAvgEval[run].second / runAvgEval[run].second;
-        }
-        tmpEnergy = tmpEnergy / group.size();
-        tmpEnergyErr = sqrt(1 / tmpEnergyErr);
+        // tmpEnergy = 0;
+        // tmpEnergyErr = 0;
+        // for(auto run : group)
+        // {
+        //     tmpEnergy += runAvgEval[run].first;
+        //     tmpEnergyErr += 1 / runAvgEval[run].second / runAvgEval[run].second;
+        // }
+        // tmpEnergy = tmpEnergy / group.size();
+        // tmpEnergyErr = sqrt(1 / tmpEnergyErr);
+        auto tmpPair = Eval(group);
+        tmpEnergy = tmpPair.first;
+        tmpEnergyErr = tmpPair.second;
         for(auto run : group)
         { averaged[run] = std::make_pair(tmpEnergy, tmpEnergyErr); }
     }
@@ -174,7 +220,7 @@ void Energy::DrawGraph(int graphNum = -1)
     std::vector<double> enVals;
     std::vector<double> enErrs;
     std::vector<double> emeasVals;
-    std::vector<double> emeasErrs(runs.size(), 0.0);
+    std::vector<double> emeasErrs;
     auto enValsAveraged = AverageKchEnergy();
 
     std::transform(runAvgEmeas.begin(), runAvgEmeas.end(), std::back_inserter(runnums),
@@ -182,8 +228,8 @@ void Energy::DrawGraph(int graphNum = -1)
 
     std::transform(runAvgEmeas.begin(), runAvgEmeas.end(), std::back_inserter(emeasVals),
                         [](std::pair<int, std::pair<Float_t, Float_t>> val) { return double(val.second.first); });
-    // std::transform(runAvgEmeas.begin(), runAvgEmeas.end(), std::back_inserter(emeasErrs),
-    //                     [](std::pair<int, std::pair<Float_t, Float_t>> val) { return double(val.second.second); });
+    std::transform(runAvgEmeas.begin(), runAvgEmeas.end(), std::back_inserter(emeasErrs),
+                        [](std::pair<int, std::pair<Float_t, Float_t>> val) { return double(val.second.second); });
     
     std::transform(enValsAveraged.begin(), enValsAveraged.end(), std::back_inserter(enVals),
                         [&](std::pair<int, std::pair<Float_t, Float_t>> val) { return double(val.second.first + energyShift); });
@@ -193,9 +239,24 @@ void Energy::DrawGraph(int graphNum = -1)
     std::vector<double> zeroes(runnums.size(), 0.0);
     TGraphErrors grEnVsRun(runnums.size(), runnums.data(), enVals.data(), zeroes.data(), enErrs.data());
     TGraphErrors grEmeasVsRun(runnums.size(), runnums.data(), emeasVals.data(), zeroes.data(), emeasErrs.data());
-    grEnVsRun.DrawClone("AP");
+
+    TGraphErrors grComptonEnVsRun;
+    grComptonEnVsRun.AddPoint(runs[0] - 10, comptonEnergyMean);
+    grComptonEnVsRun.SetPointError(0, 0, comptonEnergyError);
+    grComptonEnVsRun.SetLineColor(kBlue);
+    grComptonEnVsRun.SetMarkerColor(kBlue);
+    TLine comptonMean(runs[0], comptonEnergyMean, runs.back(), comptonEnergyMean);
+    comptonMean.SetLineColor(kYellow);
+    
+    grEmeasVsRun.GetXaxis()->SetTitle("Run");
+    grEmeasVsRun.GetYaxis()->SetTitle("Energy, MeV");
+    grEmeasVsRun.SetTitle("Red -- emeas, black -- Kch E_inv, yellow(blue) -- compton mean for energy point");
     grEmeasVsRun.SetMarkerColor(kRed);
-    grEmeasVsRun.DrawClone("P same");
+    grEmeasVsRun.SetLineColor(kRed);
+    grEmeasVsRun.DrawClone("AP");
+    grEnVsRun.DrawClone("P same");
+    grComptonEnVsRun.DrawClone("P same");
+    comptonMean.DrawClone("same");
 }
 
 int Energy::GetGroupsNum()
@@ -217,9 +278,8 @@ int energyStability()
     gROOT->Reset();
     auto start = std::chrono::system_clock::now();
 
-    auto enHandler = new Energy("C://work/Science/BINP/Kaon Mass Measure/tr_ph/expKpKm/expKch_509.root");
+    auto enHandler = new Energy("C://work/Science/BINP/Kaon Mass Measure/tr_ph/expKpKm/expKch_509.root", 508.957, 0.009, 3);
     enHandler->DrawGraph();
-    enHandler->PrintGroups();
     delete enHandler;
 
     auto end = std::chrono::system_clock::now();
