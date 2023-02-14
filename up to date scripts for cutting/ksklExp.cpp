@@ -234,7 +234,8 @@ void ksklExp::Loop(std::string histFileName)
                 // kspipt[k][0] < 350 && kspipt[k][1] < 350 &&
 		        // (kspipt[k][0]+kspipt[k][1]) > 500 &&
 		        kstlen[k] < 1.7 &&
-                tcharge[ksvind[k][0]] * tcharge[ksvind[k][1]] < 0 && kstype[k] == 0) // Added kstype[k] == 0.
+                tcharge[ksvind[k][0]] * tcharge[ksvind[k][1]] < 0 && kstype[k] == 0 &&
+                emeas0 > 100) // Added kstype[k] == 0.
                 {
                     ks.SetMagThetaPhi(1, ksth[k], ksphi[k]);
 
@@ -310,8 +311,8 @@ void ksklExp::Loop(std::string histFileName)
                 missingMom = -(piPos + piNeg);
                 piPosEn = sqrt(139.57 * 139.57 + piPos.Mag2());
                 piNegEn = sqrt(139.57 * 139.57 + piNeg.Mag2());
-                missingMass = sqrt(4 * emeas * emeas + 2 * 139.57 * 139.57 
-                                    - 2 * 2 * emeas * piPosEn - 2 * 2 * emeas * piNegEn
+                missingMass = sqrt(4 * emeas0 * emeas0 + 2 * 139.57 * 139.57 
+                                    - 2 * 2 * emeas0 * piPosEn - 2 * 2 * emeas0 * piNegEn
                                     + 2 * (piPosEn * piNegEn - piPos.Dot(piNeg)));
                 hMissingMass->Fill(missingMass);
                 // if(nph > 1)
