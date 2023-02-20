@@ -39,7 +39,7 @@ void kskl2bGen::Loop(std::string histFileName)
     if (fChain == 0)
         return;
 
-    TFile *top = new TFile(("../tr_ph/" + histFileName).c_str(), "recreate");
+    TFile *top = new TFile(("../tr_ph/MC/" + histFileName).c_str(), "recreate");
     auto tNew = new TTree("ksTree", "Cutted tr_ph (Ks mass meas important data)");
 
     Float_t dpsi;
@@ -312,8 +312,8 @@ void kskl2bGen::Loop(std::string histFileName)
                 hMissingMass->Fill(missingMass);
                 hFinalStateId->Fill(finalstate_id);
                 
-                // if(missingMass > 350)
-                // { tNew->Fill(); }
+                if(missingMass > 350)
+                { tNew->Fill(); }
                 // tNew->Fill();
                 hTrackCollCutted->Fill(fabs(tphi[0] - tphi[1]) - TMath::Pi(), tth[0] + tth[1] - TMath::Pi());
                 // hE->Fill(sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2()));
@@ -322,8 +322,8 @@ void kskl2bGen::Loop(std::string histFileName)
                 //  Cowboy Type
                 if(piPosRec.Cross(field).XYvector().DeltaPhi(piNegRec.XYvector()) < TMath::Pi() / 2)
                 { 
-                    if(missingMass > 350)
-                    { tNew->Fill(); }
+                    // if(missingMass > 350)
+                    // { tNew->Fill(); }
                     hE->Fill(sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2()));
                     hDeltaPhiVsPhi->Fill(piPos.XYvector().Phi(), piPos.XYvector().DeltaPhi(piPosRec.XYvector()));
                     hDeltaPhiRecVsGenCowboy->Fill(fabs(piPos.XYvector().DeltaPhi(piNeg.XYvector())), 
