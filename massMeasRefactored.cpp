@@ -219,7 +219,8 @@ void MassHandler::MassLnY(std::map<int, Float_t> &energyDiff, bool isEnergyDiffC
             massFullRec->SetParameters(emeas, (1 - Y*Y) / (1 + Y*Y));
             massFullRecWithEmeas = massFullRec->Eval(ksdpsi) - sigmaPsi * sigmaPsi / 2 * massFullRec->Derivative2(ksdpsi);
 
-            emeas = (energyCorrected == -1) ? emeas + (isEnergyDiffCor? 1 : 0) * energyDiff[runnum]: energyCorrected;
+            emeas = (energyCorrected == -1) ? emeas :  energyCorrected + (isEnergyDiffCor? 1 : 0) * energyDiff[runnum];
+
             massFullRec->SetParameters(emeas, (1 - Y*Y) / (1 + Y*Y));
             massCrAngle->SetParameter(0, emeas);
         
@@ -342,13 +343,13 @@ int massMeasRefactored()
     gROOT->Reset();
     auto start = std::chrono::system_clock::now();
 
-    std::string fileName = "tr_ph/expKsKl/exp508.5_v9.root";
-    // std::string fileName = "tr_ph/MC/MC509Smearing_v9.root";
-    auto kchEnergyHandler = new Energy("tr_ph/expKpKm/kchExp510.root", 509.956, 0.01, 15, 3.717);
+    std::string fileName = "tr_ph/expKsKl/exp511_v9.root";
+    // std::string fileName = "tr_ph/MC/MC514_v9.root";
+    auto kchEnergyHandler = new Energy("tr_ph/expKpKm/kchExp510.root", 509.957, 0.005, 15, 3.709);
     // auto kchEnergyHandler = new Energy("tr_ph/expKpKm/kchExp509.5.root", 509.528, 0.01, 15, 3.751);
     auto energyDiff = kchEnergyHandler->GetEnergyDiff();
     delete kchEnergyHandler;
-    auto massHandler = new MassHandler(fileName, 509);
+    auto massHandler = new MassHandler(fileName);
     massHandler->MassLnY(energyDiff, false);
     delete massHandler;
 

@@ -239,11 +239,21 @@ int auxFunc()
     sndScaleDeltaPhi->DrawClone("same");
     // grDeltaPtotNeg1->DrawClone("P same");
 
-    std::vector<Float_t> vM_Exp = {497.59, 497.578, 497.569, 497.59, 497.573, 497.556};
-    std::vector<Float_t> vMerrExp = {0.0258545, 0.00895756, 0.00402005, 0.00247398, 0.00670656, 0.0283649};
-    vE = {505, 508, 509, 510, 511, 514};
+    std::vector<Float_t> vM_Exp = {497.569,   497.579,    497.55, 497.574,    497.564,    497.591,    497.587,    497.571,    497.529};
+    std::vector<Float_t> vM_Exp2 = {{497.569,   497.579,    497.541, 497.574,    497.566,    497.601,    497.591,    497.571,    497.529}};
+    std::vector<Float_t> vMerrExp = {0.032, 0.012, 0.009, 0.010, 0.005, 0.005, 0.008, 0.010, 0.030};
+    vE = {505, 508, 508.5, 509, 509.5, 510, 510.5, 511, 514};
     TGraphErrors grRCNC_exp(vM_Exp.size(), vE.data(), vM_Exp.data(), zeroes.data(), vMerrExp.data());
-    // grRCNC_exp.DrawClone("AP");
+    TGraphErrors grRCNC_exp2(vM_Exp.size(), vE.data(), vM_Exp2.data(), zeroes.data(), vMerrExp.data());
+
+    grRCNC_exp.SetTitle("Black -- with Energy controll, Blue -- without");
+    grRCNC_exp.GetXaxis()->SetTitle("E_{beam}, MeV");
+    grRCNC_exp.GetYaxis()->SetTitle("M^{(FullRec)}_{RC NC RecCor}, #frac{MeV}{c^{2}}");
+    grRCNC_exp.SetName("EnControl");
+
+    grRCNC_exp.DrawClone("AP");
+    grRCNC_exp2.SetMarkerColor(kBlue);
+    grRCNC_exp2.DrawClone("P Same");
 
 
     // grDeltaPtotPos1.DrawClone("AP");
