@@ -16,6 +16,8 @@
 
 #include <vector>
 #include <algorithm>
+#include <iterator>
+#include <fstream>
 
 #include <chrono>
 #include <ctime> 
@@ -69,6 +71,7 @@ private:
     Int_t groupsAmount; 
 
     // Fills badRuns vector and returns number of good runs.
+    int ReadBadRuns(std::string filename);
     int BadRunSearch();
     // Calculate sigma(lnY) via Fit and RMS
     void CalcSigmas();
@@ -82,11 +85,11 @@ public:
     void MassLnY(std::map<int, Float_t> &energyDiff, bool isEnergyDiffCor, bool withFitSigma = true, int drawOpt = 0);
     std::vector<int> GetBadRunsList();
 
-    MassHandler(std::string fKsKl, double energyCorr = -1);
+    MassHandler(std::string fKsKl, std::string badRunsFileName = "", double energyCorr = -1);
     ~MassHandler();
 };
 
-MassHandler::MassHandler(std::string fKsKl, double energyCorr = -1)
+MassHandler::MassHandler(std::string fKsKl, std::string badRunsFileName, double energyCorr)
 {
     TH2D h2EvsRun("dEdXvsPtot", "", 1000, 100, 120, 659, 60741, 61400);
     Int_t runnum_;
@@ -113,12 +116,24 @@ MassHandler::MassHandler(std::string fKsKl, double energyCorr = -1)
     ksTr->SetBranchAddress("runnum", &runnum);
     ksTr->SetBranchAddress("ksdpsi", &ksdpsi);
     ksTr->SetBranchAddress("Y", &Y);
-
+    
+    ReadBadRuns(badRunsFileName);
     BadRunSearch();
 }
 
 std::vector<int> MassHandler::GetBadRunsList()
 { return badRuns; }
+
+int MassHandler::ReadBadRuns(std::string filename)
+{
+    std::ifstream input(filename);
+    if(input.is_open() && input.good())
+    {
+        std::istream_iterator<double> start(input), end;
+        badRuns.insert(badRuns.end(), start, end);
+    }
+    return badRuns.size();
+}
 
 int MassHandler::BadRunSearch()
 {
@@ -220,6 +235,14 @@ void MassHandler::MassLnY(std::map<int, Float_t> &energyDiff, bool isEnergyDiffC
             massFullRecWithEmeas = massFullRec->Eval(ksdpsi) - sigmaPsi * sigmaPsi / 2 * massFullRec->Derivative2(ksdpsi);
 
             emeas = (energyCorrected == -1) ? emeas :  energyCorrected + (isEnergyDiffCor? 1 : 0) * energyDiff[runnum];
+            if(runnum >= 60790 && runnum <= 60921)
+            { emeas = 15.7437 / (runnum-60763.1) / (runnum-60763.1) + 509.518; }
+
+            if(runnum >= 60922 && runnum <= 61174)
+            { emeas = 2441.92 / (runnum-60737.2) / (runnum-60737.2) + 509.497; }
+
+            if(runnum >= 61175 && runnum <= 61379)
+            { emeas = 631.041 / (runnum-61094.5) / (runnum-61094.5) + 509.527; }
 
             massFullRec->SetParameters(emeas, (1 - Y*Y) / (1 + Y*Y));
             massCrAngle->SetParameter(0, emeas);
@@ -228,9 +251,6 @@ void MassHandler::MassLnY(std::map<int, Float_t> &energyDiff, bool isEnergyDiffC
             hM_CrAnglelnY->Fill(lnY, massCrAngle->Eval(ksdpsi) - sigmaPsi * sigmaPsi / 2 * massCrAngle->Derivative2(ksdpsi));
             // hPsilnY->Fill(lnY, ksdpsi); 
 
-
-            // if((massFullRecWithEmeas > 490 && massFullRecWithEmeas < 496) || (massFullRecWithEmeas > 500 && massFullRecWithEmeas < 505))
-            // if(massFullRecWithEmeas > 496 && massFullRecWithEmeas < 500)
             if(massFullRecWithEmeas > 490 && massFullRecWithEmeas < 505)
             { 
                 hDeltaM->Fill(lnY, - sigmaPsi * sigmaPsi / 2 * massFullRec->Derivative2(ksdpsi));
@@ -343,14 +363,14 @@ int massMeasRefactored()
     gROOT->Reset();
     auto start = std::chrono::system_clock::now();
 
-    std::string fileName = "tr_ph/expKsKl/exp511_v9.root";
+    std::string fileName = "tr_ph/expKsKl/exp509.5_v9.root";
     // std::string fileName = "tr_ph/MC/MC514_v9.root";
     auto kchEnergyHandler = new Energy("tr_ph/expKpKm/kchExp510.root", 509.957, 0.005, 15, 3.709);
     // auto kchEnergyHandler = new Energy("tr_ph/expKpKm/kchExp509.5.root", 509.528, 0.01, 15, 3.751);
     auto energyDiff = kchEnergyHandler->GetEnergyDiff();
     delete kchEnergyHandler;
-    auto massHandler = new MassHandler(fileName);
-    massHandler->MassLnY(energyDiff, false);
+    auto massHandler = new MassHandler(fileName, "txt/BadRuns.txt");
+    massHandler->MassLnY(energyDiff, false, true, 5);
     delete massHandler;
 
     auto end = std::chrono::system_clock::now();

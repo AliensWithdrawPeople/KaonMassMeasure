@@ -5,8 +5,11 @@ int energyStability()
     gROOT->Reset();
     auto start = std::chrono::system_clock::now();
 
-    auto enHandler = new Energy("C://work/Science/BINP/Kaon Mass Measure/tr_ph/expKpKm/kchExp509.5.root", 509.528, 0.01, 15, 3.751);
-
+    // auto enHandler = new Energy("C://work/Science/BINP/Kaon Mass Measure/tr_ph/expKpKm/kchExp508.5.root", 508.397, 0.008, 15, 4.06);
+    auto enHandler = new Energy("C://work/Science/BINP/Kaon Mass Measure/tr_ph/expKpKm/kchExp509.5.root", 509.529, 0.004, 15, 3.753);
+    // auto enHandler = new Energy("C://work/Science/BINP/Kaon Mass Measure/tr_ph/expKpKm/kchExp510.root", 509.957, 0.005, 15, 3.709);
+    // auto enHandler = new Energy("C://work/Science/BINP/Kaon Mass Measure/tr_ph/expKpKm/kchExp510.5.root", 510.454, 0.007, 15, 3.677);
+    enHandler->DrawGraph();
     auto end = std::chrono::system_clock::now();
     std::chrono::duration<double> diff = end - start; 
     std::cout << "exec time = " << diff.count() << std::endl;
