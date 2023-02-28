@@ -239,8 +239,8 @@ int auxFunc()
     sndScaleDeltaPhi->DrawClone("same");
     // grDeltaPtotNeg1->DrawClone("P same");
 
-    std::vector<Float_t> vM_Exp = {497.569,   497.579,    497.55, 497.574,    497.564,    497.591,    497.587,    497.571,    497.529};
-    std::vector<Float_t> vM_Exp2 = {{497.569,   497.579,    497.541, 497.574,    497.566,    497.601,    497.591,    497.571,    497.529}};
+    std::vector<Float_t> vM_Exp = {497.587,   497.583,    497.539,     497.556,    497.556,    497.567,    497.587,    497.571,    497.57};
+    std::vector<Float_t> vM_Exp2 = {497.569,   497.579,    497.541, 497.574,    497.566,    497.601,    497.591,    497.571,    497.529};
     std::vector<Float_t> vMerrExp = {0.032, 0.012, 0.009, 0.010, 0.005, 0.005, 0.008, 0.010, 0.030};
     vE = {505, 508, 508.5, 509, 509.5, 510, 510.5, 511, 514};
     TGraphErrors grRCNC_exp(vM_Exp.size(), vE.data(), vM_Exp.data(), zeroes.data(), vMerrExp.data());
@@ -253,7 +253,7 @@ int auxFunc()
 
     grRCNC_exp.DrawClone("AP");
     grRCNC_exp2.SetMarkerColor(kBlue);
-    grRCNC_exp2.DrawClone("P Same");
+    // grRCNC_exp2.DrawClone("P Same");
 
 
     // grDeltaPtotPos1.DrawClone("AP");
