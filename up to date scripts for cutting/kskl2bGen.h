@@ -382,10 +382,9 @@ kskl2bGen::kskl2bGen(TTree *tree) : fChain(0)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("C:/work/Science/BINP/Kaon Mass Measure/tr_ph/mcgpj/tr_ph_run000015.root");
-      // TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("C:/work/Science/BINP/Kaon Mass Measure/tr_ph/mcgpj/tr_ph_run066517.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("C:/work/Science/BINP/Kaon Mass Measure/tr_ph/tr_ph_run000001.root");
       if (!f || !f->IsOpen()) {
-         f = new TFile("C:/work/Science/BINP/Kaon Mass Measure/tr_ph/mcgpj/tr_ph_run000015.root");
+         f = new TFile("C:/work/Science/BINP/Kaon Mass Measure/tr_ph/tr_ph_run000001.root");
       }
       f->GetObject("tr_ph",tree);
 
