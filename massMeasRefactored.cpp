@@ -88,7 +88,7 @@ public:
     * drawOpt: 0 - M_FullRec vs lnY profile, 1 - M_CrAngle profile, 2 - Psi vs lnY, 
     * 3 - Psi distribution, 4 - EnergySpectrum (for MC only), 5 - M_FullRec vs lnY;
     */
-    void MassLnY(bool withFitSigma = true, int drawOpt = 0);
+    void MassLnY(bool useEtrue = false, bool withFitSigma = true, int drawOpt = 0);
     std::vector<int> GetBadRunsList();
 
     MassHandler(std::string fKsKl, std::string badRunsFileName = "", 
@@ -214,6 +214,18 @@ Float_t MassHandler::GetRightEnergy(int rnum)
 {
     Float_t energy = energyCorrected.value_or(emeas) + (energyDiff.has_value() ? energyDiff->operator[](rnum) : 0);
     
+    if(rnum >= 60196 && rnum <= 60259)
+    { energy = 35.83 / (rnum - 60182.1) / (rnum - 60182.1) + 508.393; }
+
+    if(rnum >= 60260 && rnum <= 60416)
+    { energy = 769.991 / (rnum-60153.3) / (rnum-60153.3) + 508.361; }
+
+    if(rnum >= 60417 && rnum <= 60498)
+    { energy = 174994 / (rnum-59094.7) / (rnum-59094.7) + 508.288; }
+
+    if(rnum >= 60520 && rnum <= 60702)
+    { energy = 0.0076 * sin(0.0950 * (rnum - 60584.6)) + 508.945; }
+
     if(rnum >= 60790 && rnum <= 60921)
     { energy = 15.7437 / (rnum-60763.1) / (rnum-60763.1) + 509.518; }
 
@@ -232,13 +244,10 @@ Float_t MassHandler::GetRightEnergy(int rnum)
     if(rnum >= 61689 && rnum <= 61856)
     { energy = 0.0101 * sin(0.0397 * (rnum-61704.6)) + 509.960; }
 
-    if(rnum >= 61960 && rnum <= 62076)
-    {energy = 0.011 * sin(0.068 * (rnum-61973)) + 510.448; }
-
     return energy;
 }
 
-void MassHandler::MassLnY(bool withFitSigma = true, int drawOpt = 0)
+void MassHandler::MassLnY(bool useEtrue, bool withFitSigma, int drawOpt )
 {   
     CalcSigmas();
 
@@ -271,7 +280,7 @@ void MassHandler::MassLnY(bool withFitSigma = true, int drawOpt = 0)
             massFullRec->SetParameters(emeas, (1 - Y*Y) / (1 + Y*Y));
             massFullRecWithEmeas = massFullRec->Eval(ksdpsi) - sigmaPsi * sigmaPsi / 2 * massFullRec->Derivative2(ksdpsi);
 
-            emeas = GetRightEnergy(runnum);
+            emeas = useEtrue? etrue : GetRightEnergy(runnum);
 
             massFullRec->SetParameters(emeas, (1 - Y*Y) / (1 + Y*Y));
             massCrAngle->SetParameter(0, emeas);
@@ -304,14 +313,14 @@ void MassHandler::MassLnY(bool withFitSigma = true, int drawOpt = 0)
     r = hM_CrAnglelnY->ProfileX()->Fit("pol4", "SMQE", "", -0.2, 0.2);
     std::cout << "Mass_CrAngle = " << r->Parameter(0) << " +/- " << r->ParError(0) 
                 << "; chi2 / ndf = " << r->Chi2() << "/" << r->Ndf() << "; Prob = " << r->Prob() << std::endl;
-    r = hMlnYpfx->Fit("pol0", "SMQE", "goff", -0.35, 0.35);
+    r = hMlnYpfx->Fit("pol0", "SMQE", "goff", -0.33, 0.33);
     std::cout << "Mass_FullRec = " << r->Parameter(0) << " +/- " << r->ParError(0) 
                 << "; chi2 / ndf = " << r->Chi2() << "/" << r->Ndf() << "; Prob = " << r->Prob() << std::endl;
     r = hPsilnY->ProfileX("pfxAng")->Fit("pol2", "SQME", "", -0.2, 0.2);
     std::cout << "Psi = " << r->Parameter(0) << " +/- " << r->ParError(0) << std::endl;
     auto canv = new TCanvas("MlnY","Mass(lnY)", 200, 10, 600, 400);
-    std::cout << "Average E cut = " << hEnergySpectrumCut->GetMean() << " + / - " << hEnergySpectrumCut->GetMeanError() << std::endl;
-    std::cout << "Average E  = " << hEnergySpectrum->GetMean() << " + / - " << hEnergySpectrum->GetMeanError() << std::endl;
+    std::cout << "Average E cut = " << hEnergySpectrumCut->GetMean() << " +/- " << hEnergySpectrumCut->GetMeanError() << std::endl;
+    std::cout << "Average E  = " << hEnergySpectrum->GetMean() << " +/- " << hEnergySpectrum->GetMeanError() << std::endl;
 
     auto massCutHorizontal1 = new TLine(-0.8, 490, 0.8, 490);
     massCutHorizontal1->SetLineColor(kBlue);
@@ -392,8 +401,9 @@ int massMeasRefactored()
     gROOT->Reset();
     auto start = std::chrono::system_clock::now();
 
-    std::string fileName = "tr_ph/expKsKl/exp510.5_v9.root";
-    // std::string fileName = "tr_ph/MC/MC510.5_v9.root";
+    // std::string fileName = "tr_ph/expKsKl/exp510.5_v9.root";
+    // std::string fileName = "tr_ph/MC/MC509.5_v9.root";
+    std::string fileName = "tr_ph/MC/MC509.5Smeared.root";
 
     // auto kchEnergyHandler = new Energy("tr_ph/expKpKm/kchExp508.5.root", 508.397, 0.008, 20, 4.06);
     // auto kchEnergyHandler = new Energy("tr_ph/expKpKm/kchExp509.5.root", 509.528, 0.01, 15, 3.751);
@@ -402,9 +412,9 @@ int massMeasRefactored()
 
     auto energyDiff = kchEnergyHandler->GetEnergyDiff();
     delete kchEnergyHandler;
-    auto massHandler = new MassHandler(fileName, "txt/BadRuns.txt", 510.454, energyDiff);
-    // auto massHandler = new MassHandler(fileName, "", 510.305);
-    massHandler->MassLnY(true);
+    // auto massHandler = new MassHandler(fileName, "txt/BadRuns.txt", 510.454, energyDiff);
+    auto massHandler = new MassHandler(fileName, "", 509.425);
+    massHandler->MassLnY(false, true, 4);
     delete massHandler;
 
     auto end = std::chrono::system_clock::now();

@@ -280,6 +280,9 @@ void Energy::DrawGraph(int graphNum)
 
     grComptonEnVsRun.SetFillColor(kBlue);
     grComptonEnVsRun.SetFillStyle(3005);
+    
+    if(fabs(energyShift) <= 1e-6)
+    { grEmeasVsRun.GetYaxis()->SetRangeUser(comptonEnergyMean - 6, comptonEnergyMean + 2); }
 
     grEnVsRun.SetName("grKchEnergy");
     grComptonEnVsRun.SetName("grComptonMeanEnergy");
