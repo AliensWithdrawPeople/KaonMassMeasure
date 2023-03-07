@@ -1,6 +1,15 @@
 Energy =            {505,       508,        508.5,      509,        509.5,      510,        510.5,      511,        514}
-Mass_FullRec =      {}
-Mass_FullRecErr =   {}
+Mass_FullRec =      {497.746,   497.7,      497.695,    497.69,     497.717,    497.73,     497.787,    497.955,    499.067}
+Mass_FullRecErr =   {0.012,     0.012,      0.013,      0.013,      0.011,      0.012,      0.013,      0.014,      0.024}
+
+M_FullRec_RCNC =    {497.646,   497.601,    497.606,    497.61,     497.631,    497.614,    497.596,    497.621,    497.614}
+M_FullRec_RCNCErr = {0.010,     0.012,      0.013,      0.013,      0.011,      0.012,      0.013,      0.014,      0.024}
+
+################## M_FullRec_NC(mean E) - M_FullRec_NC(avg E cutted) ##################
+deltaM_RC  = {0.1, 0.099, 0.089, 0.08, 0.086, 0.116, 0.191, 0.334, 1.453}
+
+################## M_FullRec_NC(mean E) - 497.614 ##################
+deltaM_RC  = {0.132, 0.086, 0.081, 0.076, 0.086, 0.116, 0.173, 0.341, 1.453}
 
 ########################################
 ################## MC ##################
@@ -48,6 +57,7 @@ E_mean = 507.921
 Mass_FullRec = 497.606 +/- 0.0126901; chi2 / ndf = 7.92857/9; Prob = 0.541361
 
 
+
 Energy Point 508.5 MeV:
 sigma (detector resolution) related to energy smearing: 
 {0.01223, 0.00405, 0.01281, 0.00442, 0.01244, 0.01036, 0.0102, 0.00754, 0.0075, 0.00765, 0.00711, 0.00783, 0.01037, 0.01128, 0.00355, 0.01153}
@@ -70,6 +80,7 @@ E_mean = 508.417
 Mass_FullRec = 497.608 +/- 0.00938164; chi2 / ndf = 12.054/9; Prob = 0.210283
 
 
+
 Energy Point 509 MeV:
 sigma (detector resolution) related to energy smearing: 
 {0.00774, 0.00197, 0.011, 0.01131, 0.00707, 0.00899, 0.00938, 0.00705, 0.00654, 0.00873, 0.00947, 0.00477, 0.00336, 0.00608, nan, 0.00591}
@@ -90,6 +101,7 @@ MC wo energy smearing (E = 509):
 Mass_FullRec = 497.687 +/- 0.00911524; chi2 / ndf = 11.5107/9; Prob = 0.242318
 E_mean = 508.924
 Mass_FullRec = 497.615 +/- 0.00911268; chi2 / ndf = 11.5152/9; Prob = 0.242036
+
 
 
 Energy Point 509.5 MeV:
@@ -117,12 +129,94 @@ Mass_FullRec = 497.605 +/- 0.00942576; chi2 / ndf = 10.0928/9; Prob = 0.343028
 
 Energy Point 510 MeV:
 sigma (detector resolution) related to energy smearing: 
-{}
+{nan, 0.00488, 0.00158, 0.00221, 0.00339, 0.00487, 0.00973, nan, 0.00339, 0.00446, 0.00517, 0.00274, 0.00807, 0.00379, 0.00945, 0.01641}
 
 E_mean = 509.956
+Mass_CrAngle = 497.735 +/- 0.0227335; chi2 / ndf = 8.23577/11; Prob = 0.692041
+Mass_FullRec = 497.73 +/- 0.00990279; chi2 / ndf = 5.04481/9; Prob = 0.830385
 
-
-Average E cut = 509.438 +/- 0.00507761
-
+Average E cut = 509.833 +/- 0.004
+Mass_CrAngle = 497.618 +/- 0.0227236; chi2 / ndf = 8.23381/11; Prob = 0.692219
+Mass_FullRec = 497.614 +/- 0.00995551; chi2 / ndf = 5.06042/9; Prob = 0.82901
 
 E = etrue
+Mass_CrAngle = 497.624 +/- 0.0204416; chi2 / ndf = 12.6978/11; Prob = 0.313538
+Mass_FullRec = 497.614 +/- 0.00894979; chi2 / ndf = 4.39126/9; Prob = 0.883828
+
+MC wo energy smearing (E = 510):
+Mass_FullRec = 497.729 +/- 0.00980691; chi2 / ndf = 15.5563/9; Prob = 0.0767449
+E_mean = 509.884 +/- 0.004
+Mass_FullRec = 497.618 +/- 0.00980271; chi2 / ndf = 15.5552/9; Prob = 0.0767723
+
+
+
+Energy Point 510.5 MeV:
+sigma (detector resolution) related to energy smearing: 
+{0.01376, 0.00757, 0.0112, 0.00442, 0.00806, nan, 0.00648, 0.00261, 0.00322, nan, 0.00306, 0.00733, 0.00801, 0.00884, nan, 0.00706}
+
+E_mean = 510.458
+Mass_CrAngle = 497.797 +/- 0.0260826; chi2 / ndf = 0.961426/11; Prob = 0.999959
+Mass_FullRec = 497.787 +/- 0.0109343; chi2 / ndf = 3.56123/9; Prob = 0.937852
+
+Average E cut = 510.258 +/- 0.006
+Mass_CrAngle = 497.607 +/- 0.0260688; chi2 / ndf = 0.960218/11; Prob = 0.999959
+Mass_FullRec = 497.596 +/- 0.0109263; chi2 / ndf = 3.55633/9; Prob = 0.938119
+
+E = etrue
+Mass_CrAngle = 497.608 +/- 0.0216722; chi2 / ndf = 4.65324/11; Prob = 0.946791
+Mass_FullRec = 497.598 +/- 0.00940047; chi2 / ndf = 11.4685/9; Prob = 0.244955
+
+MC wo energy smearing (E = 510.5):
+Mass_CrAngle = 497.814 +/- 0.0269478; chi2 / ndf = 6.801/11; Prob = 0.814962
+Mass_FullRec = 497.792 +/- 0.0107088; chi2 / ndf = 8.78169/9; Prob = 0.457665
+E_mean = 510.305 +/- 0.005
+Mass_CrAngle = 497.628 +/- 0.0269325; chi2 / ndf = 6.80133/11; Prob = 0.814936
+Mass_FullRec = 497.606 +/- 0.0107011; chi2 / ndf = 8.78053/9; Prob = 0.457775
+
+
+
+Energy Point 511 MeV:
+sigma (detector resolution) related to energy smearing: 
+{0.01363, nan, 0.00921, 0.00789, nan, 0.00846, 0.00337, nan, nan, 0.00465, nan, nan, 0.0088, 0.01043, 0.00715, 0.00754}
+
+E_mean = 511.035
+Mass_CrAngle = 497.935 +/- 0.0279484; chi2 / ndf = 11.2806/11; Prob = 0.420066
+Mass_FullRec = 497.955 +/- 0.01206; chi2 / ndf = 12.6083/9; Prob = 0.181144
+
+Average E cut = 510.684 +/- 0.008
+Mass_CrAngle = 497.601 +/- 0.0279124; chi2 / ndf = 11.2815/11; Prob = 0.419992
+Mass_FullRec = 497.621 +/- 0.0120238; chi2 / ndf = 13.252/9; Prob = 0.151531
+
+E = etrue
+Mass_CrAngle = 497.621 +/- 0.0217364; chi2 / ndf = 13.1262/11; Prob = 0.285155
+Mass_FullRec = 497.619 +/- 0.00935429; chi2 / ndf = 10.5279/9; Prob = 0.309464
+
+MC wo energy smearing (E = 511):
+Mass_CrAngle = 497.99 +/- 0.0302268; chi2 / ndf = 6.01147/11; Prob = 0.872598
+Mass_FullRec = 497.942 +/- 0.0117951; chi2 / ndf = 8.96312/9; Prob = 0.440685
+E_mean = 510.675 +/- 0.008
+Mass_CrAngle = 497.68 +/- 0.030144; chi2 / ndf = 6.01187/11; Prob = 0.872571
+Mass_FullRec = 497.633 +/- 0.011781; chi2 / ndf = 8.95975/9; Prob = 0.440998
+
+
+
+Energy Point 514 MeV:
+
+E_mean = 513.864
+Mass_CrAngle = 499.148 +/- 0.0577497; chi2 / ndf = 18.4551/11; Prob = 0.0716038
+Mass_FullRec = 499.067 +/- 0.0230227; chi2 / ndf = 5.67517/9; Prob = 0.771937
+
+Average E cut = 512.321 +/- 0.022
+Mass_CrAngle = 497.696 +/- 0.056983; chi2 / ndf = 17.9067/11; Prob = 0.0837709
+Mass_FullRec = 497.614 +/- 0.0227959; chi2 / ndf = 5.35387/9; Prob = 0.802434
+
+E = etrue
+Mass_CrAngle = 497.585 +/- 0.0264233; chi2 / ndf = 8.94024/11; Prob = 0.627408
+Mass_FullRec = 497.594 +/- 0.0101357; chi2 / ndf = 12.8289/9; Prob = 0.1705
+
+MC wo energy smearing (E = 514):
+Mass_CrAngle = 499.189 +/- 0.0866281; chi2 / ndf = 5.85705/11; Prob = 0.88273
+Mass_FullRec = 499.108 +/- 0.0338621; chi2 / ndf = 5.81045/9; Prob = 0.758729
+E_mean = 512.403 +/- 0.032
+Mass_CrAngle = 497.677 +/- 0.0861425; chi2 / ndf = 5.85721/11; Prob = 0.88272
+Mass_FullRec = 497.599 +/- 0.0336072; chi2 / ndf = 5.71597/9; Prob = 0.767974
