@@ -1,0 +1,32 @@
+#include "TF1.h"
+#include "TGraphErrors.h"
+#include "TLine.h"
+#include "TGaxis.h"
+#include "TAxis.h"
+
+using std::vector;
+
+int drawGraphs()
+{
+    vector<double> zeroes(100, 0.0);
+
+    vector<double> E = {505, 508, 508.5, 508.5, 508.5, 509, 509.5, 509.5, 509.5, 510, 510, 510, 510.5, 510.5, 511, 514};
+    vector<double> Pavg = {106.339, 119.779, 121.882, 121.882, 121.882, 123.952, 125.989, 125.989, 125.989, 127.996, 127.996, 127.996, 129.974, 129.974, 131.924, 143.105};
+    vector<double> energyShift = {5.567, 4.228, 4.084, 4.06, 4.086, 3.907, 3.754, 3.746, 3.778, 3.722, 3.711, 3.729, 3.684, 3.681, 3.565, 3.106};
+    vector<double> energyShiftErr = {0.031, 0.005, 0.025, 0.021, 0.048,  0.010, 0.009, 0.026, 0.009, 0.009, 0.013, 0.009, 0.013, 0.008, 0.007, 0.011};
+    vector<double> energyShiftMC = {5.443, 4.144,  3.922, 3.922, 3.922, 3.770, 3.673, 3.673, 3.673, 3.597, 3.597, 3.597, 3.483, 3.483, 3.300, 2.860};
+
+    TGraphErrors grShiftExp(Pavg.size(), E.data(), energyShift.data(), zeroes.data(), energyShiftErr.data());
+    TGraphErrors grShiftMC(Pavg.size(), E.data(), energyShiftMC.data(), zeroes.data(), zeroes.data());
+
+    grShiftExp.SetTitle("Kch Energy shift (Black -- exp, Blue -- MC)");
+    // grShiftExp.GetXaxis()->SetTitle("P_{avg}, #frac{MeV}{c}");
+    grShiftExp.GetXaxis()->SetTitle("E_{mean}, MeV");
+    grShiftExp.GetYaxis()->SetTitle("#DeltaE, MeV");
+    grShiftMC.SetLineColor(kBlue);
+
+    grShiftExp.DrawClone("AP");
+    grShiftMC.DrawClone("same");
+
+    return 0;
+}
