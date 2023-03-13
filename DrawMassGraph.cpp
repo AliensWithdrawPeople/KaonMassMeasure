@@ -4,7 +4,7 @@
 #include "TGaxis.h"
 #include "TAxis.h"
 
-int auxFunc()
+int DrawMassGraph()
 {
     double massK = 497.614;
     std::vector<Float_t> zeroes(100, 0.0);
