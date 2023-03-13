@@ -6,108 +6,8 @@
 
 int auxFunc()
 {
-    double pRatio = 0.99999;
-    double psi = 2.56547;
-
-    double energy = 514;
-    double mass =  499.109;
     double massK = 497.614;
-
     std::vector<Float_t> zeroes(100, 0.0);
-
-
-    auto massFunc = new TF1("MassLnY", "sqrt([0] * [0] * (1 - (1 + sqrt(1 - [1] *[1]) * cos(x))*(1 - sqrt(1 - [1] * [1] * (1 - 4 * 139.57 * 139.57 / [0] / [0])))/ [1] / [1] ))");
-    massFunc->SetParameter(1, (1 - pRatio*pRatio) / (1 + pRatio*pRatio));
-
-    //auto tmpFunc = new TF1("MassLnY", 
-    //"sqrt(x * x * (1 - (1 + sqrt(1 - [1] *[1]) * cos([0]))*(1 - sqrt(1 - [1] * [1] * (1 - 4 * 139.57 * 139.57 / x / x)))/ [0] / [0] ))", 480, 520);
-    auto tmpFunc = new TF1("MassLnY", "sqrt(x * x * (1 - (1 + sqrt(1 - [1] *[1]) * cos([0]))*(1 - sqrt(1 - [1] * [1] * (1 - 4 * 139.57 * 139.57 / x / x)))/ [1] / [1] ))");
-    tmpFunc->SetParameters(psi, (1 - pRatio*pRatio) / (1 + pRatio*pRatio));
-    massFunc->SetParameter(0, energy);
-    double Emin = tmpFunc->GetX(490, 450, 550, 1e-5, 10000);
-    double Emax = tmpFunc->GetX(505, 450, 550, 1e-5, 10000);
-    std::cout<< Emin << " : " << Emax << std::endl;
-
-
-    auto revMassFunc = new TF1("revMassFunc", "2*TMath::ACos(TMath::Sqrt((1 - x * x / [0] / [0])/(1-4*139.57 * 139.57 / [0] / [0])))");
-    revMassFunc->SetParameter(0, energy);
-    std::cout << "At E = " << energy << " and M = " << mass << " Psi = " << revMassFunc->Eval(mass) << std::endl;
-
-
-    std::vector<Float_t> vE = {505, 508, 509, 510, 511, 514};
-
-    // Full reconstruction
-    // Avg energy radcor
-    std::vector<Float_t> vMRad2 = { 497.597, 497.593, 497.597, 497.583, 497.617, 497.642};
-    std::vector<Float_t> vMRad2NC = {497.609, 497.617, 497.608, 497.611, 497.617, 497.612};
-    std::vector<Float_t> vMerrRad2 = {0.007, 0.009, 0.008, 0.010, 0.010, 0.019};
-    TGraphErrors grRC(vMRad2.size(), vE.data(), vMRad2.data(), zeroes.data(), vMerrRad2.data());
-    TGraphErrors grRCNC(vMRad2NC.size(), vE.data(), vMRad2NC.data(), zeroes.data(), vMerrRad2.data());
-    // grRC2.SetMarkerColor(kRed);
-    
-    // RMS
-    // std::vector<Float_t> vM2 = { 497.597, 497.600, 497.597, 497.587, 497.606, 497.581};
-    std::vector<Float_t> vM2 = {497.620, 497.618, 497.615, 497.610, 497.633, 497.704};
-    std::vector<Float_t> vMerr2 = {0.007, 0.009, 0.008, 0.010, 0.010, 0.019};
-    TGraphErrors grRCNCnew(vM2.size(), vE.data(), vM2.data(), zeroes.data(), vMerr2.data());
-    grRCNCnew.SetMarkerColor(kBlack);
-
-    std::vector<Float_t> vDeltaMRad = {94, 61, 53, 90, 320, 1504};
-    std::vector<Float_t> vDeltaMRadErr = { 0.008, 0.007, 0.004, 0.010, 0.013, 0.017};
-    TGraphErrors grRCdeltaM(vDeltaMRad.size(), vE.data(), vDeltaMRad.data(), zeroes.data(), vDeltaMRadErr.data());
-    // grRCdeltaM.SetMarkerColor(kGreen);
-
-    // deltaM_NC
-    std::vector<Float_t> vDeltaM_NC_RMS = {0.023, 0.018, 0.018, 0.023, 0.027, 0.123}; //RMS sigma
-    std::vector<Float_t> vDeltaM_NC_Fit = { 0.012, 0.017, 0.011, 0.024, 0.011, 0.031}; //Fit sigma
-    std::vector<Float_t> vDeltaM_NC_FitErr = {0.0006, 0.0004, 0.0006, 0.0010, 0.0007, 0.0009};
-    std::vector<Float_t> vDeltaM_NC_RMSerr = {0.0006, 0.0004, 0.0006, 0.0010, 0.0021, 0.0050};
-    TGraphErrors grDeltaM_NC_RMS(vDeltaM_NC_RMS.size(), vE.data(), vDeltaM_NC_RMS.data(), zeroes.data(), vDeltaM_NC_RMSerr.data());
-    TGraphErrors grDeltaM_NC_Fit(vDeltaM_NC_Fit.size(), vE.data(), vDeltaM_NC_Fit.data(), zeroes.data(), vDeltaM_NC_FitErr.data());
-
-    // Critical angle
-    std::vector<Float_t> vMCrAngle = {497.685, 497.695, 497.67, 497.728, 497.914, 499.079};
-    std::vector<Float_t> vMCrAngleRCNC_Fit = {497.596, 497.615, 497.612, 497.621, 497.598, 497.582}; //Fit sigma
-    std::vector<Float_t> vMCrAngleRCNC_RMS = {497.608, 497.643, 497.608, 497.634, 497.646, 497.8}; //RMS sigma
-
-    std::vector<Float_t> vMCrAngleErr = {0.010, 0.013, 0.013, 0.014, 0.015, 0.034};
-    std::vector<Float_t> vMCrAngleRCNC_FitErr = {0.014, 0.016, 0.016, 0.018, 0.021, 0.057};
-    std::vector<Float_t> vMCrAngleRCNC_RMSErr = {0.010, 0.013, 0.013, 0.013, 0.015, 0.034};
-
-    TGraphErrors grMCrAngle(vMCrAngle.size(), vE.data(), vMCrAngle.data(), zeroes.data(), vMCrAngleErr.data());
-    TGraphErrors grMCrAngleRCNC_Fit(vMCrAngleRCNC_Fit.size(), vE.data(), vMCrAngleRCNC_Fit.data(), zeroes.data(), vMCrAngleRCNC_FitErr.data());
-    TGraphErrors grMCrAngleRCNC_RMS(vMCrAngleRCNC_RMS.size(), vE.data(), vMCrAngleRCNC_RMS.data(), zeroes.data(), vMCrAngleRCNC_RMSErr.data());
-
-    auto massKline = new TLine(505, massK, 514, massK);
-    massKline->SetLineColor(kBlue);
-    massKline->SetLineWidth(2);
-
-    grMCrAngle.SetMarkerColor(kRed);
-    grMCrAngleRCNC_RMS.SetMarkerColor(kRed);
-    grMCrAngleRCNC_Fit.SetMarkerColor(kBlack);
-    grRCNCnew.SetMarkerColor(kRed);
-
-    // grRCNC.DrawClone("AP");
-    // grRCNCnew.DrawClone("AP same");
-    grDeltaM_NC_Fit.DrawClone("AP");
-    grDeltaM_NC_RMS.DrawClone("P same");
-    // massKline->DrawClone("Same");
-
-    std::vector<Float_t> vSigmaFit = {0.0139273, 0.0142717, 0.0153109, 0.0176764, 0.0188618, 0.0220763, 0.025119, 0.0298211};
-    std::vector<Float_t> vSigmaRMS = {0.0186562, 0.019872, 0.0214141, 0.0219208, 0.0253945, 0.0270087, 0.0295075, 0.0336299};
-    std::vector<Float_t> vSigmaErr = {2.41164e-04, 2.59689e-04, 2.51916e-04, 3.13132e-04, 3.32211e-04, 4.86097e-04, 4.64792e-04, 6.67834e-04};
-    std::vector<Float_t> vWidth = {0.025, 0.075, 0.125, 0.175, 0.225, 0.275, 0.325, 0.375};
-    TGraphErrors grSigmaFit(vSigmaFit.size(), vWidth.data(), vSigmaFit.data(), zeroes.data(), vSigmaErr.data());
-    TGraphErrors grSigmaRMS(vSigmaRMS.size(), vWidth.data(), vSigmaRMS.data(), zeroes.data(), vSigmaErr.data());
-
-    // grSigmaRMS.SetMarkerColor(kRed);
-    // grSigmaRMS.DrawClone("AP"); 
-    // grSigmaFit.DrawClone("P same"); 
-
-    std::vector<Float_t> vAngle = { 2.73092, 2.65629, 2.63373, 2.62245, 2.61362, 2.59637, 2.55372};
-    std::vector<Float_t> vEtmp = {505, 508, 509, 509.527, 510, 511, 514};
-    TGraph grAngleVsE(vEtmp.size(), vEtmp.data(), vAngle.data());
-    std::cout << "Psi angle vs Energy correlation factor = " << grAngleVsE.GetCorrelationFactor() << std::endl;
 
     std::vector<Float_t> vMPDG = {497.742, 497.661, 497.625, 497.634, 497.583, 497.607};
     std::vector<Float_t> vMPDGerr = {0.085, 0.033, 0.031, 0.024, 0.021, 0.017};
@@ -117,42 +17,8 @@ int auxFunc()
     // grMPDG.DrawClone("same AP");
     // massKline->DrawClone("Same");
 
-    // gr2.DrawClone("AP");
-
-    // Positive tracks
-    std::vector<Float_t> vDeltaPtot = {0.076, 0.096, 0.126, 0.165, 0.178, 0.209, 0.248, 0.349};
-    std::vector<Float_t> vDeltaPtotErr = {0.012, 0.013, 0.017, 0.015, 0.016, 0.025, 0.017, 0.018};
-
-    std::vector<Float_t> vDeltaPhi = {-0.00076, -0.00089, -0.00072, -0.00055, -0.00064, -0.0006, -0.00065, -0.00083};
-    std::vector<Float_t> vDeltaPhiErr = {0.00019, 0.00014, 0.00009, 0.00004, 0.00002, 0.000065, 0.00005, 0.00005};
 
     std::vector<Float_t> vPavg = {157, 182, 207, 231, 235, 243, 254, 260};
-
-    // for(int i = 0; i < vDeltaPtot.size(); i++)
-    // {
-    //     vDeltaPtot[i] = vDeltaPtot[i] / vPavg[i];
-    //     vDeltaPtotErr[i] = vDeltaPtotErr[i] / vPavg[i];
-    // }
-    
-    TGraphErrors grDeltaPtotPos(vDeltaPtot.size(), vPavg.data(), vDeltaPtot.data(), zeroes.data(), vDeltaPtotErr.data());
-    TGraphErrors grDeltaPhiPos(vDeltaPhi.size(), vPavg.data(), vDeltaPhi.data(), zeroes.data(), vDeltaPhiErr.data());
-
-    // Negative tracks
-    vDeltaPtot = {0.027, 0.059,  0.059, 0.038, 0.047, 0.063, 0.051, 0.15};
-    vDeltaPtotErr = {0.014, 0.016, 0.015, 0.015, 0.002, 0.03, 0.018, 0.02};
-
-    vDeltaPhi = {0.00019, 0.00034, 0.00022, 0.00008, -0.00019, -0.00023, -0.00019, -0.00041};
-    vDeltaPhiErr = {0.00019, 0.00013, 0.00008, 0.00005, 0.00002, 0.00002, 0.00005, 0.00005};
-
-    TGraphErrors grDeltaPtotNeg(vDeltaPtot.size(), vPavg.data(), vDeltaPtot.data(), zeroes.data(), vDeltaPtotErr.data());
-    TGraphErrors grDeltaPhiNeg(vDeltaPhi.size(), vPavg.data(), vDeltaPhi.data(), zeroes.data(), vDeltaPhiErr.data());
-
-    // grDeltaPtotPos.DrawClone();
-    // grDeltaPtotNeg.DrawClone("same");
-    grDeltaPhiPos.SetTitle("Black - #pi^{+}, Red - #pi^{-}");
-    grDeltaPhiNeg.DrawClone();
-    // grDeltaPhiNeg.DrawClone("same");
-
 
     std::vector<std::vector<double>> dPtotPos{
         {0.119915, 0.0367675, 0.115981, 0.0150124, 0.0787089, -0.114334, 0.352348, 0.159914, 0.116781, -0.120692, 0.0468401, 0.113305, -0.112598, 0.0118255, -0.0153768, 0.107273, 0.107945, -0.0314952},
@@ -239,10 +105,10 @@ int auxFunc()
     sndScaleDeltaPhi->DrawClone("same");
     // grDeltaPtotNeg1->DrawClone("P same");
 
-    std::vector<Float_t> vM_Exp = {497.587,   497.575,    497.543,     497.556,    497.556,    497.567,    497.587,    497.571,    497.57};
+    std::vector<Float_t> vM_Exp = {497.573, 497.551, 497.535, 497.556, 497.54, 497.575, 497.582, 497.571, 497.601};
     std::vector<Float_t> vM_Exp2 = {497.569,   497.579,    497.541, 497.574,    497.566,    497.601,    497.591,    497.571,    497.529};
-    std::vector<Float_t> vMerrExp = {0.032, 0.012, 0.009, 0.010, 0.005, 0.005, 0.008, 0.010, 0.030};
-    vE = {505, 508, 508.5, 509, 509.5, 510, 510.5, 511, 514};
+    std::vector<Float_t> vMerrExp = {0.010,     0.012,      0.013,      0.013,      0.011,      0.012,      0.013,      0.014,      0.024};
+    std::vector<Float_t> vE = {505, 508, 508.5, 509, 509.5, 510, 510.5, 511, 514};
     TGraphErrors grRCNC_exp(vM_Exp.size(), vE.data(), vM_Exp.data(), zeroes.data(), vMerrExp.data());
     TGraphErrors grRCNC_exp2(vM_Exp.size(), vE.data(), vM_Exp2.data(), zeroes.data(), vMerrExp.data());
 
