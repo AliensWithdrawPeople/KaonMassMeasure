@@ -57,15 +57,15 @@ void kskl2bGen::Loop(std::string histFileName)
     Double_t halfPi = TMath::Pi() / 2;
     int NgoodTr = 0;
     int NgoodTrS = 0;
-    double cutChi2r = 15.;
-    double cutChi2z = 10.;
-    int cutNhitMin = 10;
-    int cutNhitMax = 30;
-    double cutRmin = 0.1;
-    double cutRmax = 6.0;
-    double cutZtrack = 12.;
-    double cutPtot = 40;
-    double cutTrackTheta = 0.7;
+    const double cutChi2r = 15.;
+    const double cutChi2z = 10.;
+    const int cutNhitMin = 10;
+    const int cutNhitMax = 30;
+    const double cutRmin = 0.1;
+    const double cutRmax = 6.0;
+    const double cutZtrack = 12.;
+    const double cutPtot = 40;
+    const double cutTrackTheta = 0.7;
 
     TVector3 ks;
     TVector3 kl;

@@ -40,8 +40,8 @@ void kpkmExp::Loop(std::string histFileName)
    TFile *top = new TFile(histFileName.c_str(), "recreate");
    auto tNew = new TTree("kChargedTree", "Cutted tr_ph (Kch Energy stability important data)");
 
-   auto hist1 = new TH2D("hKp", "K+", 5000, 0, 1000, 5000, 0, 40000);
-   auto hist2 = new TH2D("hKm", "K-", 5000, 0, 1000, 5000, 0, 40000);
+   auto hKp = new TH2D("hKp", "K+", 5000, 0, 1000, 5000, 0, 40000);
+   auto hKm = new TH2D("hKm", "K-", 5000, 0, 1000, 5000, 0, 40000);
    auto hMomentums =  new TH2D("hMoms", "K+ mom vs K- mom", 1000, 0, 1000, 1000, 0, 1000);
 
    Float_t dpsi;
@@ -57,11 +57,11 @@ void kpkmExp::Loop(std::string histFileName)
    Double_t halfPi = TMath::Pi() / 2;
    int NgoodTr = 0;
    int NgoodTrS = 0;
-   double cutChi2r = 15.;
-   double cutChi2z = 10.;
-   int cutNhitMin = 10;
-   double cutZtrack = 10.;
-   double cutPtot = 40;
+   const double cutChi2r = 15.;
+   const double cutChi2z = 10.;
+   const int cutNhitMin = 10;
+   const double cutZtrack = 10.;
+   const double cutPtot = 40;
    
    int counter = 0;
 
@@ -101,14 +101,14 @@ void kpkmExp::Loop(std::string histFileName)
          if(tcharge[0] > 0)
          {
             hMomentums->Fill(tptotv[1], tptotv[0]);
-            hist1->Fill(tptotv[0],tdedx[0]);
-            hist2->Fill(tptotv[1],tdedx[1]);
+            hKp->Fill(tptotv[0],tdedx[0]);
+            hKm->Fill(tptotv[1],tdedx[1]);
          }
          else
          {
             hMomentums->Fill(tptotv[1], tptotv[0]);
-            hist2->Fill(tptotv[0],tdedx[0]);
-            hist1->Fill(tptotv[1],tdedx[1]);
+            hKm->Fill(tptotv[0],tdedx[0]);
+            hKp->Fill(tptotv[1],tdedx[1]);
          }
       }
 

@@ -388,10 +388,10 @@ kpkmExp::kpkmExp(TTree *tree) : fChain(0)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      // TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("root://cmd//scan2018_omphi/scan2018_omphi_tr_ph_fc_e509_v9.root");
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("C:/work/Science/BINP/Kaon Mass Measure/tr_ph/MC/MCGPJ_Kch_MC510.root");
+      std::string fname = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/mcgpj/tr_ph v9/KpKm/tr_ph_run000034.root";
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(fname.c_str());
       if (!f || !f->IsOpen()) {
-         f = new TFile("C:/work/Science/BINP/Kaon Mass Measure/tr_ph/MC/MCGPJ_Kch_MC510.root");
+         f = new TFile(fname.c_str());
       }
       f->GetObject("tr_ph",tree);
 
