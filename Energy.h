@@ -111,6 +111,7 @@ int Energy::FillHists()
     for(int i = 0; i < kTr->GetEntriesFast(); i++)
     {
         kTr->GetEntry(i);
+        // Comment next if statement if you work with MC.
         if(fabs(demeas) < 1e-8 || emeas < 100)
         { continue; }
         runs_.insert(double(runnum));
@@ -194,7 +195,7 @@ int Energy::DivideIntoGroups(int maxGroupSize)
         else
         { emeasRunGroups.push_back({int(runs[i])}); }
     }
-    
+
     for(int i = 0; i < emeasRunGroups.size(); i++)
     {           
         auto it = emeasRunGroups[i].begin();
@@ -274,7 +275,7 @@ void Energy::DrawGraph(int graphNum)
     
     grEmeasVsRun.GetXaxis()->SetTitle("Run");
     grEmeasVsRun.GetYaxis()->SetTitle("Energy, MeV");
-    grEmeasVsRun.SetTitle("Red -- emeas, black -- Kch E_inv, blue band -- compton mean");
+    grEmeasVsRun.SetTitle("Red -- emeas, black -- Kch E, blue band -- compton mean");
     grEmeasVsRun.SetMarkerColor(kRed);
     grEmeasVsRun.SetLineColor(kRed);
 
