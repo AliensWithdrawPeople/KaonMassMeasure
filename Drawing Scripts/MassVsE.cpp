@@ -4,7 +4,7 @@
 #include "TGaxis.h"
 #include "TAxis.h"
 
-int DrawMassGraph()
+int MassVsE()
 {
     double massK = 497.614;
     std::vector<Float_t> zeroes(100, 0.0);
@@ -105,7 +105,7 @@ int DrawMassGraph()
     sndScaleDeltaPhi->DrawClone("same");
     // grDeltaPtotNeg1->DrawClone("P same");
 
-    std::vector<Float_t> vM_Exp = {497.573, 497.551, 497.535, 497.556, 497.54, 497.575, 497.582, 497.571, 497.601};
+    std::vector<Float_t> vM_Exp = {497.541, 497.564, 497.536, 497.563, 497.549, 497.578, 497.589, 497.571, 497.601};
     std::vector<Float_t> vM_Exp2 = {497.569,   497.579,    497.541, 497.574,    497.566,    497.601,    497.591,    497.571,    497.529};
     std::vector<Float_t> vMerrExp = {0.010,     0.012,      0.013,      0.013,      0.011,      0.012,      0.013,      0.014,      0.024};
     std::vector<Float_t> vE = {505, 508, 508.5, 509, 509.5, 510, 510.5, 511, 514};
