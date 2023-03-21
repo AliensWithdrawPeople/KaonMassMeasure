@@ -48,8 +48,10 @@ private:
     Float_t ebeam;
     Float_t tdedx[2];
     Float_t tptot[2];
+
     const double kchMass = 493.677;
     bool verbose;
+    bool isExp;
 
     /*
     * This function fills enHists, calculates energies 
@@ -72,18 +74,19 @@ public:
     void DrawGraph(int graphNum = -1);
     std::map<int, Float_t> GetEnergyDiff();
 
-    Energy(std::string fChargedK, double comptonEnergyMean, double comptonEnergyError, int maxGroupSize = 4, double shiftToKchEnergy = 4., bool isVerbose = false);
+    Energy(std::string fChargedK, double comptonEnergyMean, double comptonEnergyError, int maxGroupSize = 4, double shiftToKchEnergy = 4., bool isExp = true, bool isVerbose = false);
     ~Energy();
 };
 #endif
 
 #define Energy_cpp
-Energy::Energy(std::string fChargedK, double comptonEnergyMean, double comptonEnergyError, int maxGroupSize, double shiftToKchEnergy, bool isVerbose)
+Energy::Energy(std::string fChargedK, double comptonEnergyMean, double comptonEnergyError, int maxGroupSize, double shiftToKchEnergy, bool isExp, bool isVerbose)
 {
     TFile *file = TFile::Open(fChargedK.c_str());
     kTr = (TTree *)file->Get("kChargedTree");
     energyShift = shiftToKchEnergy;
     verbose = isVerbose;
+    this->isExp = isExp;
     this->comptonEnergyMean = comptonEnergyMean;
     this->comptonEnergyError = comptonEnergyError;
     kTr->SetBranchAddress("ebeam", &ebeam);
@@ -111,8 +114,8 @@ int Energy::FillHists()
     for(int i = 0; i < kTr->GetEntriesFast(); i++)
     {
         kTr->GetEntry(i);
-        // Comment next if statement if you work with MC.
-        if(fabs(demeas) < 1e-8 || emeas < 100)
+
+        if(isExp && (fabs(demeas) < 1e-8 || emeas < 100))
         { continue; }
         runs_.insert(double(runnum));
         if(enHists.count(runnum) <= 0)
@@ -181,6 +184,7 @@ std::pair<double, double> Energy::Eval(std::vector<int> &runGroup, bool isVerbos
     
     if(verbose && res->Chi2()/res->Ndf() > 1.5)
     { std::cout << runGroup[0] << "-" << runGroup.back() << " runs: chi2 / ndf = " << res->Chi2()/res->Ndf() << std::endl; }
+
     delete tmpHist;
     return std::make_pair(res->Parameter(1), res->ParError(1)); 
 }
