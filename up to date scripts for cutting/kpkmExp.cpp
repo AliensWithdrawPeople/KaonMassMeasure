@@ -37,7 +37,7 @@ void kpkmExp::Loop(std::string histFileName)
    if (fChain == 0)
         return;
 
-   TFile *top = new TFile(histFileName.c_str(), "recreate");
+   TFile *top = new TFile(("../tr_ph/MC/Kch/" + histFileName).c_str(), "recreate");
    auto tNew = new TTree("kChargedTree", "Cutted tr_ph (Kch Energy stability important data)");
 
    auto hKp = new TH2D("hKp", "K+", 5000, 0, 1000, 5000, 0, 40000);
