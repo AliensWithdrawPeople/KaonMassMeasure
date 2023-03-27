@@ -71,7 +71,9 @@ private:
 public:
     int GetGroupsNum();
     void PrintGroups();
-    void DrawGraph(int graphNum = -1);
+    // Draws a Energy vs Run. Returns a pair (KchMeanEnergy, KchMeanEnergyErr).
+    std::pair<double, double> DrawGraph(int graphNum = -1);
+    // Return map of (groupNum, KchEnergy(groupNum) + energyShift - comptonEnergyMean) pairs.
     std::map<int, Float_t> GetEnergyDiff();
 
     Energy(std::string fChargedK, double comptonEnergyMean, double comptonEnergyError, int maxGroupSize = 4, double shiftToKchEnergy = 4., bool isExp = true, bool isVerbose = false);
@@ -235,7 +237,7 @@ std::map<int, std::pair<Float_t, Float_t>> Energy::AverageKchEnergy(bool isValFo
     return averaged;
 }
 
-void Energy::DrawGraph(int graphNum)
+std::pair<double, double> Energy::DrawGraph(int graphNum)
 {
     std::vector<double> groupNums;
     std::vector<double> groupNumsErr;
@@ -295,6 +297,9 @@ void Energy::DrawGraph(int graphNum)
     grEmeasVsRun.DrawClone("AP");
     grComptonEnVsRun.DrawClone("L3 same");
     grEnVsRun.DrawClone("P same");
+
+    auto r = grEnVsRun.Fit("pol0", "SQME");
+    return std::pair<double, double>(r->Parameter(0), r->ParError(0));
 }
 
 int Energy::GetGroupsNum()

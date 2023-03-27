@@ -9,24 +9,27 @@ int energyStability()
     const std::vector<std::string> energyPoints = {"505", "508", "508.5", "509", "509.5", "510", "510.5", "511", "514"};
 
     std::map<std::string, Energy*> enDict;
-    // for(int i = 0; i < energyPoints.size(); i++)
-    // { 
-    //     enDict[energyPoints[i]] = new Energy("C://work/Science/BINP/Kaon Mass Measure/tr_ph/expKpKm/kchExp" + energyPoints[i] + ".root", 
-    //                                                                                             meanEnergies[i], meanEnergiesErr[i], 30, 2.9);        
-    // }
+    for(int i = 0; i < energyPoints.size(); i++)
+    { 
+        enDict[energyPoints[i]] = new Energy("C://work/Science/BINP/Kaon Mass Measure/tr_ph/expKpKm/kchExp" + energyPoints[i] + ".root", 
+                                                                                                meanEnergies[i], meanEnergiesErr[i], 30, 0);        
+    }
+    
+    std::vector<double> kchMeanEnergy;
+    std::vector<double> kchMeanEnergyErr;
+    for(auto &handler : enDict)
+    {
+        auto p = handler.second->DrawGraph();
+        kchMeanEnergy.push_back(p.first);
+        kchMeanEnergyErr.push_back(p.second);
+    }
 
-    enDict["510"] = new Energy("C://work/Science/BINP/Kaon Mass Measure/tr_ph/expKpKm/KpKm_NoVertex/kchExp510_noVertex.root", meanEnergies[5], meanEnergiesErr[5], 30, 0);
-
-    enDict["510"]->DrawGraph();
-
-    // std::cout << "{";
-    // for(auto &handler : enDict)
-    // {
-    //     auto shift = handler.second->GetEnergyDiff();
-    //     for (auto k : shift)
-    //     { std::cout << -k.second << ", "; }
-    // }
-    // std::cout << "}" << std::endl;
+    for(auto en : kchMeanEnergy)
+    { std::cout<< en << ", "; }
+    std::cout<< std::endl;
+    for(auto err : kchMeanEnergyErr)
+    { std::cout<< err << ", "; }
+    std::cout<< std::endl;
 
     for(auto &handler : enDict)
     { delete handler.second; }
