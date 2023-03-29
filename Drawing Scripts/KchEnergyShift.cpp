@@ -52,24 +52,24 @@ int KchEnergyShift()
     CMD2Preprint.DrawClone("same");
 
     // EnergyShift Data/MC vs Pavg:
-    vector<double> dataMCratio = {1.02, 1.03, 1.04, 1.04, 1.04, 1.04, 1.02, 1.02, 1.03, 1.03, 1.03, 1.03, 1.06, 1.06, 1.07, 1.07, 1.08};
-    vector<double> dataMCratioErr = {0.008, 0.002, 0.009, 0.008, 0.017, 0.004, 0.003, 0.01, 0.003, 0.004, 0.005, 0.004, 0.005, 0.003, 0.009, 0.004, 0.005};
+    vector<double> dataMCdiff = {0.11, 0.11, 0.17, 0.15, 0.17, 0.15, 0.08, 0.08, 0.11, 0.12, 0.11, 0.12, 0.2, 0.2, 0.25, 0.25, 0.23};
+    vector<double> dataMCdiffErr = {0.044, 0.007, 0.035, 0.03, 0.068, 0.014, 0.013, 0.037, 0.013, 0.013, 0.018, 0.013, 0.018, 0.011, 0.031, 0.013, 0.016};
 
-    vector<double> meanDelta_MCratio = {1.0, 1.02, 1.04, 1.04, 1.02, 1.03, 1.06, 1.07, 1.08};
-    vector<double> meanDelta_MCratioErr = {0.008, 0.003, 0.003, 0.003, 0.002, 0.002, 0.003, 0.004, 0.006};
+    vector<double> meanDelta_MCdiff = {0.02, 0.1, 0.15, 0.16, 0.09, 0.11, 0.2, 0.25, 0.23};
+    vector<double> meanDelta_MCdiffErr = {0.042, 0.013, 0.011, 0.013, 0.006, 0.007, 0.01, 0.013, 0.017};
 
-    TGraphErrors grDataMC_ratio(Pavg.size(), Pavg.data(), dataMCratio.data(), zeroes.data(), dataMCratioErr.data());
-    TGraphErrors grMeanDelta_MC_ratio(Pavg2.size(), Pavg2.data(), meanDelta_MCratio.data(), zeroes.data(), meanDelta_MCratioErr.data());
-    grMeanDelta_MC_ratio.SetMarkerColor(kBlue);
-    grMeanDelta_MC_ratio.SetName("meanDelta_MCratio");
+    TGraphErrors grDataMC_diff(Pavg.size(), Pavg.data(), dataMCdiff.data(), zeroes.data(), dataMCdiffErr.data());
+    TGraphErrors grMeanDelta_MC_diff(Pavg2.size(), Pavg2.data(), meanDelta_MCdiff.data(), zeroes.data(), meanDelta_MCdiffErr.data());
+    grMeanDelta_MC_diff.SetMarkerColor(kBlue);
+    grMeanDelta_MC_diff.SetName("meanDelta_MCratio");
 
-    grDataMC_ratio.SetName("DataMCratio");
-    grDataMC_ratio.SetTitle("Black - data/MC, Blue - E^{(K^{#pm})}_{avg} - compton_mean / MC");
-    grDataMC_ratio.GetXaxis()->SetTitle("P_{avg}, #frac{MeV}{c}");
-    grDataMC_ratio.GetYaxis()->SetTitle("data/MC");
+    grDataMC_diff.SetName("DataMCdiff");
+    grDataMC_diff.SetTitle("Black - data-MC, Blue - (E^{(K^{#pm})}_{avg} - compton_mean)-MC");
+    grDataMC_diff.GetXaxis()->SetTitle("P_{avg}, #frac{MeV}{c}");
+    grDataMC_diff.GetYaxis()->SetTitle("data-MC, MeV");
 
-    // grDataMC_ratio.DrawClone("AP");
-    // grMeanDelta_MC_ratio.DrawClone("P same");
+    grDataMC_diff.DrawClone("AP");
+    grMeanDelta_MC_diff.DrawClone("P same");
 
     return 0;
 }
