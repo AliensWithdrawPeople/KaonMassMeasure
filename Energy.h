@@ -40,6 +40,7 @@ private:
     double energyShift;
     double comptonEnergyMean;
     double comptonEnergyError;
+    std::vector<int> badRuns;
 
     std::vector<double> runs;
     Int_t runnum;
@@ -67,6 +68,7 @@ private:
     */
     std::pair<double, double> Eval(int run, bool isVerbose = true); 
     std::pair<double, double> Eval(std::vector<int> &runGroup, bool isVerbose = true); 
+    int ReadBadRuns(std::string filename);
 
 public:
     int GetGroupsNum();
@@ -76,13 +78,13 @@ public:
     // Return map of (groupNum, KchEnergy(groupNum) + energyShift - comptonEnergyMean) pairs.
     std::map<int, Float_t> GetEnergyDiff();
 
-    Energy(std::string fChargedK, double comptonEnergyMean, double comptonEnergyError, int maxGroupSize = 4, double shiftToKchEnergy = 4., bool isExp = true, bool isVerbose = false);
+    Energy(std::string fChargedK, std::string fBadRunsList, double comptonEnergyMean, double comptonEnergyError, int maxGroupSize = 4, double shiftToKchEnergy = 4., bool isExp = true, bool isVerbose = false);
     ~Energy();
 };
 #endif
 
 #define Energy_cpp
-Energy::Energy(std::string fChargedK, double comptonEnergyMean, double comptonEnergyError, int maxGroupSize, double shiftToKchEnergy, bool isExp, bool isVerbose)
+Energy::Energy(std::string fChargedK, std::string fBadRunsList, double comptonEnergyMean, double comptonEnergyError, int maxGroupSize, double shiftToKchEnergy, bool isExp, bool isVerbose)
 {
     TFile *file = TFile::Open(fChargedK.c_str());
     kTr = (TTree *)file->Get("kChargedTree");
@@ -97,9 +99,21 @@ Energy::Energy(std::string fChargedK, double comptonEnergyMean, double comptonEn
     kTr->SetBranchAddress("runnum", &runnum);
     kTr->SetBranchAddress("tdedx", tdedx);
     kTr->SetBranchAddress("tptot", tptot);
-
+    if(fBadRunsList != "")
+    { ReadBadRuns(fBadRunsList); }
     FillHists();
     DivideIntoGroups(maxGroupSize);
+}
+
+int Energy::ReadBadRuns(std::string filename)
+{
+    std::ifstream input(filename);
+    if(input.is_open() && input.good())
+    {
+        std::istream_iterator<double> start(input), end;
+        badRuns.insert(badRuns.end(), start, end);
+    }
+    return badRuns.size();
 }
 
 Energy::~Energy()
@@ -117,6 +131,8 @@ int Energy::FillHists()
     {
         kTr->GetEntry(i);
 
+        if(std::find(badRuns.begin(), badRuns.end(), runnum) != badRuns.end())
+        { continue; }
         if(isExp && (fabs(demeas) < 1e-8 || emeas < 100))
         { continue; }
         runs_.insert(double(runnum));
@@ -142,17 +158,32 @@ std::pair<double, double> Energy::Eval(int run, bool isVerbose)
     { 
         auto tmpHist = new TH1D(*enHists[run]);
         tmpHist->Rebin(8);
-         
+
+        // int bin = 0;
+        // double leftBorder = tmpHist->GetBinWithContent(tmpHist->GetMaximum() * 0.4, bin, 0, tmpHist->GetMaximumBin(), 1e-2);
+        // leftBorder = tmpHist->GetBinCenter(bin);
+
+        // double rightBorder = tmpHist->GetBinWithContent(tmpHist->GetMaximum() * 0.9, bin, tmpHist->GetMaximumBin(), tmpHist->GetNbinsX()-1, 1e-2);
+        // rightBorder = tmpHist->GetBinCenter(bin);
+
+        // auto res = tmpHist->Fit("gaus", "SEQM", "", leftBorder, rightBorder);
+
         auto res = tmpHist->Fit("gaus", "SEQM", "", tmpHist->GetBinCenter(tmpHist->GetMaximumBin()) - tmpHist->GetRMS(), 
-                                                    tmpHist->GetBinCenter(tmpHist->GetMaximumBin()) + 2 * tmpHist->GetRMS());
+                                                    tmpHist->GetBinCenter(tmpHist->GetMaximumBin()) + 2 * tmpHist->GetRMS());                                            
         if(res == -1)
-        { 
-            std::cout<< 1 << std::endl;
-            return std::make_pair(0, 0); }
+        { return std::make_pair(0, 0); }
+
+        // leftBorder = tmpHist->GetBinWithContent(res->Parameter(0) * 0.4, bin, 0, tmpHist->FindBin(res->Parameter(1)), 1e-2);
+        // leftBorder = tmpHist->GetBinCenter(bin);
+
+        // rightBorder = tmpHist->GetBinWithContent(res->Parameter(0) * 0.9, bin, tmpHist->FindBin(res->Parameter(1)), tmpHist->GetNbinsX()-1, 1e-2);
+        // rightBorder = tmpHist->GetBinCenter(bin);
+        // res = tmpHist->Fit("gaus", "SEQM", "", leftBorder, rightBorder);
+
+
         res = tmpHist->Fit("gaus", "SEQM", "", res->Parameter(1) - res->Parameter(2), res->Parameter(1) + 2 * res->Parameter(2));
         if(res == -1)
         { return std::make_pair(0, 0); }
-        // std::cout<< 1 << std::endl;
 
         if(verbose && res->Chi2()/res->Ndf() > 1.5)
         { std::cout << run << " run: chi2 / ndf = " << res->Chi2()/res->Ndf() << std::endl; }
@@ -319,8 +350,21 @@ void Energy::PrintGroups()
 std::map<int, Float_t> Energy::GetEnergyDiff()
 {
     auto tmp = AverageKchEnergy(true);
+    double mean = 0;
+    double meanErr = 0;
     std:: map<int, Float_t> diff;
     for(auto& [run, energy] : tmp)
-    { diff[run] = energy.first + energyShift - comptonEnergyMean; }
+    { 
+        mean += energy.first;
+        if(energy.second > 1e-7)
+        { meanErr += 1 / energy.second / energy.second; }
+    }
+    mean = mean / tmp.size();
+    meanErr = sqrt(1 / meanErr);
+
+    for(auto& [run, energy] : tmp)
+    { diff[run] = energy.first - mean; }
+    // { diff[run] = energy.first + energyShift - comptonEnergyMean; }
+
     return diff;
 }
