@@ -1,5 +1,6 @@
 #include "TF1.h"
 #include "TGraphErrors.h"
+#include "TH1D.h"
 #include "TLine.h"
 #include "TGaxis.h"
 #include "TAxis.h"
@@ -15,7 +16,11 @@ int KchEnergyShift()
     vector<double> Pavg = {106.339, 119.779, 121.882, 121.882, 121.882, 123.952, 125.989, 125.989, 125.989, 127.996, 127.996, 127.996, 129.974, 129.974, 131.924, 131.924, 143.10};
     vector<double> Pavg2 = {106.339, 119.779, 121.882, 123.952, 125.989, 127.996, 129.974, 131.924, 143.105};
 
-    // Energy shift vs Pavg:
+/*
+******************************
+* Energy shift vs Pavg:
+******************************
+*/ 
     vector<double> energyShift = {5.567, 4.228, 4.075, 4.051, 4.078, 3.907, 3.753, 3.746, 3.778, 3.722, 3.711, 3.729, 3.684, 3.681, 3.559, 3.561, 3.106};
     vector<double> energyShiftErr = {0.031, 0.005, 0.023, 0.024, 0.017,  0.010, 0.009, 0.026, 0.009, 0.009, 0.013, 0.009, 0.013, 0.008, 0.022, 0.009, 0.011};
     vector<double> energyShiftMC_NoFSR = {5.443, 4.144,  3.922, 3.922, 3.922, 3.770, 3.673, 3.673, 3.673, 3.597, 3.597, 3.597, 3.487, 3.487, 3.300, 3.300, 2.860};
@@ -51,7 +56,11 @@ int KchEnergyShift()
     grMeanDelta.DrawClone("P same");
     CMD2Preprint.DrawClone("same");
 
-    // EnergyShift Data/MC vs Pavg:
+/*
+******************************
+* EnergyShift Data - MC vs Pavg:
+******************************
+*/ 
     vector<double> dataMCdiff = {0.11, 0.11, 0.17, 0.15, 0.17, 0.15, 0.08, 0.08, 0.11, 0.12, 0.11, 0.12, 0.2, 0.2, 0.25, 0.25, 0.23};
     vector<double> dataMCdiffErr = {0.044, 0.007, 0.035, 0.03, 0.068, 0.014, 0.013, 0.037, 0.013, 0.013, 0.018, 0.013, 0.018, 0.011, 0.031, 0.013, 0.016};
 
@@ -67,16 +76,33 @@ int KchEnergyShift()
     grDataMC_diff.SetTitle("Black - data-MC, Blue - (E^{(K^{#pm})}_{avg} - compton_mean)-MC");
     grDataMC_diff.GetXaxis()->SetTitle("P_{avg}, #frac{MeV}{c}");
     grDataMC_diff.GetYaxis()->SetTitle("data-MC, MeV");
-
     grDataMC_diff.DrawClone("AP");
     grMeanDelta_MC_diff.DrawClone("P same");
 
-    // EnergyShift vs M correlation
-    vector<double> M = {497.541, 497.564, 497.536, 497.536, 497.536, 497.563, 497.549, 497.549, 497.549, 497.578, 497.578, 497.578, 497.589, 497.589, 497.571, 497.571, 497.601};
-    vector<double> M_err = {0.010, 0.012, 0.013, 0.013, 0.013, 0.013, 0.011, 0.011, 0.011, 0.012, 0.012, 0.012, 0.013, 0.013, 0.014, 0.014, 0.024};
+/*
+******************************
+* (Data - MC) - fit_curve_vals(pol2: 8.19e-5 * mom * mom - 0.01488 * mom + 0.714251) 
+******************************
+*/ 
+    vector<double> dataMC_fitCurve_diff = {0.05, -0.0, 0.05, 0.03, 0.06, 0.02, -0.06, -0.06, -0.03, -0.03, -0.05, -0.03, 0.04, 0.03, 0.07, 0.07, -0.04};
+    TGraphErrors grDataMC_fitCurve_diff(Pavg.size(), Pavg.data(), dataMC_fitCurve_diff.data(), zeroes.data(), dataMCdiffErr.data());
+    TH1D hDataMC_fitCurve_diff("hist", "hist", 5, -0.1, 0.1);
+    for(auto diff : dataMC_fitCurve_diff)
+    { hDataMC_fitCurve_diff.Fill(diff); }
+
+    grDataMC_fitCurve_diff.DrawClone("AP");
+    hDataMC_fitCurve_diff.DrawClone();
+
+/*
+******************************
+* EnergyShift vs M correlation
+******************************
+*/ 
+    vector<double> M = {497.525, 497.561, 497.54, 497.54, 497.54, 497.553, 497.548, 497.548, 497.548, 497.573, 497.573, 497.573, 497.586, 497.586, 497.565, 497.565, 497.609};
+    vector<double> M_err = {0.042, 0.013, 0.011, 0.011, 0.011, 0.013, 0.006, 0.006, 0.006, 0.007, 0.007, 0.007, 0.01, 0.01, 0.013,  0.013, 0.017};
     // M - M_mean (pol0); M_mean (pol0) = 497.561 +/- 0.004 MeV
-    vector<double> M_diff = {-0.02, 0.003, -0.025, -0.025, -0.025, 0.002, -0.012, -0.012, -0.012, 0.017, 0.017, 0.017, 0.028, 0.028, 0.01, 0.01, 0.04};
-    vector<double> M_diff_err = {0.011, 0.013, 0.014, 0.014, 0.014, 0.014, 0.012, 0.012, 0.012, 0.013, 0.013, 0.013, 0.014, 0.014, 0.015, 0.015, 0.024};
+    vector<double> M_diff = {-0.037, -0.001, -0.022, -0.022, -0.022, -0.009, -0.014, -0.014, -0.014, 0.011, 0.011, 0.011, 0.024, 0.024, 0.003, 0.003, 0.047};
+    vector<double> M_diff_err = {0.036, 0.014, 0.011, 0.011, 0.011, 0.009, 0.008, 0.008, 0.008, 0.01, 0.01, 0.01, 0.013, 0.013, 0.014, 0.014, 0.029};
 
 
     TGraphErrors grDataMC_diff_vs_M(M_diff.size(), M_diff.data(), dataMCdiff.data(), M_diff_err.data(), dataMCdiffErr.data());
@@ -85,7 +111,7 @@ int KchEnergyShift()
     grDataMC_diff_vs_M.GetXaxis()->SetTitle("M - M_{mean}, MeV");
     grDataMC_diff_vs_M.GetYaxis()->SetTitle("#DeltaE Data - MC, MeV");
 
-    grDataMC_diff_vs_M.DrawClone("AP");
+    // grDataMC_diff_vs_M.DrawClone("AP");
 
     return 0;
 }
