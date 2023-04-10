@@ -1,3 +1,11 @@
+1 point:
+Mass_CrAngle = 497.774 +/- 0.0269482; chi2 / ndf = 6.80119/11; Prob = 0.814948
+Mass_FullRec = 497.752 +/- 0.0107072; chi2 / ndf = 8.78144/9; Prob = 0.457689
+Average E cut = 510.305 +/- 0.00551469
+Average E  = 510.319 +/- 0.00402658
+hE->GetMean() = 510.31586 +/- 0.006
+hEUncutted->GetMean() = 510.31723 +/- 0.003
+
 5 points:
 Mass_CrAngle = 497.798 +/- 0.0260845; chi2 / ndf = 0.988375/11; Prob = 0.999953
 Mass_FullRec = 497.788 +/- 0.0109345; chi2 / ndf = 3.86585/9; Prob = 0.920018
@@ -46,3 +54,12 @@ Average E  = 510.269 +/- 0.00282313
 
 Energy point: 510.7; Mean Energy = 510.27 +/- 0.00387182; e_mc = 0.142447
 Mean Smeared Energy = 510.271 +/- 0.00447903
+
+
+std::vector<double> energy = {510.316, 510.274, 510.266, 510.272, 510.270, 510.270};
+std::vector<double> energyErr = {0.004, 0.002, 0.005, 0.004, 0.004, 0.004};
+
+std::vector<double> energyUnCutted = {510.317,  510.276, 510.270, 510.270, 510.269,  510.269};
+std::vector<double> energyUnCuttedErr = {0.003, 0.001, 0.003, 0.002, 0.002, 0.002};
+
+std::vector<double> points = {1, 5, 7, 9, 11, 13};
