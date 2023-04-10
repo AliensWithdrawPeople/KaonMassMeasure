@@ -14,7 +14,13 @@ int RadCor()
 
     TGraph grRC(RC.size(), vE.data(), RC.data());
     TGraph grRC_smearing(RC.size(), vE.data(), RC_smeared.data());
+
     grRC_smearing.SetMarkerColor(kBlue);
+    grRC_smearing.SetMarkerSize(1.5);
+    grRC_smearing.SetMarkerStyle(22);
+
+    grRC.SetMarkerSize(1.5);
+    grRC.SetMarkerStyle(23);
 
     grRC.SetTitle("ISR correction (black dots -- wo energy smearing, blue dots -- with smearing)");
     grRC.GetXaxis()->SetTitle("E, MeV");
