@@ -14,6 +14,11 @@ int energyStability()
         enDict[energyPoints[i]] = new Energy("C://work/Science/BINP/Kaon Mass Measure/tr_ph/expKpKm/kchExp" + energyPoints[i] + ".root", 
                                                 "C://work/Science/BINP/Kaon Mass Measure/txt/BadRuns.txt", meanEnergies[i], meanEnergiesErr[i], 30, 0);        
     }
+
+    // MC
+    // enDict["510"] = new Energy("C://work/Science/BINP/Kaon Mass Measure/tr_ph/MC/Kch/Kch_MC510_smeared.root", 
+    //                                             "", 509.956, 0.007, 30, 0, false);
+    
     enDict["510"]->DrawGraph();
     std::vector<double> kchMeanEnergy;
     std::vector<double> kchMeanEnergyErr;
