@@ -40,7 +40,7 @@ int MassVsE()
     grRCNC_exp2.SetLineColor(kBlue);
     grRCNC_exp2.SetMarkerStyle(22);
     grRCNC_exp2.SetMarkerSize(1.5);
-    // grRCNC_exp2.DrawClone("P Same");
+    grRCNC_exp2.DrawClone("P Same");
 
     return 0;
 }

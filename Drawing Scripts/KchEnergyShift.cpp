@@ -45,11 +45,16 @@ int KchEnergyShift()
     grShiftExp.GetXaxis()->SetTitle("P_{avg}, #frac{MeV}{c}");
     // grShiftExp.GetXaxis()->SetTitle("E_{mean}, MeV");
     grShiftExp.GetYaxis()->SetTitle("#DeltaE, MeV");
+    grShiftExp.SetMarkerSize(1.5);
 
     grShiftMC_FSR.SetLineColor(kBlue);
     grShiftMC_FSR.SetMarkerColor(kBlue);
+    grShiftMC_FSR.SetMarkerSize(1.5);
+    grShiftMC_FSR.SetMarkerStyle(23);
 
     grMeanDelta.SetMarkerColor(kMagenta);
+    grMeanDelta.SetMarkerSize(1.5);
+    grMeanDelta.SetMarkerStyle(22);
 
     grShiftExp.DrawClone("AP");
     grShiftMC_FSR.DrawClone("P same");
@@ -79,8 +84,8 @@ int KchEnergyShift()
     grDataMC_diff.GetYaxis()->SetTitle("data-MC, MeV");
     grDataMC_diff.SetMarkerSize(1.5);
 
-    grDataMC_diff.DrawClone("AP");
-    grMeanDelta_MC_diff.DrawClone("P same");
+    // grDataMC_diff.DrawClone("AP");
+    // grMeanDelta_MC_diff.DrawClone("P same");
 
 /*
 ******************************
