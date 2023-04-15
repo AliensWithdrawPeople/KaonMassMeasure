@@ -30,16 +30,18 @@ int MassVsE()
     grRCNC_exp.SetTitle("Black -- with Energy controll, Blue -- without");
     grRCNC_exp.GetXaxis()->SetTitle("E_{beam}, MeV");
     grRCNC_exp.GetYaxis()->SetTitle("M^{(FullRec)}_{RC NC RecCor}, #frac{MeV}{c^{2}}");
+    grRCNC_exp.GetYaxis()->SetTitleOffset(1.2);
     grRCNC_exp.SetName("EnControl");
-    grRCNC_exp.SetMarkerSize(1.5);
-    grRCNC_exp.DrawClone("AP");
+    grRCNC_exp.SetMarkerSize(2);
     grRCNC_exp.Fit("pol0", "ME");
+    grRCNC_exp.DrawClone("AP");
     
     grRCNC_exp2.SetName("NoEnControl");
     grRCNC_exp2.SetMarkerColor(kBlue);
     grRCNC_exp2.SetLineColor(kBlue);
     grRCNC_exp2.SetMarkerStyle(22);
-    grRCNC_exp2.SetMarkerSize(1.5);
+    grRCNC_exp2.SetMarkerSize(2);
+    grRCNC_exp2.Fit("pol0", "ME+");
     grRCNC_exp2.DrawClone("P Same");
 
     return 0;

@@ -108,18 +108,19 @@ int KchEnergyShift()
 */ 
     vector<double> M = {497.525, 497.561, 497.54, 497.54, 497.54, 497.553, 497.548, 497.548, 497.548, 497.573, 497.573, 497.573, 497.586, 497.586, 497.565, 497.565, 497.609};
     vector<double> M_err = {0.042, 0.013, 0.011, 0.011, 0.011, 0.013, 0.006, 0.006, 0.006, 0.007, 0.007, 0.007, 0.01, 0.01, 0.013,  0.013, 0.017};
-    // M - M_mean (pol0); M_mean (pol0) = 497.561 +/- 0.004 MeV
+    // M - M_mean (pol0); M_mean (pol0) = 497.558 +/- 0.004 MeV
     vector<double> M_diff = {-0.037, -0.001, -0.022, -0.022, -0.022, -0.009, -0.014, -0.014, -0.014, 0.011, 0.011, 0.011, 0.024, 0.024, 0.003, 0.003, 0.047};
     vector<double> M_diff_err = {0.036, 0.014, 0.011, 0.011, 0.011, 0.009, 0.008, 0.008, 0.008, 0.01, 0.01, 0.01, 0.013, 0.013, 0.014, 0.014, 0.029};
 
 
     TGraphErrors grDataMC_diff_vs_M(M_diff.size(), M_diff.data(), dataMCdiff.data(), M_diff_err.data(), dataMCdiffErr.data());
-
-    grDataMC_diff_vs_M.SetTitle(("M_{mean} = 497.561 #pm 0.004 MeV, CorrelationFactor = " + std::to_string(grDataMC_diff_vs_M.GetCorrelationFactor())).c_str());
+    grDataMC_diff_vs_M.SetTitle(("M_{mean} = 497.558 #pm 0.006 MeV, CorrelationFactor = " + std::to_string(grDataMC_diff_vs_M.GetCorrelationFactor())).c_str());
+    grDataMC_diff_vs_M.AddPoint(0.3, 0.4);
+    grDataMC_diff_vs_M.AddPoint(0.3, -0.1);
     grDataMC_diff_vs_M.GetXaxis()->SetTitle("M - M_{mean}, MeV");
     grDataMC_diff_vs_M.GetYaxis()->SetTitle("#DeltaE Data - MC, MeV");
 
-    // grDataMC_diff_vs_M.DrawClone("AP");
+    grDataMC_diff_vs_M.DrawClone("AP");
 
     return 0;
 }

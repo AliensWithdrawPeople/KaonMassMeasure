@@ -80,14 +80,17 @@ int DetectorResolution()
 * deltaM_NC vs lnY (E_point = 510.5 MeV):
 *****************************************
 */
-{
     vec deltaM_exp = {0.036, 0.027, 0.022, 0.017, 0.015, 0.0125, 0.0115, 0.011, 0.011, 0.0115, 0.0125, 0.015, 0.017, 0.022, 0.027, 0.036};
-    vec deltaM_MC = {0.034, 0.024, 0.020, 0.0115, 0.0135, 0.0095, 0.0105, 0.0095, 0.0095, 0.0105, 0.0135, 0.0145, 0.018, 0.024, 0.022, 0.034};
+    vec deltaM_MC = {0.034, 0.024, 0.020, 0.0145, 0.0135, 0.0115, 0.0105, 0.0095, 0.0095, 0.0105, 0.0135, 0.0145, 0.0155, 0.021, 0.025, 0.034};
     vec deltaM_MCsmeared = {0.036, 0.026, 0.022, 0.017, 0.015, 0.0125, 0.0115, 0.011, 0.011, 0.0115, 0.0125, 0.015, 0.017, 0.022, 0.026, 0.036};
 
     TGraphErrors grDeltaM_exp(lnY.size(), lnY.data(), deltaM_exp.data(), xRange.data(), zeroes.data());
     TGraphErrors grDeltaM_MC(lnY.size(), lnY.data(), deltaM_MC.data(), xRange.data(), zeroes.data());
     TGraphErrors grDeltaM_MCsmeared(lnY.size(), lnY.data(), deltaM_MCsmeared.data(), xRange.data(), zeroes.data());
+    
+    grDeltaM_exp.SetName("grDeltaM_exp");
+    grDeltaM_MC.SetName("grDeltaM_MC");
+    grDeltaM_MCsmeared.SetName("grDeltaM_MCsmeared");
 
     grDeltaM_exp.SetTitle("E_{point} = 510.5 MeV, Black - data, Red - MC, Blue - MC with energy smearing");
     grDeltaM_exp.GetXaxis()->SetTitle("lnY");
@@ -107,14 +110,6 @@ int DetectorResolution()
     grDeltaM_exp.DrawClone("AP");
     grDeltaM_MC.DrawClone("P same");
     grDeltaM_MCsmeared.DrawClone("P same");
-}
-/*
-**********************
-* deltaM_NC vs E_beam:
-**********************
-*/
-    vec deltaM_exp = {};
-    vec deltaM_MC = {};
-    vec deltaM_MCsmeared = {};
+
     return 0;
 }
