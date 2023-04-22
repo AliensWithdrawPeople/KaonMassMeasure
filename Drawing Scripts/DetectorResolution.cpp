@@ -92,9 +92,9 @@ int DetectorResolution()
     grDeltaM_MC.SetName("grDeltaM_MC");
     grDeltaM_MCsmeared.SetName("grDeltaM_MCsmeared");
 
-    grDeltaM_exp.SetTitle("E_{point} = 510.5 MeV, Black - data, Red - MC, Blue - MC with energy smearing");
+    grDeltaM_exp.SetTitle("E_{beam} = 510.5 MeV (Black - data, Red - MC, Blue - MC with energy smearing)");
     grDeltaM_exp.GetXaxis()->SetTitle("lnY");
-    grDeltaM_exp.GetYaxis()->SetTitle("#DeltaM_{NC}, MeV");
+    grDeltaM_exp.GetYaxis()->SetTitle("#DeltaM^{(NC)}, MeV/c^{2}");
 
     grDeltaM_exp.SetMarkerColor(kBlack);
     grDeltaM_exp.SetMarkerSize(1.5);

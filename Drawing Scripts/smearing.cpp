@@ -19,7 +19,7 @@ int smearing()
     TGraphErrors grSmearCut(points.size(), points.data(), energy.data(), zeroes.data(), energyErr.data());
     TGraphErrors grSmearNoCut(points.size(), points.data(), energyUnCutted.data(), zeroes.data(), energyUnCuttedErr.data());
 
-    grSmearCut.SetTitle("E_{mean} = 510.458 MeV, #sigma_{beam} = 0.288 MeV (Black -- With Cuts, Red -- Without Cuts)");
+    grSmearCut.SetTitle("E_{mean} = 510.458 MeV, #sigma_{beam} = 0.288 MeV (Black -- Without Cuts, Red -- With Cuts)");
     grSmearCut.GetXaxis()->SetTitle("number of points");
     grSmearCut.GetYaxis()->SetTitle("E_{avg}, MeV");
     grSmearCut.SetName("WithCuts");

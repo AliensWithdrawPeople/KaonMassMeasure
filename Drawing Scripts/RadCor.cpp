@@ -22,7 +22,7 @@ int RadCor()
     grRC.SetMarkerSize(1.5);
     grRC.SetMarkerStyle(23);
 
-    grRC.SetTitle("ISR correction (black dots -- wo energy smearing, blue dots -- with smearing)");
+    grRC.SetTitle("ISR correction (black -- without energy smearing, blue  -- with smearing)");
     grRC.GetXaxis()->SetTitle("E, MeV");
     grRC.GetYaxis()->SetTitle("#DeltaM^{(RC)}, #frac{MeV}{c^{2}}");
 
