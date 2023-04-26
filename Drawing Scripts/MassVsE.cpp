@@ -6,17 +6,23 @@
 
 int MassVsE()
 {
-    double massK = 497.614;
     std::vector<Float_t> zeroes(100, 0.0);
-
+/*
+******************************
+* Prev results:
+******************************
+*/ 
     std::vector<Float_t> vMPDG = {497.742, 497.661, 497.625, 497.634, 497.583, 497.607};
     std::vector<Float_t> vMPDGerr = {0.085, 0.033, 0.031, 0.024, 0.021, 0.017};
     std::vector<Float_t> vExpNum = {505, 506, 507, 508, 509, 510};
     TGraphErrors grMPDG(vMPDG.size(), vExpNum.data(), vMPDG.data(), zeroes.data(), vMPDGerr.data());
     // grMPDG.DrawClone("same AP");
-    // massKline->DrawClone("Same");
 
-    std::vector<Float_t> vPavg = {157, 182, 207, 231, 235, 243, 254, 260};
+/*
+******************************
+* Mass vs E_beam in Exp:
+******************************
+*/ 
 
     // std::vector<Float_t> vM_Exp = {497.541, 497.564, 497.536, 497.563, 497.549, 497.578, 497.589, 497.571, 497.601};
     std::vector<Float_t> vM_Exp = {497.525, 497.561, 497.54, 497.553, 497.548, 497.573, 497.586, 497.565, 497.609};
@@ -34,7 +40,6 @@ int MassVsE()
     grRCNC_exp.SetName("EnControl");
     grRCNC_exp.SetMarkerSize(2);
     grRCNC_exp.Fit("pol0", "ME");
-    grRCNC_exp.DrawClone("AP");
     
     grRCNC_exp2.SetName("NoEnControl");
     grRCNC_exp2.SetMarkerColor(kBlue);
@@ -42,7 +47,47 @@ int MassVsE()
     grRCNC_exp2.SetMarkerStyle(22);
     grRCNC_exp2.SetMarkerSize(2);
     grRCNC_exp2.Fit("pol0", "ME+");
-    grRCNC_exp2.DrawClone("P Same");
+
+    grRCNC_exp.DrawClone("AP");
+    // grRCNC_exp2.DrawClone("P Same");
+
+/*
+******************************
+* Mass vs E_beam in MC:
+******************************
+*/ 
+    std::vector<Float_t> vM_MC_NoSmearing = {497.590, 497.608, 497.614, 497.615, 497.605, 497.618, 497.601, 497.635, 497.600};
+    std::vector<Float_t> vM_MC_NoSmearingErr = {0.011, 0.013, 0.010, 0.009, 0.009, 0.009, 0.010, 0.010, 0.034};
+
+    std::vector<Float_t> vM_MC_WithSmearing = {497.627, 497.604, 497.612, 497.603, 497.606, 497.611, 497.607, 497.613,  497.609};
+    std::vector<Float_t> vM_MC_WithSmearingErr = {0.008, 0.009 , 0.003, 0.006, 0.006, 0.003, 0.006, 0.003, 0.023};
+    
+    TGraphErrors grMC_NoSmearing(vE.size(), vE.data(), vM_MC_NoSmearing.data(), zeroes.data(), vM_MC_NoSmearingErr.data());
+    TGraphErrors grMC_WithSmearingErr(vE.size(), vE.data(), vM_MC_WithSmearing.data(), zeroes.data(), vM_MC_WithSmearingErr.data());
+
+    TLine massKline(504.5, 497.614, 514.5, 497.614);
+    massKline.SetLineStyle(2);
+    massKline.SetLineWidth(4);
+    massKline.SetLineColor(kRed);
+
+    grMC_NoSmearing.SetTitle("Black -- without Energy Smearing, Blue -- with Energy Smearing, Red line --- mass in generator");
+    grMC_NoSmearing.GetXaxis()->SetTitle("E_{beam}, MeV");
+    grMC_NoSmearing.GetYaxis()->SetTitle("M^{(FullRec)}_{RC NC}, #frac{MeV}{c^{2}}");
+    grMC_NoSmearing.GetYaxis()->SetTitleOffset(1.2);
+    grMC_NoSmearing.SetName("NoSmear");
+    grMC_NoSmearing.SetMarkerSize(2);
+    grMC_NoSmearing.Fit("pol0", "ME");
+    
+    grMC_WithSmearingErr.SetName("Smear");
+    grMC_WithSmearingErr.SetMarkerColor(kBlue);
+    grMC_WithSmearingErr.SetLineColor(kBlue);
+    grMC_WithSmearingErr.SetMarkerStyle(22);
+    grMC_WithSmearingErr.SetMarkerSize(2);
+    grMC_WithSmearingErr.Fit("pol0", "ME+");
+
+    // grMC_NoSmearing.DrawClone("AP");
+    // grMC_WithSmearingErr.DrawClone("P Same");
+    // massKline.DrawClone("same");
 
     return 0;
 }

@@ -45,15 +45,12 @@ int KchEnergyShift()
     grShiftExp.GetXaxis()->SetTitle("P_{avg}, #frac{MeV}{c}");
     // grShiftExp.GetXaxis()->SetTitle("E_{mean}, MeV");
     grShiftExp.GetYaxis()->SetTitle("#DeltaE, MeV");
-    grShiftExp.SetMarkerSize(1.5);
 
     grShiftMC_FSR.SetLineColor(kBlue);
     grShiftMC_FSR.SetMarkerColor(kBlue);
-    grShiftMC_FSR.SetMarkerSize(1.5);
     grShiftMC_FSR.SetMarkerStyle(23);
 
     grMeanDelta.SetMarkerColor(kMagenta);
-    grMeanDelta.SetMarkerSize(1.5);
     grMeanDelta.SetMarkerStyle(22);
 
     grShiftExp.DrawClone("AP");
@@ -76,15 +73,13 @@ int KchEnergyShift()
     TGraphErrors grMeanDelta_MC_diff(Pavg2.size(), Pavg2.data(), meanDelta_MCdiff.data(), zeroes.data(), meanDelta_MCdiffErr.data());
     grMeanDelta_MC_diff.SetMarkerColor(kBlue);
     grMeanDelta_MC_diff.SetName("meanDelta_MCratio");
-    grMeanDelta_MC_diff.SetMarkerSize(1.5);
 
     grDataMC_diff.SetName("DataMCdiff");
     grDataMC_diff.SetTitle("Black - data-MC, Blue - (E^{(K^{#pm})}_{avg} - compton_mean)-MC");
     grDataMC_diff.GetXaxis()->SetTitle("P_{avg}, #frac{MeV}{c}");
     grDataMC_diff.GetYaxis()->SetTitle("data-MC, MeV");
-    grDataMC_diff.SetMarkerSize(1.5);
 
-    // grDataMC_diff.DrawClone("AP");
+    grDataMC_diff.DrawClone("AP");
     // grMeanDelta_MC_diff.DrawClone("P same");
 
 /*
@@ -120,7 +115,7 @@ int KchEnergyShift()
     grDataMC_diff_vs_M.GetXaxis()->SetTitle("M - M_{mean}, MeV");
     grDataMC_diff_vs_M.GetYaxis()->SetTitle("#DeltaE Data - MC, MeV");
 
-    grDataMC_diff_vs_M.DrawClone("AP");
+    // grDataMC_diff_vs_M.DrawClone("AP");
 
     return 0;
 }

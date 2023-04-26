@@ -438,19 +438,21 @@ int massMeasRefactored()
         radiativeCorrections[energyPoints[i]] = deltaM_RC_Smeared[i]; 
     }
 
-    std::string energyPoint = "510.5";
+    std::string energyPoint = "509.5";
     // std::string fileName = "tr_ph/expKsKl/exp" + energyPoint + "_v9.root";
-    // std::string fileName = "tr_ph/MC/MC510.5_v9.root";
-    std::string fileName = "tr_ph/MC/MC510.5_Smeared.root";
-    // std::string fadRunsFile = "tr_ph/MC/MC509.5_Smeared.root";
 
-    auto kchEnergyHandler = new Energy("C://work/Science/BINP/Kaon Mass Measure/tr_ph/expKpKm/kchExp" + energyPoint + ".root", "txt/BadRuns.txt", 
-                                                        meanEnergies[energyPoint].first, meanEnergies[energyPoint].second, 30, 0); 
-    auto energyDiff = kchEnergyHandler->GetEnergyDiff();
-    delete kchEnergyHandler;
+    std::string fileName = "tr_ph/MC/MC" + energyPoint + "_v9.root";
+    // std::string fileName = "tr_ph/MC/MC" + energyPoint + "_Smeared.root";
 
-    auto massHandler = new MassHandler(fileName, "txt/BadRuns.txt", meanEnergies[energyPoint].first);
-    // auto massHandler = new MassHandler(fileName, "", 510.694);
+    std::string fadRunsFile = "txt/BadRuns.txt";
+
+    // auto kchEnergyHandler = new Energy("C://work/Science/BINP/Kaon Mass Measure/tr_ph/expKpKm/kchExp" + energyPoint + ".root", fadRunsFile, 
+    //                                                     meanEnergies[energyPoint].first, meanEnergies[energyPoint].second, 30, 0); 
+    // auto energyDiff = kchEnergyHandler->GetEnergyDiff();
+    // delete kchEnergyHandler;
+
+    // auto massHandler = new MassHandler(fileName, fadRunsFile, meanEnergies[energyPoint].first);
+    auto massHandler = new MassHandler(fileName, "");
     auto mass = massHandler->MassLnY(0.33, false) - radiativeCorrections[energyPoint];
     std::cout << "M_NCRC_smeared = " << mass << std::endl;
     delete massHandler;
