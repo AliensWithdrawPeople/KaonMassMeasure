@@ -8,8 +8,9 @@
 int RadCor()
 {
     std::vector<Float_t> zeroes(100, 0.0);
-    std::vector<Float_t> RC = {0.073, 0.075, 0.073, 0.069, 0.064, 0.112, 0.186, 0.328, 1.51};
-    std::vector<Float_t> RC_smeared = {0.1, 0.099, 0.089, 0.08, 0.086, 0.116, 0.191, 0.334, 1.453};
+    std::vector<Float_t> RC =         {0.073, 0.075, 0.073, 0.069, 0.064, 0.112, 0.186, 0.328, 1.51};
+    std::vector<Float_t> RC_smeared = {0.1, 0.099, 0.089, 0.08, 0.071, 0.116, 0.191, 0.334, 1.453};
+    // std::vector<Float_t> RC_smeared = {0.132, 0.086, 0.076, 0.062, 0.071, 0.106, 0.178, 0.325, 1.453};
     std::vector<Float_t> vE = {505, 508, 508.5, 509, 509.5, 510, 510.5, 511, 514};
 
     TGraph grRC(RC.size(), vE.data(), RC.data());
