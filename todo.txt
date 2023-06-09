@@ -21,6 +21,11 @@
 Check this!!!
 
 **************
+Check RadCor: 
+Why on the left slope there is a difference between RC with and without Energy Smearing (around 30 keV)
+but on the right one there is NO difference?
+
+**************
 Energy control via KpKm
 Check energy and (data - MC) without beam point. 
 

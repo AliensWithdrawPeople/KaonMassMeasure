@@ -61,8 +61,13 @@ int MassVsE()
     std::vector<Float_t> vM_MC_WithSmearing = {497.627, 497.604, 497.612, 497.603, 497.606, 497.611, 497.607, 497.613,  497.609};
     std::vector<Float_t> vM_MC_WithSmearingErr = {0.008, 0.009 , 0.003, 0.006, 0.006, 0.003, 0.006, 0.003, 0.023};
     
+    std::vector<Float_t> vM_MC_WrongEnergy = {497.575, 497.582, 497.588, 497.588, 497.588, 497.593};
+    std::vector<Float_t> vM_MC_WrongEnergyErr = {0.002, 0.002, 0.003, 0.003, 0.003, 0.003};
+    std::vector<Float_t> vE_short = {508.5, 509, 509.5, 510, 510.5, 511};
+
     TGraphErrors grMC_NoSmearing(vE.size(), vE.data(), vM_MC_NoSmearing.data(), zeroes.data(), vM_MC_NoSmearingErr.data());
-    TGraphErrors grMC_WithSmearingErr(vE.size(), vE.data(), vM_MC_WithSmearing.data(), zeroes.data(), vM_MC_WithSmearingErr.data());
+    TGraphErrors grMC_WithSmearing(vE.size(), vE.data(), vM_MC_WithSmearing.data(), zeroes.data(), vM_MC_WithSmearingErr.data());
+    TGraphErrors grMC_WrongEnergy(vE_short.size(), vE_short.data(), vM_MC_WrongEnergy.data(), zeroes.data(), vM_MC_WrongEnergyErr.data());
 
     TLine massKline(504.5, 497.614, 514.5, 497.614);
     massKline.SetLineStyle(2);
@@ -77,16 +82,27 @@ int MassVsE()
     grMC_NoSmearing.SetMarkerSize(2);
     grMC_NoSmearing.Fit("pol0", "ME");
     
-    grMC_WithSmearingErr.SetName("Smear");
-    grMC_WithSmearingErr.SetMarkerColor(kBlue);
-    grMC_WithSmearingErr.SetLineColor(kBlue);
-    grMC_WithSmearingErr.SetMarkerStyle(22);
-    grMC_WithSmearingErr.SetMarkerSize(2);
-    grMC_WithSmearingErr.Fit("pol0", "ME+");
+    grMC_WithSmearing.SetName("Smear");
+    grMC_WithSmearing.SetMarkerColor(kBlue);
+    grMC_WithSmearing.SetLineColor(kBlue);
+    grMC_WithSmearing.SetMarkerStyle(22);
+    grMC_WithSmearing.SetMarkerSize(2);
+    grMC_WithSmearing.Fit("pol0", "ME+");
+
+    grMC_WrongEnergy.SetName("Smear");
+    grMC_WrongEnergy.SetMarkerColor(kBlue);
+    grMC_WrongEnergy.SetLineColor(kBlue);
+    grMC_WrongEnergy.SetMarkerStyle(21);
+    grMC_WrongEnergy.SetMarkerSize(2);
+    grMC_WrongEnergy.Fit("pol0", "ME+");
+
+    grMC_WrongEnergy.DrawClone("AP");
+
 
     // grMC_NoSmearing.DrawClone("AP");
-    // grMC_WithSmearingErr.DrawClone("P Same");
+    // grMC_WithSmearing.DrawClone("P Same");
     // massKline.DrawClone("same");
+
 
     return 0;
 }
