@@ -60,7 +60,7 @@ int KchEnergyShift()
 
 /*
 ******************************
-* EnergyShift Data - MC vs Pavg:
+* EnergyShift Data - MC vs Pavg with beam point:
 ******************************
 */ 
     vector<double> dataMCdiff = {0.11, 0.11, 0.17, 0.15, 0.17, 0.15, 0.08, 0.08, 0.11, 0.12, 0.11, 0.12, 0.2, 0.2, 0.25, 0.25, 0.23};
@@ -71,17 +71,37 @@ int KchEnergyShift()
 
     TGraphErrors grDataMC_diff(Pavg.size(), Pavg.data(), dataMCdiff.data(), zeroes.data(), dataMCdiffErr.data());
     TGraphErrors grMeanDelta_MC_diff(Pavg2.size(), Pavg2.data(), meanDelta_MCdiff.data(), zeroes.data(), meanDelta_MCdiffErr.data());
+
     grMeanDelta_MC_diff.SetMarkerColor(kBlue);
     grMeanDelta_MC_diff.SetName("meanDelta_MCratio");
 
     grDataMC_diff.SetName("DataMCdiff");
-    grDataMC_diff.SetTitle("Black - data-MC, Blue - (E^{(K^{#pm})}_{avg} - compton_mean)-MC");
+    grDataMC_diff.SetTitle("#DeltaE data-MC with beam point");
+    // grDataMC_diff.SetTitle("Black - data-MC, Blue - (E^{(K^{#pm})}_{avg} - compton_mean)-MC with ");
     grDataMC_diff.GetXaxis()->SetTitle("P_{avg}, #frac{MeV}{c}");
-    grDataMC_diff.GetYaxis()->SetTitle("data-MC, MeV");
+    grDataMC_diff.GetYaxis()->SetTitle("#DeltaE data-MC, MeV");
 
     grDataMC_diff.DrawClone("AP");
     // grMeanDelta_MC_diff.DrawClone("P same");
 
+
+/*
+******************************
+* EnergyShift Data - MC vs Pavg without beam point:
+******************************
+*/ 
+    vector<double> moms = {106.339, 119.779, 121.882, 121.882, 121.882, 127.996, 127.996, 127.996, 131.924, 131.924};
+    vector<double> dataMC_diff_NoBeamPoint = {0.004, 0.065, 0.124, 0.022, 0.133, 0.088, 0.084, 0.098, 0.222, 0.226};
+    vector<double> dataMC_diff_NoBeamPointErr = {0.0288, 0.0118, 0.0209, 0.021, 0.0166, 0.0207, 0.0189, 0.0132, 0.0141, 0.0136};
+    TGraphErrors grDataMC_diff_NoBeamPoint(moms.size(), moms.data(), dataMC_diff_NoBeamPoint.data(), zeroes.data(), dataMC_diff_NoBeamPointErr.data());
+
+    grDataMC_diff_NoBeamPoint.SetMarkerColor(kBlue);
+
+    grDataMC_diff_NoBeamPoint.SetTitle("#DeltaE data-MC without beam point");
+    grDataMC_diff_NoBeamPoint.GetXaxis()->SetTitle("P_{avg}, #frac{MeV}{c}");
+    grDataMC_diff_NoBeamPoint.GetYaxis()->SetTitle("#DeltaE data-MC, MeV");
+
+    // grDataMC_diff_NoBeamPoint.DrawClone("AP");
 /*
 ******************************
 * (Data - MC) - fit_curve_vals(pol2: 8.19e-5 * mom * mom - 0.01488 * mom + 0.714251) 
