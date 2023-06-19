@@ -59,13 +59,13 @@ void kskl2bGen::Loop(std::string histFileName)
     int NgoodTrS = 0;
     const double cutChi2r = 15.;
     const double cutChi2z = 10.;
-    const int cutNhitMin = 10;
+    const int cutNhitMin = 6;
     const int cutNhitMax = 30;
-    const double cutRmin = 0.1;
+    // const double cutRmin = 0.1;
     const double cutRmax = 6.0;
     const double cutZtrack = 12.;
     const double cutPtot = 40;
-    const double cutTrackTheta = 0.7;
+    // const double cutTrackTheta = 0.7;
 
     TVector3 ks;
     TVector3 kl;
@@ -120,6 +120,7 @@ void kskl2bGen::Loop(std::string histFileName)
     auto hTrackTheta = new TH1D("hTrackTheta", "hTrackTheta", 250, -TMath::Pi() / 2, TMath::Pi() / 2);
 
     auto hMissingMass = new TH1D("hMissingMass", "hMissingMass", 10000, 0, 10000);
+    auto hKsInvMass = new TH1D("hKsInvMass", "hKsInvMass", 5000, 0, 1000);
     auto hFinalStateId = new TH1D("hFinalStateId", "hFinalStateId", 1000, 0, 1000);
 
     hdThetadPhi->GetXaxis()->SetTitle("#Delta#phi, rad");
@@ -182,8 +183,10 @@ void kskl2bGen::Loop(std::string histFileName)
             for(int k = 0; k < nks; k++)
             {
                 if(ksalign[k] > 0.85 && (tdedx[ksvind[k][0]] + tdedx[ksvind[k][1]]) / 2 < 5000 &&
-                abs(kspith[k][0] - TMath::Pi() / 2) <= cutTrackTheta && 
-                abs(kspith[k][1] - TMath::Pi() / 2) <= cutTrackTheta &&
+                // abs(kspith[k][0] - TMath::Pi() / 2) <= cutTrackTheta && 
+                // abs(kspith[k][1] - TMath::Pi() / 2) <= cutTrackTheta &&
+                kspith[k][0] < TMath::Pi() - 1 && kspith[k][0] > 1 &&
+                kspith[k][1] < TMath::Pi() - 1 && kspith[k][1] > 1 &&
                 //20 - half of the linear size of Drift Chamber
                 //(20 - ksz0[0]) * fabs(TMath::Tan(kspith[0][0])) > 15 && (20 - ksz0[0]) * fabs(TMath::Tan(kspith[0][1])) > 15 &&
                 // kspipt[k][0] > 120 && kspipt[k][1] > 120 && 
@@ -258,7 +261,7 @@ void kskl2bGen::Loop(std::string histFileName)
                     }        
         
                     histKlCands->Fill(tmpCounter);
-                    if(tmpCounter > 0) // '|| 1' if there is no Kl cut
+                    if(tmpCounter > 0 || 1) // '|| 1' if there is no Kl cut
                     { ksCand.push_back(k); }
                     tmpCounter = 0;
                 }
@@ -305,14 +308,17 @@ void kskl2bGen::Loop(std::string histFileName)
                 // Y = piPos.Mag() / piNeg.Mag();
                 // dpsi = piPos.Angle(piNeg);
                 // emeas = sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2());
-
+                
                 missingMass = sqrt(4 * emeas * emeas + 2 * 139.57 * 139.57 
                 - 2 * 2 * emeas * sqrt(139.57 * 139.57 + piPosRec.Mag2()) - 2 * 2 * emeas * sqrt(139.57 * 139.57 + piNegRec.Mag2()) 
                 + 2 * (sqrt(139.57 * 139.57 + piPosRec.Mag2()) * sqrt(139.57 * 139.57 + piNegRec.Mag2()) - piPosRec.Dot(piNegRec)));
+
+                double pipiInvMass = sqrt(2 * (139.57 * 139.57 + sqrt(139.57 * 139.57 + piPosRec.Mag2()) * sqrt(139.57 * 139.57 + piNegRec.Mag2()) - piPosRec.Dot(piNegRec)));
                 hMissingMass->Fill(missingMass);
+                hKsInvMass->Fill(pipiInvMass);
                 hFinalStateId->Fill(finalstate_id);
                 
-                if(missingMass > 350)
+                if(missingMass > 350 || 1)
                 { tNew->Fill(); }
                 // tNew->Fill();
                 hTrackCollCutted->Fill(fabs(tphi[0] - tphi[1]) - TMath::Pi(), tth[0] + tth[1] - TMath::Pi());

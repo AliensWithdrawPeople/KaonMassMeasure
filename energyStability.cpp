@@ -8,18 +8,29 @@ int energyStability()
     const std::vector<double> meanEnergiesErr = {0.007, 0.007, 0.008, 0.009, 0.004, 0.005, 0.007, 0.009, 0.009};
     const std::vector<std::string> energyPoints = {"505", "508", "508.5", "509", "509.5", "510", "510.5", "511", "514"};
 
+    std::string badRuns = "C://work/Science/BINP/Kaon Mass Measure/txt/BadRuns.txt";
     std::map<std::string, Energy*> enDict;
-    for(int i = 0; i < energyPoints.size(); i++)
-    { 
-        enDict[energyPoints[i]] = new Energy("C://work/Science/BINP/Kaon Mass Measure/tr_ph/expKpKm/kchExp" + energyPoints[i] + ".root", 
-                                                "C://work/Science/BINP/Kaon Mass Measure/txt/BadRuns.txt", meanEnergies[i], meanEnergiesErr[i], 30, 0);        
-    }
+    // for(int i = 0; i < energyPoints.size(); i++)
+    // { 
+    //     enDict[energyPoints[i]] = new Energy("C://work/Science/BINP/Kaon Mass Measure/tr_ph/expKpKm/kchExp" + energyPoints[i] + ".root", 
+    //                                             badRuns, meanEnergies[i], meanEnergiesErr[i], 30, 3.4);        
+    // }
 
     // MC
     // enDict["510"] = new Energy("C://work/Science/BINP/Kaon Mass Measure/tr_ph/MC/Kch/Kch_MC510_smeared.root", 
     //                                             "", 509.956, 0.007, 30, 0, false);
-    
-    enDict["510"]->DrawGraph();
+
+    // No beam point
+    std::string enPointName = "514";  
+    // exp
+    enDict[enPointName] = new Energy("C://work/Science/BINP/Kaon Mass Measure/tr_ph/expKpKm/KpKm_NoVertex/kchExp" + enPointName +  "_noVertex.root", 
+                                                badRuns, meanEnergies[8], meanEnergiesErr[8], 30, 0);
+
+    // MC                              
+    // enDict[enPointName] = new Energy("C://work/Science/BINP/Kaon Mass Measure/tr_ph/MC/Kch/MC_Kch" + enPointName +  "_NoBeamPoint.root", 
+    //                                             "", meanEnergies[8], meanEnergiesErr[8], 30, 0, false);
+
+    enDict[enPointName]->DrawGraph();
     std::vector<double> kchMeanEnergy;
     std::vector<double> kchMeanEnergyErr;
     // for(auto &handler : enDict)

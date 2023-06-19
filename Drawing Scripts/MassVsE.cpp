@@ -27,10 +27,15 @@ int MassVsE()
     std::vector<Float_t> vM_Exp = {497.545, 497.566, 497.539, 497.547, 497.544, 497.571, 497.579, 497.566, 497.6};
 
     std::vector<Float_t> vM_Exp2 = {497.577, 497.568, 497.533, 497.554, 497.544, 497.57, 497.589, 497.568, 497.604};
+    std::vector<Float_t> vM_Exp_vis = {497.677, 497.667, 497.622, 497.634, 497.615, 497.686, 497.78, 497.902, 499.057};
+
     std::vector<Float_t> vMerrExp = {0.036, 0.014, 0.011, 0.008, 0.007, 0.01, 0.013, 0.014, 0.029};
-    std::vector<Float_t> vE = {505, 508, 508.5, 509, 509.5, 510, 510.5, 511, 514};
+    // std::vector<Float_t> vE = {505, 508, 508.5, 509, 509.5, 510, 510.5, 511, 514};
+    std::vector<Float_t> vE = {504.8, 507.862, 508.404, 508.957, 509.528, 509.956, 510.458, 511.035, 513.864};
+    
     TGraphErrors grRCNC_exp(vM_Exp.size(), vE.data(), vM_Exp.data(), zeroes.data(), vMerrExp.data());
     TGraphErrors grRCNC_exp2(vM_Exp.size(), vE.data(), vM_Exp2.data(), zeroes.data(), vMerrExp.data());
+    TGraphErrors grNC_exp(vM_Exp.size(), vE.data(), vM_Exp_vis.data(), zeroes.data(), vMerrExp.data());
 
     grRCNC_exp.SetTitle("Black -- with Energy controll, Blue -- without");
     grRCNC_exp.GetXaxis()->SetTitle("E_{beam}, MeV");
@@ -48,7 +53,7 @@ int MassVsE()
     grRCNC_exp2.Fit("pol0", "ME+");
 
     grRCNC_exp.DrawClone("AP");
-    // grRCNC_exp2.DrawClone("P Same");
+    grRCNC_exp2.DrawClone("AP");
 
 /*
 ******************************
@@ -61,7 +66,7 @@ int MassVsE()
     std::vector<Float_t> vM_MC_WithSmearing = {497.627, 497.604, 497.612, 497.603, 497.606, 497.611, 497.607, 497.613,  497.609};
     std::vector<Float_t> vM_MC_WithSmearingErr = {0.008, 0.009 , 0.003, 0.006, 0.006, 0.003, 0.006, 0.003, 0.023};
     
-    std::vector<Float_t> vM_MC_WrongEnergy = {497.575, 497.582, 497.588, 497.588, 497.588, 497.593};
+    std::vector<Float_t> vM_MC_WrongEnergy = {497.575, 497.582, 497.584, 497.586, 497.588, 497.593};
     std::vector<Float_t> vM_MC_WrongEnergyErr = {0.002, 0.002, 0.003, 0.003, 0.003, 0.003};
     std::vector<Float_t> vE_short = {508.5, 509, 509.5, 510, 510.5, 511};
 
@@ -96,11 +101,11 @@ int MassVsE()
     grMC_WrongEnergy.SetMarkerSize(2);
     grMC_WrongEnergy.Fit("pol0", "ME+");
 
-    grMC_WrongEnergy.DrawClone("AP");
+    // grMC_WrongEnergy.DrawClone("AP");
 
 
     // grMC_NoSmearing.DrawClone("AP");
-    // grMC_WithSmearing.DrawClone("P Same");
+    // grMC_WithSmearing.DrawClone("AP");
     // massKline.DrawClone("same");
 
 
