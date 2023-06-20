@@ -89,6 +89,7 @@ Energy::Energy(std::string fChargedK, std::string fBadRunsList, double comptonEn
 {
     TFile *file = TFile::Open(fChargedK.c_str());
     kTr = (TTree *)file->Get("kChargedTree");
+    
     energyShift = shiftToKchEnergy;
     verbose = isVerbose;
     this->isExp = isExp;
@@ -114,6 +115,7 @@ int Energy::ReadBadRuns(std::string filename)
         std::istream_iterator<double> start(input), end;
         badRuns.insert(badRuns.end(), start, end);
     }
+    input.close();
     return badRuns.size();
 }
 
@@ -139,7 +141,8 @@ int Energy::FillHists()
         runs_.insert(double(runnum));
         if(enHists.count(runnum) <= 0)
         { 
-            auto tmpStr = ("hEn_" + std::to_string(runnum)).c_str();
+            auto num = std::to_string(runnum);
+            auto tmpStr = ("hEn_" + num).c_str();
             enHists[runnum] = new TH1D(tmpStr, tmpStr, 2000, 480, 520);
         }
         enHists[runnum]->Fill(sqrt(tptot[0] * tptot[0] + kchMass * kchMass));

@@ -4,6 +4,7 @@
 #include "TLine.h"
 #include "TGaxis.h"
 #include "TAxis.h"
+#include "TCanvas.h"
 
 int RadCor()
 {
@@ -27,7 +28,9 @@ int RadCor()
     grRC.GetXaxis()->SetTitle("E, MeV");
     grRC.GetYaxis()->SetTitle("#DeltaM^{(RC)}, #frac{MeV}{c^{2}}");
 
+    TCanvas c("canv");
     grRC.DrawClone("AP");
-    grRC_smearing.DrawClone("P same");
+    grRC_smearing.DrawClone("P Same");
+    c.DrawClone();
     return 0;
 }
