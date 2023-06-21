@@ -102,20 +102,30 @@ class Solver:
 
         return phPart + elPart
     
-def SigmaBorn(s: float, m_phi: float, gamma_phi: float)->float:
+def SigmaBorn(s: float, m_phi: float, gamma_phi: float, B_phi_gamma_phi_ee: float)->float:
     m_rho = 775.26
     m_omega = 782.66
     gamma_rho = 1 # todo
     gamma_omega = 1 # todo
     # B_VKK
-    B_rho = 1
-    B_omega = 1
+    B_rho = 1 # todo
+    B_omega = 1 # todo
     # K^0 momentum
-    def p_K(E: float)->float: 
-        return np.sqrt(E**2 - 497.614**2)
+    def p_K(s: float)->float: 
+        return np.emath.sqrt(s - 4 * 497.614**2)
     
-    g_rho = np.sqrt(3 * m_rho**3 * 6.77 / 4 / pi / alpha) * np.sqrt(6 * pi * m_rho**2 * gamma_rho * B_rho / p_K(m_rho)**3)
-    g_omega = np.sqrt(3 * m_omega**3 * 0.60 / 4 / pi / alpha)
-    g_phi = np.sqrt(3 * m_phi**3 * 6.77 / 4 / pi / alpha)
+    def D(s: float, m_V: float, Gamma_V)->complex:
+        return m_V**2 - s - 1j * Gamma_V(s)
     
-    rho_part = 
+    def Gamma_rho(s: float):
+        return gamma_rho * m
+    
+    
+    g_phi_gamma = np.emath.sqrt(3 * m_phi**3 * B_phi_gamma_phi_ee/ 4 / pi / alpha) 
+    g_phi_KK = np.emath.sqrt(6 * pi * m_phi**2 * gamma_phi / p_K(m_omega**2)**3)
+    g_phi = g_phi_gamma * g_phi_KK
+    
+    g_rho = np.emath.sqrt(3 * m_rho**3 * 7.04 / 4 / pi / alpha) * (g_phi_KK / np.sqrt(2))
+    g_omega = np.emath.sqrt(3 * m_omega**3 * 0.60 / 4 / pi / alpha) * (-g_phi_KK / np.sqrt(2))
+    
+    rho_part = g_rho / D(s, m_rho, Gamma_rho)
