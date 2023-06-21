@@ -318,7 +318,7 @@ void kskl2bGen::Loop(std::string histFileName)
                 hKsInvMass->Fill(pipiInvMass);
                 hFinalStateId->Fill(finalstate_id);
                 
-                if(missingMass > 350 || 1)
+                if(missingMass > 350)
                 { tNew->Fill(); }
                 // tNew->Fill();
                 hTrackCollCutted->Fill(fabs(tphi[0] - tphi[1]) - TMath::Pi(), tth[0] + tth[1] - TMath::Pi());

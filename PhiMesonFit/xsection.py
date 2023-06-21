@@ -1,7 +1,5 @@
 import numpy as np
 from scipy.interpolate import make_interp_spline, BSpline 
-import matplotlib.pyplot as ppl
-
 
 class Xsection:
     def __init__(self, energies: np.ndarray, xsection: np.ndarray, interpolation_range: tuple[float, float]) -> None:
@@ -19,6 +17,5 @@ class Xsection:
     def Get_xsection(self, energy: float)->float:
         return float(np.interp(energy, self._energy_range, self._vis_xsection))
     
-    def draw(self):
-        ppl.plot(self._energy_range, self._vis_xsection)
-        ppl.show()
+    def Get_Data(self):
+        return self._energy_range, self._vis_xsection
