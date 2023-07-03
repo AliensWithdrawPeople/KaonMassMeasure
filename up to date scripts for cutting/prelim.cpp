@@ -42,24 +42,23 @@ void prelim::Loop(std::string histFileName)
     Long64_t nentries = fChain->GetEntriesFast();
 
     TFile *top = new TFile(histFileName.c_str(), "recreate");
-    auto tNew = new TTree("ksPrelim", "Preliminary cut tree");
+    auto tNew = fChain->CloneTree(0);
+    // tNew->Branch("emeas0", &emeas0, "emeas0/F");
+    // tNew->Branch("demeas0", &demeas0, "demeas0/F");
+    // tNew->Branch("emeas", &emeas, "emeas/F");
+    // tNew->Branch("demeas", &demeas, "demeas/F");
+    // tNew->Branch("runnum", &runnum, "runnum/F");
+    // tNew->Branch("nks", &nks, "nks/F");
 
-    tNew->Branch("emeas0", &emeas0, "emeas0/F");
-    tNew->Branch("demeas0", &demeas0, "demeas0/F");
-    tNew->Branch("emeas", &emeas, "emeas/F");
-    tNew->Branch("demeas", &demeas, "demeas/F");
-    tNew->Branch("runnum", &runnum, "runnum/F");
-    tNew->Branch("nks", &nks, "nks/F");
-
-    tNew->Branch("tcharge", tcharge, "tcharge[15]/I");
-    tNew->Branch("ksvind", ksvind, "ksvind[15][2]/I");
-    tNew->Branch("kspiphi", kspiphi, "kspiphi[15][2]/F");
-    tNew->Branch("kspith", kspith, "kspith[15][2]/F");
-    tNew->Branch("kspipt", kspipt, "kspipt[15][2]/F");
+    // tNew->Branch("tcharge", tcharge, "tcharge[15]/I");
+    // tNew->Branch("ksvind", ksvind, "ksvind[15][2]/I");
+    // tNew->Branch("kspiphi", kspiphi, "kspiphi[15][2]/F");
+    // tNew->Branch("kspith", kspith, "kspith[15][2]/F");
+    // tNew->Branch("kspipt", kspipt, "kspipt[15][2]/F");
     
-    tNew->Branch("ksminv", ksminv, "ksminv[15]/F");
-    tNew->Branch("kstlen", kstlen, "kstlen[15]/F");
-    tNew->Branch("ksalign", ksalign, "ksalign[15]/F");
+    // tNew->Branch("ksminv", ksminv, "ksminv[15]/F");
+    // tNew->Branch("kstlen", kstlen, "kstlen[15]/F");
+    // tNew->Branch("ksalign", ksalign, "ksalign[15]/F");
 
     Double_t halfPi = TMath::Pi() / 2;
     double cutChi2r = 15.;
@@ -69,6 +68,8 @@ void prelim::Loop(std::string histFileName)
     double cutZtrack = 12.;
     double cutPtot = 40;
     double cutTrackTheta = 0.3;
+    
+    bool flag = false;
 
     auto isGoodTrack = [&](int TrackNum) {
         return (tptot[TrackNum] > cutPtot  && 
@@ -86,22 +87,27 @@ void prelim::Loop(std::string histFileName)
         nbytes += nb;
         // if (Cut(ientry) < 0) continue;
 
+        if(nks < 1)
+        { continue; }
+
         for(int k = 0; k < nks; k++)
         {
             if( isGoodTrack(ksvind[k][0]) && isGoodTrack(ksvind[k][1]) &&
-                (tdedx[ksvind[k][0]] + tdedx[ksvind[k][1]]) / 2 < 5000 &&
-                1 < kspith[k][0] && kspith[k][0] < TMath::Pi() - 1 && 
-                1 < kspith[k][1] && kspith[k][1] < TMath::Pi() - 1 && 
                 kspipt[k][0] > 130 && kspipt[k][1] > 130 && 
                 kspipt[k][0] < 320 && kspipt[k][1] < 320 &&
                 tcharge[ksvind[k][0]] * tcharge[ksvind[k][1]] < 0 && kstype[k] == 0)
-            { tNew->Fill(); }
+            { flag = true; }
         }
+
+        if(flag)
+        { tNew->Fill(); }
+
+        flag = true;
     }
 
     std::cout << "nentries = " << tNew->GetEntries() << std::endl;
     std::cout << "e_MC =  " << double(tNew->GetEntries()) / nentries << std::endl;
 
     top->Write();
-    top->Save();
+    // top->Save();
 }
