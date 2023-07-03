@@ -17,7 +17,7 @@ energy_info = dict(zip(points, mean_energies))
 
 N_events = []
 for energy_point in points:
-    with up.open("C://work/Science/BINP/Kaon Mass Measure/tr_ph/expKsKl/KsKl_Phi/exp" + energy_point +".root:ksTree") as ksTree:
+    with up.open(f"C://work/Science/BINP/Kaon Mass Measure/tr_ph/expKsKl/KsKl_Phi/exp{energy_point}.root:ksTree") as ksTree:
         tree = ksTree.arrays(['emeas', 'demeas', 'runnum', 'ksdpsi', 'Y'], library="np")
     N_events.append(len(tree['emeas']))
 N_events = np.array(N_events)
