@@ -27,7 +27,7 @@ int MassVsE()
 */ 
 
     // std::vector<Float_t> vM_Exp = {497.545, 497.566, 497.539, 497.547, 497.544, 497.571, 497.579, 497.566, 497.6};
-    std::vector<Float_t> vM_Exp = {497.664, 497.642, 497.618, 497.63, 497.634, 497.647, 497.644, 497.619, 497.645};
+    std::vector<Float_t> vM_Exp = {497.632, 497.608, 497.585, 497.596, 497.604, 497.619, 497.62, 497.597, 497.635};
 
     std::vector<Float_t> vM_Exp2 = {497.577, 497.568, 497.533, 497.554, 497.544, 497.57, 497.589, 497.568, 497.604};
     std::vector<Float_t> vM_Exp_vis = {497.677, 497.667, 497.622, 497.634, 497.615, 497.686, 497.78, 497.902, 499.057};
@@ -65,10 +65,10 @@ int MassVsE()
     grRC.SetMarkerStyle(22);
     grRC.SetMarkerSize(2);
 
-    // grRCNC_exp.DrawClone("AP");
+    grRCNC_exp.DrawClone("AP");
 
-    grNC_exp.DrawClone("AP");
-    grRC.DrawClone("P same");
+    // grNC_exp.DrawClone("AP");
+    // grRC.DrawClone("P same");
     // grRCNC_exp2.DrawClone("AP");
 
 /*

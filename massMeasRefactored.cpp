@@ -506,8 +506,8 @@ int massMeasRefactored()
         radiativeCorrections[energyPoints[i]] = deltaM_RC_Smeared[i]; 
     }
 
-    std::string energyPoint = "505";
-    double deltaE = 0.096;
+    std::string energyPoint = "511";
+    double deltaE = 0.062;
     std::string fileName = "tr_ph/expKsKl/exp" + energyPoint + "_v9.root";
 
     // std::string fileName = "tr_ph/MC/KsKl/MC" + energyPoint + "_v9.root";
@@ -522,9 +522,8 @@ int massMeasRefactored()
     // auto energyDiff = kchEnergyHandler->GetEnergyDiff();
     // delete kchEnergyHandler;
     
-    // std::cout << "1111" <<std::endl;
     // auto massHandler = new MassHandler(fileName, fadRunsFile, meanEnergies[energyPoint].first);
-    // auto mass = massHandler->MassLnY(0.27, false, deltaE).first - radiativeCorrections[energyPoint];
+    // auto mass = massHandler->MassLnY(0.33, false).first - radiativeCorrections[energyPoint];
     // std::cout << "M_NCRC_smeared = " << mass << std::endl;
     // delete massHandler;
 

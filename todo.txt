@@ -1,11 +1,6 @@
 **************
 Rewrite massMeasRefactored with python (???)
 
-************** 
-Read articles: 
-1) KLOE's article about KS mass measurement (part about energy calibration) +
-2) Kozyrev's articles about phi -> KsKl and phi -> KpKm cross sections
-
 **************
 Do energy calibration by e+e- -> KsKl cross section.
 
