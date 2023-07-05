@@ -1,5 +1,5 @@
-#define PhiToKn_cxx
-#include "PhiToKn.h"
+#define PhiToKn_MC_cxx
+#include "PhiToKn_MC.h"
 #include <TH2.h>
 #include <TH1D.h>
 #include <TH2D.h>
@@ -14,7 +14,7 @@
 #include <TFitResult.h>
 #include <TFitResultPtr.h>
 
-void PhiToKn::Loop(std::string output_fname, double energy0)
+void PhiToKn_MC::Loop(std::string output_fname, double energy0)
 {
 //   In a ROOT session, you can do:
 //      root> .L PhiToKn.C
@@ -39,7 +39,7 @@ void PhiToKn::Loop(std::string output_fname, double energy0)
 // METHOD2: replace line
 //    fChain->GetEntry(jentry);       //read all branches
 //by  b_branchname->GetEntry(ientry); //read only this branch
-   if (fChain == 0) return;
+    if (fChain == 0) return;
 
     Long64_t nentries = fChain->GetEntriesFast();
 
@@ -73,38 +73,31 @@ void PhiToKn::Loop(std::string output_fname, double energy0)
     double piThetaNeg = 0;
 
     TFile *top = new TFile(output_fname.c_str(), "recreate");
-    auto tNew = new TTree("Kn", "Cutted tr_ph (phi xsec related data)");
+    auto tNew = new TTree("Kn_MC", "Cutted tr_ph (phi xsec related data)");
 
     auto hKsMass = new TH1D("hKsMass", "M^{(#pi^{+}#pi^{-})}_{inv}", 640, 420, 580);
     auto hPsi = new TH1D("hPsi", "Psi", 2000, -1, 1);
     auto hKsMom = new TH1D("hKsMom", "P_{K_{S}}", 2000, 0, 1000);
     auto hKstlen = new TH1D("hKstlen", "kstlen_{K_{S}}", 100, 0, 10);
-
-    auto hKspipt = new TH1D("hKspipt", "hKspipt", 1000, 0, 1000);
-
     auto hMissingMass = new TH1D("hMissingMass", "M_{K_{L}}", 1000, 0, 1000);
     auto hKstlenVsMinv = new TH2D("hKstlenVsMinv", "", 100, 0, 10, 640, 420, 580);
     auto hKsMomVsMinv = new TH2D("hKsMomVsMinv", "", 1000, 0, 1000, 640, 420, 580);
+    auto hKspith = new TH1D("hKspith", "hKspith", 1000, -3.14, 3.14);
 
-    tNew->Branch("emeas", &emeas0, "emeas/F");
-    tNew->Branch("demeas", &demeas0, "demeas/F");
+
+    auto hKsEnergy_Gen = new TH1D("hKsEnergy_Gen", "hKsEnergy_Gen", 1000, 450, 550);
+
+    tNew->Branch("emeas", &emeas, "emeas/F");
+    tNew->Branch("demeas", &demeas, "demeas/F");
     tNew->Branch("runnum", &runnum, "runnum/I");
+    tNew->Branch("ksminv", ksminv, "ksminv[15]/F");
     tNew->Branch("mass", &mass, "mass/D");
-    tNew->Branch("lumi", &lumoff, "lumiRun/F");
-    tNew->Branch("lumiErr", &lumofferr, "lumiErr/F");
-    // tNew->Branch("ksminv", ksminv, "ksminv[6]/F");
-    tNew->Branch("kstlen", kstlen, "kstlen[6]/F");
-    tNew->Branch("kspipt", kspipt, "kspipt[6][2]/F");
+    tNew->Branch("kstlen", kstlen, "kstlen[15]/F");
 
     tNew->Branch("piThetaPos", &piThetaPos, "piThetaPos/D");
     tNew->Branch("piThetaNeg", &piThetaNeg, "piThetaNeg/D");
 
-
     bool flag = false; 
-    int prevRunnum = 0;
-    
-    double lumi = 0;
-    double lumi_err = 0;
 
     auto isGoodTrack = [&](int TrackNum) {
         return (tptot[TrackNum] > cutPtot  && 
@@ -129,7 +122,6 @@ void PhiToKn::Loop(std::string output_fname, double energy0)
     std::cout << "Ks Momentum bounds = " <<  ksMomLowerBound << "--" << ksMomUpperBound << std::endl;
 
     nbytes = 0, nb = 0;
-
     for (Long64_t jentry=0; jentry<nentries;jentry++) {
         Long64_t ientry = LoadTree(jentry);
 
@@ -137,15 +129,15 @@ void PhiToKn::Loop(std::string output_fname, double energy0)
         nb = fChain->GetEntry(jentry);   nbytes += nb;
         // if (Cut(ientry) < 0) continue;
 
-        double energy = emeas0;
+        double energy = emeas;
         std::vector<int> KsCand = {};
         std::vector<double> KlCandMasses = {};
         std::vector<double> KsCandMasses = {};
         for(int k = 0; k < nks; k++)
         {
-            if( isGoodTrack(ksvind[k][0]) && isGoodTrack(ksvind[k][1]) &&
-                // kspipt[k][0] > 130 && kspipt[k][1] > 130 && 
-                // kspipt[k][0] < 320 && kspipt[k][1] < 320 &&
+            if(isGoodTrack(ksvind[k][0]) && isGoodTrack(ksvind[k][1]) &&
+                kspipt[k][0] > 130 && kspipt[k][1] > 130 && 
+                kspipt[k][0] < 320 && kspipt[k][1] < 320 &&
                 tcharge[ksvind[k][0]] * tcharge[ksvind[k][1]] < 0 && kstype[k] == 0 && 
                 energy > 100 && 
                 // is_coll != 1 &&
@@ -158,10 +150,10 @@ void PhiToKn::Loop(std::string output_fname, double energy0)
                 ksptot[k] > ksMomLowerBound && ksptot[k] < ksMomUpperBound
                 ) 
             {
-                hKspipt->Fill(kspipt[k][0]);
-                hKspipt->Fill(kspipt[k][1]);
                 posTrackNumber = tcharge[ksvind[k][0]] > 0 ? 0 : 1;
                 negTrackNumber = posTrackNumber == 1 ? 0 : 1;
+
+                hKspith->Fill(kspith[k][posTrackNumber]);
 
                 p1 = kspipt[k][posTrackNumber];
                 p2 = kspipt[k][negTrackNumber];
@@ -225,18 +217,20 @@ void PhiToKn::Loop(std::string output_fname, double energy0)
                 piThetaPos = kspith[candNum][posTrackNumber];
                 piThetaNeg = kspith[candNum][negTrackNumber];
 
-                if(runnum != prevRunnum)
-                {
-                    lumi += lumoff;
-                    lumi_err += lumofferr * lumofferr;
-                    prevRunnum = runnum;
+                for(int i = 0; i < nsim; i++)
+                { 
+                    if(simtype[i] == 310)
+                    { hKsEnergy_Gen->Fill(sqrt(simmom[i] * simmom[i] + 497*614 * 497.614)); }
                 }
-
+                
                 mass = KsCandMasses[candNum];
                 hKstlenVsMinv->Fill(kstlen[KsCand[candNum]], mass);
                 hKsMomVsMinv->Fill(ksptot[KsCand[candNum]], mass);
                 mass = KsCandMasses[candNum];
                 hKsMass->Fill(ksminv[candNum]);
+                // if(mass > 580 || mass < 420)
+                // { std::cout << "n_entry = " << jentry << "; mass = " << mass << 
+                //                 "; KsCandMasses[candNum] = " << KsCandMasses[candNum] << "; candNum = " << candNum << std::endl; }
                 tNew->Fill(); 
             }
         }
@@ -251,6 +245,7 @@ void PhiToKn::Loop(std::string output_fname, double energy0)
         KsCand.shrink_to_fit();
         flag = false; 
     }
+
     int n_events = tNew->GetEntries();
     if(energy0 < 506)
     {
@@ -264,8 +259,7 @@ void PhiToKn::Loop(std::string output_fname, double energy0)
         std::cout << "chi2 = " << res1->Chi2() << std::endl;
         std::cout << "ndf = " << res1->Ndf() << std::endl;
     }
-    std::cout << "luminosity = " << lumi << std::endl;
-    std::cout << "luminosity_err = " << sqrt(lumi_err) << std::endl;
-    std::cout << "entries = " << n_events << std::endl;
+
+    std::cout << "n_events = " << n_events << std::endl;
     top->Write();
 }
