@@ -3,8 +3,8 @@ from itertools import dropwhile
 import re
 
 energy_points = ["501", "503", "505", "508", "508.5", "509", "509.5", "510", "510.5", "511", "511.5", "514"]
-energy_points = ["508", "508.5", "509", "509.5", "510", "510.5", "511", "511.5", "514"]
-# energy_points = ["501", "503", "505"]
+# energy_points = ["508", "508.5", "509", "509.5", "510", "510.5", "511", "511.5", "514"]
+energy_points = ["514"]
 aux1, aux2 = "\"", "\\"
 pattern = r'luminosity = ([\d.]+)\r\nluminosity_err = ([\d.]+)\r\nentries = (\d+)'
         

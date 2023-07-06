@@ -90,16 +90,16 @@ void prelim::Loop(std::string histFileName)
         if(nks < 1)
         { continue; }
 
-        for(int k = 0; k < nks; k++)
-        {
-            if( isGoodTrack(ksvind[k][0]) && isGoodTrack(ksvind[k][1]) &&
-                kspipt[k][0] > 130 && kspipt[k][1] > 130 && 
-                kspipt[k][0] < 320 && kspipt[k][1] < 320 &&
-                tcharge[ksvind[k][0]] * tcharge[ksvind[k][1]] < 0 && kstype[k] == 0)
-            { flag = true; }
-        }
+        // for(int k = 0; k < nks; k++)
+        // {
+        //     if( isGoodTrack(ksvind[k][0]) && isGoodTrack(ksvind[k][1]) &&
+        //         kspipt[k][0] > 130 && kspipt[k][1] > 130 && 
+        //         kspipt[k][0] < 320 && kspipt[k][1] < 320 &&
+        //         tcharge[ksvind[k][0]] * tcharge[ksvind[k][1]] < 0 && kstype[k] == 0)
+        //     { flag = true; }
+        // }
 
-        if(flag)
+        // if(flag)
         { tNew->Fill(); }
 
         flag = true;

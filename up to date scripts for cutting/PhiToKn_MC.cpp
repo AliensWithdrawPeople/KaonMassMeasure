@@ -71,6 +71,7 @@ void PhiToKn_MC::Loop(std::string output_fname, double energy0)
 
     double piThetaPos = 0;
     double piThetaNeg = 0;
+    double ksCandtlen = 0;
 
     TFile *top = new TFile(output_fname.c_str(), "recreate");
     auto tNew = new TTree("Kn_MC", "Cutted tr_ph (phi xsec related data)");
@@ -92,7 +93,8 @@ void PhiToKn_MC::Loop(std::string output_fname, double energy0)
     tNew->Branch("runnum", &runnum, "runnum/I");
     tNew->Branch("ksminv", ksminv, "ksminv[15]/F");
     tNew->Branch("mass", &mass, "mass/D");
-    tNew->Branch("kstlen", kstlen, "kstlen[15]/F");
+    // tNew->Branch("kstlen", kstlen, "kstlen[6]/F");
+    tNew->Branch("kstlen", &ksCandtlen, "kstlen/D");
 
     tNew->Branch("piThetaPos", &piThetaPos, "piThetaPos/D");
     tNew->Branch("piThetaNeg", &piThetaNeg, "piThetaNeg/D");
@@ -118,7 +120,7 @@ void PhiToKn_MC::Loop(std::string output_fname, double energy0)
     auto res = hKsMom->Fit("gaus", "SQME", "goff", sqrt(energy0 * energy0 - 497.614 * 497.614) - 15, sqrt(energy0 * energy0 - 497.614 * 497.614) + 15);
     res = hKsMom->Fit("gaus", "SQME", "goff", res->Parameter(1) - 2 * res->Parameter(2), res->Parameter(1) + 2 * res->Parameter(2));
     const double ksMomUpperBound = res->Parameter(1) + 5 * res->Parameter(2);
-    const double ksMomLowerBound = res->Parameter(1) - 5 * res->Parameter(2);
+    const double ksMomLowerBound = energy0 < 513 ? res->Parameter(1) - 5 * res->Parameter(2) : 85.;
     std::cout << "Ks Momentum bounds = " <<  ksMomLowerBound << "--" << ksMomUpperBound << std::endl;
 
     nbytes = 0, nb = 0;
@@ -196,6 +198,7 @@ void PhiToKn_MC::Loop(std::string output_fname, double energy0)
                 hMissingMass->Fill(missingMass);
             }
         }
+
         if(flag)
         { 
             double tmp = fabs(KsCandMasses[0] - 497.614);
@@ -211,11 +214,12 @@ void PhiToKn_MC::Loop(std::string output_fname, double energy0)
             
             if(missingMass > 350)
             {
-                posTrackNumber = tcharge[ksvind[candNum][0]] > 0 ? 0 : 1;
+                posTrackNumber = tcharge[ksvind[KsCand[candNum]][0]] > 0 ? 0 : 1;
                 negTrackNumber = posTrackNumber == 1 ? 0 : 1;
 
-                piThetaPos = kspith[candNum][posTrackNumber];
-                piThetaNeg = kspith[candNum][negTrackNumber];
+                piThetaPos = kspith[KsCand[candNum]][posTrackNumber];
+                piThetaNeg = kspith[KsCand[candNum]][negTrackNumber];
+                ksCandtlen = kstlen[KsCand[candNum]];
 
                 for(int i = 0; i < nsim; i++)
                 { 

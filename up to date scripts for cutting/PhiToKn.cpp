@@ -71,6 +71,7 @@ void PhiToKn::Loop(std::string output_fname, double energy0)
 
     double piThetaPos = 0;
     double piThetaNeg = 0;
+    double ksCandtlen = 0;
 
     TFile *top = new TFile(output_fname.c_str(), "recreate");
     auto tNew = new TTree("Kn", "Cutted tr_ph (phi xsec related data)");
@@ -93,7 +94,8 @@ void PhiToKn::Loop(std::string output_fname, double energy0)
     tNew->Branch("lumi", &lumoff, "lumiRun/F");
     tNew->Branch("lumiErr", &lumofferr, "lumiErr/F");
     // tNew->Branch("ksminv", ksminv, "ksminv[6]/F");
-    tNew->Branch("kstlen", kstlen, "kstlen[6]/F");
+    // tNew->Branch("kstlen", kstlen, "kstlen[6]/F");
+    tNew->Branch("kstlen", &ksCandtlen, "kstlen/D");
     tNew->Branch("kspipt", kspipt, "kspipt[6][2]/F");
 
     tNew->Branch("piThetaPos", &piThetaPos, "piThetaPos/D");
@@ -125,7 +127,7 @@ void PhiToKn::Loop(std::string output_fname, double energy0)
     auto res = hKsMom->Fit("gaus", "SQME", "goff", sqrt(energy0 * energy0 - 497.614 * 497.614) - 15, sqrt(energy0 * energy0 - 497.614 * 497.614) + 15);
     res = hKsMom->Fit("gaus", "SQME", "goff", res->Parameter(1) - 2 * res->Parameter(2), res->Parameter(1) + 2 * res->Parameter(2));
     const double ksMomUpperBound = res->Parameter(1) + 5 * res->Parameter(2);
-    const double ksMomLowerBound = res->Parameter(1) - 5 * res->Parameter(2);
+    const double ksMomLowerBound = energy0 < 513 ? res->Parameter(1) - 5 * res->Parameter(2) : 85.;
     std::cout << "Ks Momentum bounds = " <<  ksMomLowerBound << "--" << ksMomUpperBound << std::endl;
 
     nbytes = 0, nb = 0;
@@ -186,7 +188,6 @@ void PhiToKn::Loop(std::string output_fname, double energy0)
                 }
                 hKstlen->Fill(kstlen[k]);
 
-
                 p1 = tptot[ ksvind[k][posTrackNumber] ];
                 p2 = tptot[ ksvind[k][negTrackNumber] ];
                 piPos.SetMagThetaPhi(p1, tth[ ksvind[k][posTrackNumber] ], tphi[ ksvind[k][posTrackNumber] ]);
@@ -204,6 +205,7 @@ void PhiToKn::Loop(std::string output_fname, double energy0)
                 hMissingMass->Fill(missingMass);
             }
         }
+
         if(flag)
         { 
             double tmp = fabs(KsCandMasses[0] - 497.614);
@@ -219,11 +221,12 @@ void PhiToKn::Loop(std::string output_fname, double energy0)
             
             if(missingMass > 350)
             {
-                posTrackNumber = tcharge[ksvind[candNum][0]] > 0 ? 0 : 1;
+                posTrackNumber = tcharge[ksvind[KsCand[candNum]][0]] > 0 ? 0 : 1;
                 negTrackNumber = posTrackNumber == 1 ? 0 : 1;
 
-                piThetaPos = kspith[candNum][posTrackNumber];
-                piThetaNeg = kspith[candNum][negTrackNumber];
+                piThetaPos = kspith[KsCand[candNum]][posTrackNumber];
+                piThetaNeg = kspith[KsCand[candNum]][negTrackNumber];
+                ksCandtlen = kstlen[KsCand[candNum]];
 
                 if(runnum != prevRunnum)
                 {
@@ -231,12 +234,12 @@ void PhiToKn::Loop(std::string output_fname, double energy0)
                     lumi_err += lumofferr * lumofferr;
                     prevRunnum = runnum;
                 }
-
+                
                 mass = KsCandMasses[candNum];
                 hKstlenVsMinv->Fill(kstlen[KsCand[candNum]], mass);
                 hKsMomVsMinv->Fill(ksptot[KsCand[candNum]], mass);
-                mass = KsCandMasses[candNum];
-                hKsMass->Fill(ksminv[candNum]);
+                hKsMass->Fill(ksminv[KsCand[candNum]]);
+
                 tNew->Fill(); 
             }
         }
@@ -252,17 +255,17 @@ void PhiToKn::Loop(std::string output_fname, double energy0)
         flag = false; 
     }
     int n_events = tNew->GetEntries();
-    if(energy0 < 506)
+    if(energy0 < 506 || energy0 > 513)
     {
         auto hMass = new TH1D("hMass", "Mass without background", 160, 420, 580);
         tNew->Draw("mass >> hMass", "", "goff");
-        auto func = new TF1("func", "gaus(0) + [3]", 420, 580);
-        func->SetParameters(100., 497.6, 4., 2.);
-        auto res1 = hMass->Fit("func", "SQME", "goff", 450, 550);
-        n_events = hMass->Integral(65, 90) -  res1->Parameter(3) * 25.;
-        std::cout << "[3] = " << res1->Parameter(3) << std::endl;
-        std::cout << "chi2 = " << res1->Chi2() << std::endl;
-        std::cout << "ndf = " << res1->Ndf() << std::endl;
+        auto res1 = hMass->Fit("pol0", "SQME", "goff", 520, 578);
+        auto res2 = hMass->Fit("pol0", "SQME", "goff", 420, 465);
+        double bckgLevel = (res1->Parameter(0) + res2->Parameter(0)) / 2.;
+        n_events = hMass->Integral(65, 90) -  res1->Parameter(0) * 25.;
+        std::cout << "bckgLevel = " << bckgLevel << std::endl;
+        std::cout << "res1 chi2 /ndf = " << res1->Chi2() / res1->Ndf() << std::endl;
+        std::cout << "res1 chi2 /ndf = " << res2->Chi2() / res2->Ndf() << std::endl;
     }
     std::cout << "luminosity = " << lumi << std::endl;
     std::cout << "luminosity_err = " << sqrt(lumi_err) << std::endl;

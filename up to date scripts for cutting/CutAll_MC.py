@@ -4,8 +4,8 @@ import numpy as np
 import re
 
 energy_points = ["501", "503", "505", "508", "508.5", "509", "509.5", "510", "510.5", "511", "511.5", "514"]
-energy_points = ["508", "508.5", "509", "509.5", "510", "510.5", "511", "511.5", "514"]
-# energy_points = ["501", "503", "505"]
+# energy_points = ["508", "508.5", "509", "509.5", "510", "510.5", "511", "511.5", "514"]
+energy_points = ["514"]
 aux1, aux2 = "\"", "\\"
 eff = []
 pattern = r'n_events = (\d+)'
@@ -25,9 +25,6 @@ for en in energy_points:
 
 for en in energy_points:
     print(en)
-    # with up.open(f"C:/work/Science/BINP/Kaon Mass Measure/tr_ph/PhiXSection/MC/MC_Kn{en}.root:Kn_MC") as ksTree: # type: ignore
-    #     tree = ksTree.arrays(['emeas'], library="np") # type: ignore
-    # N_event1 = len(tree['emeas'])
     N_event1 = n_events[en]
     
     with up.open(f"C:/work/Science/BINP/Kaon Mass Measure/tr_ph/mcgpj/tr_ph v9/EnergySmearing/MCGPJ_kskl{en}_Merged.root:tr_ph_merged") as ksTree: # type: ignore
