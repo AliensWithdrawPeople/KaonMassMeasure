@@ -146,8 +146,8 @@ void PhiToKn::Loop(std::string output_fname, double energy0)
         for(int k = 0; k < nks; k++)
         {
             if( isGoodTrack(ksvind[k][0]) && isGoodTrack(ksvind[k][1]) &&
-                // kspipt[k][0] > 130 && kspipt[k][1] > 130 && 
-                // kspipt[k][0] < 320 && kspipt[k][1] < 320 &&
+                kspipt[k][0] > 130 && kspipt[k][1] > 130 && 
+                kspipt[k][0] < 320 && kspipt[k][1] < 320 &&
                 tcharge[ksvind[k][0]] * tcharge[ksvind[k][1]] < 0 && kstype[k] == 0 && 
                 energy > 100 && 
                 // is_coll != 1 &&
@@ -262,8 +262,11 @@ void PhiToKn::Loop(std::string output_fname, double energy0)
         auto res1 = hMass->Fit("pol0", "SQME", "goff", 520, 578);
         auto res2 = hMass->Fit("pol0", "SQME", "goff", 420, 465);
         double bckgLevel = (res1->Parameter(0) + res2->Parameter(0)) / 2.;
+        double bckgLevelErr = sqrt(res1->ParError(0) * res1->ParError(0) + res2->ParError(0) * res2->ParError(0));
         n_events = hMass->Integral(65, 90) -  res1->Parameter(0) * 25.;
-        std::cout << "bckgLevel = " << bckgLevel << std::endl;
+        std::cout << "bckgLevel_Left = " << res1->Parameter(0) << "; bckgLevel_Right = " << res2->Parameter(0) << "; bckgLevel_Avg = " << bckgLevel << std::endl;
+        std::cout << "N_bckg = " << bckgLevel * hMass->GetNbinsX() << std::endl;
+        std::cout << "N_bckg_err = " <<  bckgLevelErr * hMass->GetNbinsX() << std::endl;
         std::cout << "res1 chi2 /ndf = " << res1->Chi2() / res1->Ndf() << std::endl;
         std::cout << "res1 chi2 /ndf = " << res2->Chi2() / res2->Ndf() << std::endl;
     }

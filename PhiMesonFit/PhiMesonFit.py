@@ -27,7 +27,9 @@ n_events = [302, 2620, 1735, 27365, 124438, 151469, 591058, 456543, 191690, 8559
 efficiency = e_MC
 
 xsec_vis = n_events / lumi
-xsec_vis_err = np.sqrt( (np.sqrt(n_events) / lumi / efficiency)**2 + (n_events / efficiency / (lumi**2))**2 * lumi_err**2  * (n_events / lumi / (efficiency**2))**2 * e_MC_err**2 )
+
+xsec_err_energy_part = np.array([0.00903471, 0.015707, 0.0667149, 1.00209, 6.51135, 4.1341, 3.67391, 6.89706, 4.01397, 1.47482, 1.1773, 0.204747, 0.137859, 0.0518114, 0.019589, 0.0228199])
+xsec_vis_err = np.sqrt( (np.sqrt(n_events) / lumi / efficiency)**2 + (n_events / efficiency / (lumi**2))**2 * lumi_err**2  * (n_events / lumi / (efficiency**2))**2 * e_MC_err**2  + xsec_err_energy_part**2)
 xsec = n_events / lumi / efficiency
 
 print("E_beam =", energy_points)

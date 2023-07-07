@@ -251,17 +251,21 @@ void PhiToKn_MC::Loop(std::string output_fname, double energy0)
     }
 
     int n_events = tNew->GetEntries();
-    if(energy0 < 506)
+    if(energy0 < 506 || energy0 > 513)
     {
         auto hMass = new TH1D("hMass", "Mass without background", 160, 420, 580);
         tNew->Draw("mass >> hMass", "", "goff");
-        auto func = new TF1("func", "gaus(0) + [3]", 420, 580);
-        func->SetParameters(100., 497.6, 4., 2.);
-        auto res1 = hMass->Fit("func", "SQME", "goff", 450, 550);
-        n_events = hMass->Integral(65, 90) -  res1->Parameter(3) * 25.;
-        std::cout << "[3] = " << res1->Parameter(3) << std::endl;
-        std::cout << "chi2 = " << res1->Chi2() << std::endl;
-        std::cout << "ndf = " << res1->Ndf() << std::endl;
+        auto res1 = hMass->Fit("pol0", "SQME", "goff", 520, 578);
+        auto res2 = hMass->Fit("pol0", "SQME", "goff", 420, 465);
+        double bckgLevel = (res1->Parameter(0) + res2->Parameter(0)) / 2.;
+        double bckgLevelErr = sqrt(res1->ParError(0) * res1->ParError(0) + res2->ParError(0) * res2->ParError(0));
+        //n_events = hMass->Integral(65, 90) -  res1->Parameter(0) * 25.;
+        
+        std::cout << "bckgLevel_Left = " << res1->Parameter(0) << "; bckgLevel_Right = " << res2->Parameter(0) << "; bckgLevel_Avg = " << bckgLevel << std::endl;
+        std::cout << "N_bckg = " << bckgLevel * hMass->GetNbinsX() << std::endl;
+        std::cout << "N_bckg_err = " <<  bckgLevelErr * hMass->GetNbinsX() << std::endl;
+        std::cout << "res1 chi2 /ndf = " << res1->Chi2() / res1->Ndf() << std::endl;
+        std::cout << "res1 chi2 /ndf = " << res2->Chi2() / res2->Ndf() << std::endl;
     }
 
     std::cout << "n_events = " << n_events << std::endl;
