@@ -6,7 +6,6 @@
 #include "TGraphErrors.h"
 #include "TCanvas.h"
 #include "TGraph.h"
-#include "TH1D.h"
 #include "TFile.h"
 
 Double_t RhoWidth(Double_t s);
@@ -22,8 +21,6 @@ Double_t PKLKS(Double_t s);
 Double_t QPGamma(Int_t Mode, Double_t s);
 
 Double_t PhitoK0(double x, const std::vector<double>& par);
-
-Double_t eff1(double s);
 
 Double_t PKPKM(Double_t s)
 {
@@ -170,9 +167,9 @@ Double_t RhoWidth(Double_t s)
     Double_t MPhi = 1019.461;
 
     // Double_t PhiWidth(Double_t);
-    // Double_t PKPKM(Double_t);
-    // Double_t PKLKS(Double_t);
-    // Double_t QPGamma(Int_t, Double_t);
+    Double_t PKPKM(Double_t);
+    Double_t PKLKS(Double_t);
+    Double_t QPGamma(Int_t, Double_t);
 
     Double_t Fval = WRho*MRho*MRho/s
                     * 0.9987386*TMath::Power((s/4.0-Mpi*Mpi)/(MRho*MRho/4.0-Mpi*Mpi),1.5)
@@ -199,11 +196,11 @@ Double_t OmgWidth(Double_t s)
     Double_t BrOmg2Pi   = 0.0153;
     Double_t BrOmgPiG   = 0.087;
 
-    // Double_t PhiWidth(Double_t);
-    // Double_t PKPKM(Double_t);
-    // Double_t PKLKS(Double_t);
-    // Double_t QPGamma(Int_t, Double_t);
-    // Double_t FAS_ASPO(Double_t);
+    //Double_t PhiWidth(Double_t);
+    Double_t PKPKM(Double_t);
+    Double_t PKLKS(Double_t);
+    Double_t QPGamma(Int_t, Double_t);
+    Double_t FAS_ASPO(Double_t);
 
     Double_t Temp1, Temp2, Temp3, Temp4, Temp5, Temp6;
     Double_t X;
@@ -250,11 +247,11 @@ Double_t PhiWidth(Double_t s, Double_t MPhi, Double_t WPhi)
 
     Double_t MPhi2 = 1019.461 * 1019.461;
 
-    // Double_t PKPKM(Double_t);
-    // Double_t PKLKS(Double_t);
-    // Double_t QPGamma(Int_t, Double_t);
+    Double_t PKPKM(Double_t);
+    Double_t PKLKS(Double_t);
+    Double_t QPGamma(Int_t, Double_t);
 
-    // Double_t FAS_ASPO(Double_t);
+    Double_t FAS_ASPO(Double_t);
 
     Double_t W1, W2;
     Double_t TwoE;
@@ -266,16 +263,17 @@ Double_t PhiWidth(Double_t s, Double_t MPhi, Double_t WPhi)
     MPi2 = MPi*MPi;
 
 
-    Double_t Fval = MPhi2*WPhi*(Br[0]*PKPKM(s)/PKPKM(MPhi2) +
-                                    Br[1]*PKLKS(s)/PKLKS(MPhi2) +
-                    Br2Pi*TMath::Power((s/4.0-MPi2)/(MPhi2/4.0-MPi2),1.5))/s +
-                                WPhi*(Br[2]*W1/W2+BrPi0Gamma*QPGamma(0,s)/QPGamma(0,MPhi2) +
-                                    Br[3]*QPGamma(1,s)/QPGamma(1,MPhi2));
+    Double_t Fval = MPhi2*WPhi*(
+                        Br[0]*PKPKM(s)/PKPKM(MPhi2) +
+                        Br[1]*PKLKS(s)/PKLKS(MPhi2) +
+                        Br2Pi*TMath::Power((s/4.0-MPi2)/(MPhi2/4.0-MPi2),1.5))/s +
+                    WPhi*(Br[2]*W1/W2+BrPi0Gamma*QPGamma(0,s)/QPGamma(0,MPhi2) +
+                            Br[3]*QPGamma(1,s)/QPGamma(1,MPhi2));
 
     return Fval;
 }
 
-Double_t PhitoK0(double *x, double *par)
+Double_t PhitoK0(double x, const std::vector<double>& par)
 {
     TComplex DPhi = TComplex(0.0,0.0);
 
@@ -307,7 +305,7 @@ Double_t PhitoK0(double *x, double *par)
 
     Double_t C = 0.389379292E12;
 
-    S    = x[0] * x[0];
+    S    = x * x * 1e6;
 
     Smax = par[0];
     MPhi = 1000.0 + par[1];
@@ -348,17 +346,10 @@ Double_t PhitoK0(double *x, double *par)
                     * (RePart*RePart+ImPart*ImPart);
     // if S < threshold then Sigma = 0
     double M_K0 = 497.614;
-    // return (S < 4 * M_K0 * M_K0)? 0. : Fval;
-    return Fval;
+    return (S < 4 * M_K0 * M_K0)? 0. : Fval;
+    // return Fval;
 }
 
-Double_t eff1(double s)
-{
-    std::vector<double> energy = {1001.859, 1005.96, 1009.6, 1015.724, 1016.808, 1017.914, 1019.056, 1019.912, 1020.916, 1022.07, 1022.896, 1027.728};
-    std::vector<double> eff_data = {0.100742, 0.14724, 0.168875, 0.189286, 0.191459, 0.194718, 0.19831, 0.198671, 0.199915, 0.202736, 0.202236, 0.205726};
-    auto efficiency = new TSpline3("efficiency", energy.data(), eff_data.data(), eff_data.size());
-    return efficiency->Eval(TMath::Sqrt(s));
-}
 
 int PhiToK0_XSecBornFunc()
 {
@@ -391,13 +382,6 @@ int PhiToK0_XSecBornFunc()
     gr->DrawClone("AP");
     // a.DrawClone("P same");
     bb->DrawClone("same");
-
-
-    std::vector<double> energy = {1001.859, 1005.96, 1009.6, 1015.724, 1016.808, 1017.914, 1019.056, 1019.912, 1020.916, 1022.07, 1022.896, 1027.728};
-    std::vector<double> eff_data = {0.100742, 0.14724, 0.168875, 0.189286, 0.191459, 0.194718, 0.19831, 0.198671, 0.199915, 0.202736, 0.202236, 0.205726};
-    auto efficiency = new TSpline3("efficiency", energy.data(), eff_data.data(), eff_data.size());
-    std::cout << efficiency->Eval(1000); 
-    // efficiency->DrawClone();
 
     c.DrawClone();
     return 0;
