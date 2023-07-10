@@ -17,7 +17,7 @@ n_bckg = []
 n_bckg_err = []
 
 for en in energy_points:
-    command = f"root -l -q \"up to date scripts for cutting/cutter.cpp(\\{aux1 + en + aux2}\")\""
+    command = f"root -l -q \"C:/work/Science/BINP/Kaon Mass Measure/up to date scripts for cutting/cutter.cpp(\\{aux1 + en + aux2}\")\""
     res = sub.run(command, capture_output=True)
     output = res.stderr if res.stderr else res.stdout
     print(res.stdout.decode()[118:])

@@ -1,7 +1,0 @@
-**************
-Rewrite massMeasRefactored with python (???)
-
-**************
-Do energy calibration by e+e- -> KsKl cross section.
-
-**************

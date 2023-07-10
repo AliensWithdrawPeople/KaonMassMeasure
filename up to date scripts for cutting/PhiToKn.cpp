@@ -263,7 +263,8 @@ void PhiToKn::Loop(std::string output_fname, double energy0)
         auto res2 = hMass->Fit("pol0", "SQME", "goff", 420, 465);
         double bckgLevel = (res1->Parameter(0) + res2->Parameter(0)) / 2.;
         double bckgLevelErr = sqrt(res1->ParError(0) * res1->ParError(0) + res2->ParError(0) * res2->ParError(0));
-        n_events = hMass->Integral(65, 90) -  res1->Parameter(0) * 25.;
+        n_events = hMass->Integral(65, 90) -  bckgLevel * 25.;
+        
         std::cout << "bckgLevel_Left = " << res1->Parameter(0) << "; bckgLevel_Right = " << res2->Parameter(0) << "; bckgLevel_Avg = " << bckgLevel << std::endl;
         std::cout << "N_bckg = " << bckgLevel * hMass->GetNbinsX() << std::endl;
         std::cout << "N_bckg_err = " <<  bckgLevelErr * hMass->GetNbinsX() << std::endl;

@@ -71,6 +71,7 @@ void PhiToKn_MC::Loop(std::string output_fname, double energy0)
 
     double piThetaPos = 0;
     double piThetaNeg = 0;
+    int ksCandSimType = 0;
     double ksCandtlen = 0;
 
     TFile *top = new TFile(output_fname.c_str(), "recreate");
@@ -84,10 +85,11 @@ void PhiToKn_MC::Loop(std::string output_fname, double energy0)
     auto hKstlenVsMinv = new TH2D("hKstlenVsMinv", "", 100, 0, 10, 640, 420, 580);
     auto hKsMomVsMinv = new TH2D("hKsMomVsMinv", "", 1000, 0, 1000, 640, 420, 580);
     auto hKspith = new TH1D("hKspith", "hKspith", 1000, -3.14, 3.14);
+    auto hSimType = new TH1D("hSimType", "hSimType", 6000, -3000, 3000);
 
 
-    auto hKsEnergy_Gen = new TH1D("hKsEnergy_Gen", "hKsEnergy_Gen", 1000, 450, 550);
-
+    auto hKsEnergy_Gen = new TH1D("hKsEnergy_Gen", "hKsEnergy_Gen", 300, 490, 520);
+    int counter = 0;
     tNew->Branch("emeas", &emeas, "emeas/F");
     tNew->Branch("demeas", &demeas, "demeas/F");
     tNew->Branch("runnum", &runnum, "runnum/I");
@@ -98,6 +100,7 @@ void PhiToKn_MC::Loop(std::string output_fname, double energy0)
 
     tNew->Branch("piThetaPos", &piThetaPos, "piThetaPos/D");
     tNew->Branch("piThetaNeg", &piThetaNeg, "piThetaNeg/D");
+    // tNew->Branch("simtype", &ksCandSimType, "simtype/I");
 
     bool flag = false; 
 
@@ -120,7 +123,7 @@ void PhiToKn_MC::Loop(std::string output_fname, double energy0)
     auto res = hKsMom->Fit("gaus", "SQME", "goff", sqrt(energy0 * energy0 - 497.614 * 497.614) - 15, sqrt(energy0 * energy0 - 497.614 * 497.614) + 15);
     res = hKsMom->Fit("gaus", "SQME", "goff", res->Parameter(1) - 2 * res->Parameter(2), res->Parameter(1) + 2 * res->Parameter(2));
     const double ksMomUpperBound = res->Parameter(1) + 5 * res->Parameter(2);
-    const double ksMomLowerBound = energy0 < 513 ? res->Parameter(1) - 5 * res->Parameter(2) : 85.;
+    const double ksMomLowerBound = energy0 < 511.8 ? res->Parameter(1) - 5 * res->Parameter(2) : 85.;
     std::cout << "Ks Momentum bounds = " <<  ksMomLowerBound << "--" << ksMomUpperBound << std::endl;
 
     nbytes = 0, nb = 0;
@@ -182,8 +185,9 @@ void PhiToKn_MC::Loop(std::string output_fname, double energy0)
 
 
                 p1 = tptot[ ksvind[k][posTrackNumber] ];
-                p2 = tptot[ ksvind[k][negTrackNumber] ];
                 piPos.SetMagThetaPhi(p1, tth[ ksvind[k][posTrackNumber] ], tphi[ ksvind[k][posTrackNumber] ]);
+                
+                p2 = tptot[ ksvind[k][negTrackNumber] ];
                 piNeg.SetMagThetaPhi(p2, tth[ ksvind[k][negTrackNumber] ], tphi[ ksvind[k][negTrackNumber] ]);
                 
                 missingMom = -(piPos + piNeg);
@@ -195,7 +199,7 @@ void PhiToKn_MC::Loop(std::string output_fname, double energy0)
                 TLorentzVector pseudo(TVector3(0, 0, 0), 2 * energy);
                 missingMass = (pseudo - piPlus - piMinus).M();
                 KlCandMasses.push_back(missingMass);
-                hMissingMass->Fill(missingMass);
+                // hMissingMass->Fill(missingMass);
             }
         }
 
@@ -203,16 +207,16 @@ void PhiToKn_MC::Loop(std::string output_fname, double energy0)
         { 
             double tmp = fabs(KsCandMasses[0] - 497.614);
             int candNum = 0;
-            for(int i = 1; i < KsCandMasses.size(); i++) 
-            { 
-                if(fabs(KsCandMasses[i] - 497.614) < tmp)
-                { 
-                    tmp = fabs(KsCandMasses[i] - 497.614); 
-                    candNum = i;
-                }
-            }
-            
-            if(missingMass > 350)
+            // for(int i = 1; i < KsCandMasses.size(); i++) 
+            // { 
+            //     if(fabs(KsCandMasses[i] - 497.614) < tmp)
+            //     { 
+            //         tmp = fabs(KsCandMasses[i] - 497.614); 
+            //         candNum = i;
+            //     }
+            // }
+
+            if(KlCandMasses[candNum] > 350)
             {
                 posTrackNumber = tcharge[ksvind[KsCand[candNum]][0]] > 0 ? 0 : 1;
                 negTrackNumber = posTrackNumber == 1 ? 0 : 1;
@@ -224,17 +228,21 @@ void PhiToKn_MC::Loop(std::string output_fname, double energy0)
                 for(int i = 0; i < nsim; i++)
                 { 
                     if(simtype[i] == 310)
-                    { hKsEnergy_Gen->Fill(sqrt(simmom[i] * simmom[i] + 497*614 * 497.614)); }
+                    { 
+                        hKsEnergy_Gen->Fill(sqrt(simmom[i] * simmom[i] + 497.614 * 497.614)); 
+                        counter++;
+                    }
+
+                    if(simorig[i] == 0)
+                    { hSimType->Fill(simtype[i]); }
                 }
-                
+          
+                hMissingMass->Fill(KlCandMasses[candNum]);
                 mass = KsCandMasses[candNum];
                 hKstlenVsMinv->Fill(kstlen[KsCand[candNum]], mass);
                 hKsMomVsMinv->Fill(ksptot[KsCand[candNum]], mass);
                 mass = KsCandMasses[candNum];
                 hKsMass->Fill(ksminv[candNum]);
-                // if(mass > 580 || mass < 420)
-                // { std::cout << "n_entry = " << jentry << "; mass = " << mass << 
-                //                 "; KsCandMasses[candNum] = " << KsCandMasses[candNum] << "; candNum = " << candNum << std::endl; }
                 tNew->Fill(); 
             }
         }
@@ -251,7 +259,7 @@ void PhiToKn_MC::Loop(std::string output_fname, double energy0)
     }
 
     int n_events = tNew->GetEntries();
-    if(energy0 < 506 || energy0 > 513)
+    if(energy0 < 506 || energy0 > 511.8)
     {
         auto hMass = new TH1D("hMass", "Mass without background", 160, 420, 580);
         tNew->Draw("mass >> hMass", "", "goff");
@@ -259,7 +267,7 @@ void PhiToKn_MC::Loop(std::string output_fname, double energy0)
         auto res2 = hMass->Fit("pol0", "SQME", "goff", 420, 465);
         double bckgLevel = (res1->Parameter(0) + res2->Parameter(0)) / 2.;
         double bckgLevelErr = sqrt(res1->ParError(0) * res1->ParError(0) + res2->ParError(0) * res2->ParError(0));
-        //n_events = hMass->Integral(65, 90) -  res1->Parameter(0) * 25.;
+        // n_events = hMass->Integral(65, 90) -  bckgLevel * 25.;
         
         std::cout << "bckgLevel_Left = " << res1->Parameter(0) << "; bckgLevel_Right = " << res2->Parameter(0) << "; bckgLevel_Avg = " << bckgLevel << std::endl;
         std::cout << "N_bckg = " << bckgLevel * hMass->GetNbinsX() << std::endl;
@@ -269,5 +277,6 @@ void PhiToKn_MC::Loop(std::string output_fname, double energy0)
     }
 
     std::cout << "n_events = " << n_events << std::endl;
+    std::cout << "Ks counter = " << counter << std::endl;
     top->Write();
 }
