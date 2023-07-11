@@ -19,6 +19,7 @@
 #include <iterator>
 #include <fstream>
 #include <optional>
+#include <memory>
 
 #include <chrono>
 #include <ctime> 
@@ -93,13 +94,16 @@ public:
     std::pair<double, double> MassLnY(double fitRange = 0.33, bool useEtrue = false, double deltaE = 0.0, bool withFitSigma = true, int drawOpt = 0, bool verbose = true);
     std::vector<int> GetBadRunsList();
 
+    std::unique_ptr<TGraphErrors>  MlnYFit(const TH2D *MassVsLnY, bool verbose = false);
+
     MassHandler(std::string fKsKl, std::string badRunsFileName = "", 
                 std::optional<double> energyCorr = std::nullopt, 
-                std::optional<std::map<int, Float_t>> energyDiff = std::nullopt);
+                std::optional<std::map<int, Float_t>> energyDiff = std::nullopt,
+                bool isVerbose = true);
     ~MassHandler();
 };
 
-MassHandler::MassHandler(std::string fKsKl, std::string badRunsFileName, std::optional<double> energyCorr, std::optional<std::map<int, Float_t>> energyDiff)
+MassHandler::MassHandler(std::string fKsKl, std::string badRunsFileName, std::optional<double> energyCorr, std::optional<std::map<int, Float_t>> energyDiff, bool isVerbose)
 {
     TH2D h2EvsRun("dEdXvsPtot", "", 1000, 100, 120, 659, 60741, 61400);
     Int_t runnum_;
@@ -131,6 +135,7 @@ MassHandler::MassHandler(std::string fKsKl, std::string badRunsFileName, std::op
     
     ReadBadRuns(badRunsFileName);
     BadRunSearch();
+    CalcSigmas(isVerbose);
 }
 
 std::vector<int> MassHandler::GetBadRunsList()
@@ -166,9 +171,9 @@ int MassHandler::BadRunSearch()
 
 void MassHandler::CalcSigmas(bool verbose)
 {
-    std::vector<TH2D *> psilnYs;
+    std::vector<std::unique_ptr<TH2D>> psilnYs;
     for(int i = 0; i < 16; i++)
-    { psilnYs.push_back(new TH2D(("hPsilnY" + std::to_string(i + 1)).c_str(), ("Psi" + std::to_string(i + 1) + "(lnY)").c_str(), 400, -0.4, 0.4, 10000, 2.4, 3.3)); }
+    { psilnYs.push_back(std::make_unique<TH2D>(TH2D(("hPsilnY" + std::to_string(i + 1)).c_str(), ("Psi" + std::to_string(i + 1) + "(lnY)").c_str(), 400, -0.4, 0.4, 10000, 2.4, 3.3))); }
 
     double sigmaPsi = 0;
     double massFullRecWithEmeas = 0;
@@ -190,12 +195,12 @@ void MassHandler::CalcSigmas(bool verbose)
     }
 
     TFitResultPtr r;
-    std::vector<TH1D *> psilnYprojYs;
+    std::vector<std::unique_ptr<TH1D>> psilnYprojYs;
     if(verbose)
     { std::cout << "Sigmas: " << std::endl; }
     for(int i = 0; i < psilnYs.size(); i++)
     {
-        psilnYprojYs.push_back(psilnYs[i]->ProjectionY(("py" + std::to_string(i + 1)).c_str()));
+        psilnYprojYs.push_back(std::unique_ptr<TH1D>(psilnYs[i]->ProjectionY(("py" + std::to_string(i + 1)).c_str())));
         psilnYprojYs.back()->Rebin(40);
         r = psilnYprojYs.back()->Fit("gaus", "SEQ", "", psilnYprojYs.back()->GetXaxis()->GetBinCenter(psilnYprojYs.back()->GetMaximumBin()) - 3 * psilnYprojYs.back()->GetStdDev(), 
                                                 psilnYprojYs.back()->GetXaxis()->GetBinCenter(psilnYprojYs.back()->GetMaximumBin()) + 3 * psilnYprojYs.back()->GetStdDev());
@@ -209,7 +214,7 @@ void MassHandler::CalcSigmas(bool verbose)
         std::cout<<std::endl;
         std::cout << "RMS: " << std::endl;
     }
-    for(auto hist : psilnYprojYs)
+    for(const auto &hist : psilnYprojYs)
     {
         // hist->GetXaxis()->SetRangeUser(hist->GetXaxis()->GetBinCenter(hist->GetMaximumBin()) - 3 * hist->GetStdDev(),
         //                                 hist->GetXaxis()->GetBinCenter(hist->GetMaximumBin()) + 3 * hist->GetStdDev());
@@ -276,11 +281,52 @@ Float_t MassHandler::GetRightEnergy(int rnum, double deltaE)
     return energy + deltaE;
 }
 
+std::unique_ptr<TGraphErrors> MassHandler::MlnYFit(const TH2D *MassVsLnY, bool verbose)
+{
+    auto grMassLnY_Fit = std::make_unique<TGraphErrors>(TGraphErrors());
+    TFitResultPtr res;
+
+    int nNewBins = 7;
+    int nOldBins = MassVsLnY->GetNbinsX();
+    // int firstBin = 0;
+    // int lastBin = int(nOldBins / nNewBins);
+
+    int firstBin = 1;
+    int lastBin = 0 + 20;
+
+    for (size_t i = 0; i < nNewBins; i++)
+    {
+        auto hist = MassVsLnY->ProjectionY(("MassVsLnY_py" + std::to_string(i)).c_str(), firstBin, lastBin);
+        hist->Rebin(4);
+        res = hist->Fit("gaus", "SQME", "", hist->GetBinCenter(hist->GetMaximumBin()) - 1.5 * hist->GetRMS(), hist->GetBinCenter(hist->GetMaximumBin()) + 0.8* hist->GetRMS());
+        res = hist->Fit("gaus", "SQME", "", res->Parameter(1) - 1.5 * res->Parameter(2),  res->Parameter(1) + 0.8 * res->Parameter(2));
+        
+        if(verbose)
+        { 
+            std::cout << "MassVsLnY_py" << i << " fit; chi2/ndf = " << res->Chi2() << "/" << res->Ndf() << "; Prob = " << res->Prob() << 
+                        "; Mean = " << res->Parameter(1) << "; MeanErr = " << res->ParError(1) << "; Sigma = " << res->Parameter(2) << std::endl; 
+        }
+
+        grMassLnY_Fit->SetPoint(i, MassVsLnY->GetXaxis()->GetBinCenter(int((lastBin + firstBin) / 2)), res->Parameter(1));
+        grMassLnY_Fit->SetPointError(i, 0., res->ParError(1));
+
+        // grMassLnY_Fit->SetPoint(i, MassVsLnY->GetXaxis()->GetBinCenter(int((lastBin + firstBin) / 2)), hist->GetMean());
+        // grMassLnY_Fit->SetPointError(i, 0., hist->GetMeanError());
+        
+        firstBin = lastBin + 1;
+        // lastBin = lastBin + int(nOldBins / nNewBins);
+        lastBin = lastBin + 40;
+    }
+    if(verbose)
+    { std::cout << std::endl; }
+
+    return grMassLnY_Fit;
+}
+
+
 std::pair<double, double> MassHandler::MassLnY(double fitRange, bool useEtrue, double deltaE, bool withFitSigma, int drawOpt, bool verbose)
 {   
-    CalcSigmas(verbose);
-
-    auto hMlnY = new TH2D("hMlnY", "M(lnY)", 250, -1, 1, 40000, 480, 520);
+    auto hMlnY = new TH2D("hMlnY", "M(lnY)", 300, -0.3, 0.3, 600, 480, 520);
     auto hDeltaM = new TProfile("hDeltaM", "DeltaM(lnY)", 40, -1, 1, -1, 1);
     auto hMlnYpfx  = new TProfile("hMlnYpfx","Profile of M versus lnY", 30, -1, 1, 490, 505);
     auto hMPsi = new TH2D("MPsi", "M(Psi)", 200, 2, TMath::Pi(), 200, 480, 520);
@@ -320,8 +366,10 @@ std::pair<double, double> MassHandler::MassLnY(double fitRange, bool useEtrue, d
             hM_CrAnglelnY->Fill(lnY, massCrAngle->Eval(ksdpsi) - sigmaPsi * sigmaPsi / 2 * massCrAngle->Derivative2(ksdpsi));
             // hPsilnY->Fill(lnY, ksdpsi); 
 
-            if(massFullRecWithEmeas > 490 && massFullRecWithEmeas < 505)
+            if(massFullRecWithEmeas > 480 && massFullRecWithEmeas < 505)
             { 
+                hMlnY->Fill(lnY, massFullRec->Eval(ksdpsi) - sigmaPsi * sigmaPsi / 2 * massFullRec->Derivative2(ksdpsi));
+
                 hDeltaM->Fill(lnY, - sigmaPsi * sigmaPsi / 2 * massFullRec->Derivative2(ksdpsi));
                 hMlnYpfx->Fill(lnY, massFullRec->Eval(ksdpsi) - sigmaPsi * sigmaPsi / 2 * massFullRec->Derivative2(ksdpsi));
                 hPsilnY->Fill(lnY, ksdpsi); 
@@ -340,6 +388,8 @@ std::pair<double, double> MassHandler::MassLnY(double fitRange, bool useEtrue, d
     hMlnYpfx->GetYaxis()->SetTitle("M_{K^{0}_{S}}, #frac{MeV}{c^{2}}");
     hMlnYpfx->GetXaxis()->SetTitle("ln(Y)");
 
+    auto grMlnYFit = MlnYFit(hMlnY);
+
     TFitResultPtr r;
     double mass = 0;
     double massErr = 0;
@@ -349,16 +399,27 @@ std::pair<double, double> MassHandler::MassLnY(double fitRange, bool useEtrue, d
         r = hM_CrAnglelnY->ProfileX()->Fit("pol4", "SMQE", "", -0.2, 0.2);
         std::cout << "Mass_CrAngle = " << r->Parameter(0) << " +/- " << r->ParError(0) 
                     << "; chi2 / ndf = " << r->Chi2() << "/" << r->Ndf() << "; Prob = " << r->Prob() << std::endl;
+
         r = hMlnYpfx->Fit("pol0", "SMQE", "goff", -fitRange, fitRange);
         std::cout << "Mass_FullRec = " << r->Parameter(0) << " +/- " << r->ParError(0) 
                     << "; chi2 / ndf = " << r->Chi2() << "/" << r->Ndf() << "; Prob = " << r->Prob() << std::endl;
+
         mass = r->Parameter(0);
         massErr = r->ParError(0);
+
         r = hPsilnY->ProfileX("pfxAng")->Fit("pol2", "SQME", "", -0.2, 0.2);
         std::cout << "Psi = " << r->Parameter(0) << " +/- " << r->ParError(0) << std::endl;
-        auto canv = new TCanvas("MlnY","Mass(lnY)", 200, 10, 600, 400);
+
+        r = grMlnYFit->Fit("pol0", "SMQE", "goff", -fitRange, fitRange);
+        std::cout << "MassVsLnY_Fit_FullRec = " << r->Parameter(0) << " +/- " << r->ParError(0) 
+                    << "; chi2 / ndf = " << r->Chi2() << "/" << r->Ndf() << "; Prob = " << r->Prob() << std::endl;
+
+        mass = r->Parameter(0);
+        massErr = r->ParError(0);
+
         std::cout << "Average E cut = " << hEnergySpectrumCut->GetMean() << " +/- " << hEnergySpectrumCut->GetMeanError() << std::endl;
         std::cout << "Average E  = " << hEnergySpectrum->GetMean() << " +/- " << hEnergySpectrum->GetMeanError() << std::endl;
+
     }
     else
     {
@@ -367,6 +428,17 @@ std::pair<double, double> MassHandler::MassLnY(double fitRange, bool useEtrue, d
                     << "; chi2 / ndf = " << r->Chi2() << "/" << r->Ndf() << "; Prob = " << r->Prob() << std::endl;
         mass = r->Parameter(0);
         massErr = r->ParError(0);
+
+        // r = grMlnYFit->Fit("pol0", "SMQE", "goff", -fitRange, fitRange);
+        // std::cout << "MassVsLnY_Fit_FullRec = " << r->Parameter(0) << " +/- " << r->ParError(0) 
+        //             << "; chi2 / ndf = " << r->Chi2() << "/" << r->Ndf() << "; Prob = " << r->Prob() << std::endl;
+
+        // r = hM_CrAnglelnY->ProfileX()->Fit("pol4", "SMQE", "", -0.15, 0.15);
+        // std::cout << "Mass_CrAngle = " << r->Parameter(0) << " +/- " << r->ParError(0) 
+        //             << "; chi2 / ndf = " << r->Chi2() << "/" << r->Ndf() << "; Prob = " << r->Prob() << std::endl;
+
+        // mass = r->Parameter(0);
+        // massErr = r->ParError(0);
     }
 
 
@@ -420,7 +492,8 @@ std::pair<double, double> MassHandler::MassLnY(double fitRange, bool useEtrue, d
         hEnergySpectrumCut->DrawClone("same E0");
         break;
     case 5:
-        hMlnY->DrawClone();
+        // hMlnY->DrawClone();
+        grMlnYFit->DrawClone();
     default:
         break;
     }
@@ -446,33 +519,52 @@ MassHandler::~MassHandler()
     delete massFullRec;
 }
 
-int massScan(const std::map<std::string, std::pair<double, double>> &meanEnergies, double deltaE = 0)
+int massScan(const std::map<std::string, std::pair<double, double>> &meanEnergies, double deltaE = 0, bool isExp = true)
 {
     double lnYrange = 0.33;
     std::vector<double> vals = {};
     std::vector<double> errs = {};
 
+    std::vector<double> ens = {504.683, 507.762, 508.323, 508.885, 509.445, 509.841, 510.263, 510.694, 512.32};
+    int counter = 0;
+    std::string fadRunsFile;
+    std::string energyFilename;
+    std::string filename;
+
     for(const auto&[energyPoint, meanEnergy] : meanEnergies)
     {
         if(energyPoint == "505" || energyPoint == "508") 
-        { lnYrange = 0.27; }
+        { lnYrange = 0.22; }
         else 
         { lnYrange = 0.33; }
 
-        std::string fadRunsFile = "txt/BadRuns.txt";
-        std::string filename = "tr_ph/expKsKl/exp" + energyPoint + "_v9.root";
-        auto kchEnergyHandler = new Energy("C://work/Science/BINP/Kaon Mass Measure/tr_ph/expKpKm/kchExp" + energyPoint + ".root", fadRunsFile, 
-                                                            meanEnergy.first, meanEnergy.second, 30, 0); 
-        auto energyDiff = kchEnergyHandler->GetEnergyDiff();
-        delete kchEnergyHandler;
+        if(isExp)
+        {
+            fadRunsFile = "txt/BadRuns.txt";
+            filename = "tr_ph/expKsKl/exp" + energyPoint + "_v9.root";
+            filename = "tr_ph/expKsKl/Sailor/exp" + energyPoint + "_v9_sailor.root";
+            energyFilename = "C://work/Science/BINP/Kaon Mass Measure/tr_ph/expKpKm/kchExp" + energyPoint + ".root";
+        }
+        else
+        {
+            fadRunsFile = "";
+            energyFilename = "C://work/Science/BINP/Kaon Mass Measure/tr_ph/expKpKm/kchExp" + energyPoint + ".root";
+            filename = "tr_ph/MC/KsKl_Smeared/MC" + energyPoint + "_Smeared.root";
+        }
+
+        // auto kchEnergyHandler = new Energy(energyFilename, fadRunsFile, meanEnergy.first, meanEnergy.second, 30, 0); 
+        // auto energyDiff = kchEnergyHandler->GetEnergyDiff();
+        // delete kchEnergyHandler;
 
         auto massHandler = new MassHandler(filename, fadRunsFile, meanEnergy.first);
+        // auto massHandler = new MassHandler(filename, fadRunsFile, ens[counter]);
         std::cout << "\n\nEnergy Point = " << energyPoint << std::endl;
         auto [mass, massErr] = massHandler->MassLnY(lnYrange, false, deltaE, true, 0, false);
 
         vals.push_back(mass);
         errs.push_back(massErr);
 
+        counter++;
         delete massHandler;
     }
 
@@ -500,7 +592,8 @@ int massMeasRefactored()
 
     // RC with energy shifted by 134 keV
     const std::vector<double> deltaM_RC_Smeared = {0.1021, 0.0966, 0.087, 0.0759, 0.0808, 0.1336, 0.2191, 0.3726, 1.5223};
-    const std::vector<std::string> energyPoints = {"505", "508", "508.5", "509", "509.5", "510", "510.5", "511", "514"};
+    // const std::vector<std::string> energyPoints = {"505", "508", "508.5", "509", "509.5", "510", "510.5", "511", "514"};
+    const std::vector<std::string> energyPoints = {"505", "508", "508.5", "509", "509.5", "510", "510.5", "511"};
 
     std::map<std::string, std::pair<double, double>> meanEnergies;
     std::map<std::string, double> radiativeCorrections;
@@ -512,22 +605,22 @@ int massMeasRefactored()
 
     std::string energyPoint = "511";
     double deltaE = 0.0;
-    std::string fileName = "tr_ph/expKsKl/exp" + energyPoint + "_v9.root";
+    // std::string fileName = "tr_ph/expKsKl/exp" + energyPoint + "_v9.root";
 
     // std::string fileName = "tr_ph/MC/KsKl/MC" + energyPoint + "_v9.root";
-    // std::string fileName = "tr_ph/MC/KsKl_Smeared/MC" + energyPoint + "_Smeared.root";
+    std::string fileName = "tr_ph/MC/KsKl_Smeared/MC" + energyPoint + "_Smeared.root";
     // std::string fileName = "tr_ph/MC/KsKl_WrongEnergy/MC" + energyPoint + "_WrongEnergy.root";
 
     std::string fadRunsFile = "txt/BadRuns.txt";
 
-    massScan(meanEnergies, deltaE);
+    massScan(meanEnergies, deltaE, true);
     // auto kchEnergyHandler = new Energy("C://work/Science/BINP/Kaon Mass Measure/tr_ph/expKpKm/kchExp" + energyPoint + ".root", fadRunsFile, 
     //                                                     meanEnergies[energyPoint].first, meanEnergies[energyPoint].second, 30, 0); 
     // auto energyDiff = kchEnergyHandler->GetEnergyDiff();
     // delete kchEnergyHandler;
     
     // auto massHandler = new MassHandler(fileName, fadRunsFile, meanEnergies[energyPoint].first);
-    // auto mass = massHandler->MassLnY(0.33, false).first - radiativeCorrections[energyPoint];
+    // auto mass = massHandler->MassLnY(0.20, false, 0., true, 5).first - radiativeCorrections[energyPoint];
     // std::cout << "M_NCRC_smeared = " << mass << std::endl;
     // delete massHandler;
 
