@@ -141,9 +141,8 @@ int Energy::FillHists()
         runs_.insert(double(runnum));
         if(enHists.count(runnum) <= 0)
         { 
-            auto num = std::to_string(runnum);
-            auto tmpStr = ("hEn_" + num).c_str();
-            enHists[runnum] = new TH1D(tmpStr, tmpStr, 2000, 480, 520);
+            std::string tmpStr = "hEn_" + std::to_string(runnum);
+            enHists[runnum] = new TH1D(tmpStr.c_str(), tmpStr.c_str(), 2000, 480, 520);
         }
         enHists[runnum]->Fill(sqrt(tptot[0] * tptot[0] + kchMass * kchMass));
         enHists[runnum]->Fill(sqrt(tptot[1] * tptot[1] + kchMass * kchMass));
