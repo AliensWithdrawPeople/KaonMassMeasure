@@ -63,12 +63,16 @@ void ksklExp::Loop(std::string histFileName)
     auto tNew = new TTree("ksTree", "Cutted tr_ph (Ks mass meas important data)");
 
     Float_t dpsi;
+    Float_t ksTheta;
+    Float_t ksPhi;
     Float_t Y;
-    Float_t p1; Float_t p2;
+    Float_t posMom, negMom;
     tNew->Branch("emeas", &emeas0, "emeas/F");
     tNew->Branch("demeas", &demeas0, "demeas/F");
     tNew->Branch("runnum", &runnum, "runnum/I");
     tNew->Branch("ksdpsi", &dpsi, "dpsi/F");
+    tNew->Branch("kstheta", &ksTheta, "kstheta/F");
+    tNew->Branch("ksphi", &ksPhi, "ksphi/F");
     tNew->Branch("Y", &Y, "Y/F");
 
     // pi+ pi- track reconstruction difference correction
@@ -226,8 +230,8 @@ void ksklExp::Loop(std::string histFileName)
             for(int k = 0; k < nks; k++)
             {
                 if(ksalign[k] > 0.85 && (tdedx[ksvind[k][0]] + tdedx[ksvind[k][1]]) / 2 < 5000 &&
-                abs(kspith[k][0] - TMath::Pi() / 2) <= 0.7 && 
-                abs(kspith[k][1] - TMath::Pi() / 2) <= 0.7 &&
+                1.1 < kspith[k][0] && kspith[k][0] < TMath::Pi() - 1.1 && 
+                1.1 < kspith[k][1] && kspith[k][1] < TMath::Pi() - 1.1 &&
                 //20 - half of the linear size of Drift Chamber
                 //(20 - ksz0[0]) * fabs(TMath::Tan(kspith[0][0])) > 15 && (20 - ksz0[0]) * fabs(TMath::Tan(kspith[0][1])) > 15 &&
                 // kspipt[k][0] > 120 && kspipt[k][1] > 120 && 
@@ -291,25 +295,28 @@ void ksklExp::Loop(std::string histFileName)
             histKsCands->Fill(ksCand.size());
             if(ksCand.size() > 0)
             {
-                posTrackNumber = tcharge[ksvind[0][0]] > 0 ? 0 : 1;
+                posTrackNumber = tcharge[ksvind[ksCand[0]][0]] > 0 ? 0 : 1;
                 negTrackNumber = posTrackNumber == 1 ? 0 : 1;
 
-                phiIndexPos = int(kspiphi[0][posTrackNumber] / (2 * TMath::Pi() / Nchambers));
-                phiIndexNeg = int(kspiphi[0][negTrackNumber] / (2 * TMath::Pi() / Nchambers));
-                p1 = kspipt[0][posTrackNumber] + dPtotPos[PtotBinNumber(kspipt[0][posTrackNumber])][phiIndexPos];
-                p2 = kspipt[0][negTrackNumber] + dPtotNeg[PtotBinNumber(kspipt[0][negTrackNumber])][phiIndexNeg];
+                phiIndexPos = int(kspiphi[ksCand[0]][posTrackNumber] / (2 * TMath::Pi() / Nchambers));
+                phiIndexNeg = int(kspiphi[ksCand[0]][negTrackNumber] / (2 * TMath::Pi() / Nchambers));
+                posMom = kspipt[ksCand[0]][posTrackNumber] + dPtotPos[PtotBinNumber(kspipt[ksCand[0]][posTrackNumber])][phiIndexPos];
+                negMom = kspipt[ksCand[0]][negTrackNumber] + dPtotNeg[PtotBinNumber(kspipt[ksCand[0]][negTrackNumber])][phiIndexNeg];
 
-                Y = p1 / p2;
+                Y = posMom / negMom;
     
-                piPos.SetMagThetaPhi(p1, kspith[0][posTrackNumber], 
-                                    kspiphi[0][posTrackNumber] + dPhiPos[PtotBinNumber(kspipt[0][posTrackNumber])][phiIndexPos]);
-                piNeg.SetMagThetaPhi(p2, kspith[0][negTrackNumber], 
-                                        kspiphi[0][negTrackNumber] + dPhiNeg[PtotBinNumber(kspipt[0][negTrackNumber])][phiIndexNeg]);
+                piPos.SetMagThetaPhi(posMom, kspith[ksCand[0]][posTrackNumber], 
+                                    kspiphi[ksCand[0]][posTrackNumber] + dPhiPos[PtotBinNumber(kspipt[ksCand[0]][posTrackNumber])][phiIndexPos]);
+                piNeg.SetMagThetaPhi(negMom, kspith[ksCand[0]][negTrackNumber], 
+                                        kspiphi[ksCand[0]][negTrackNumber] + dPhiNeg[PtotBinNumber(kspipt[ksCand[0]][negTrackNumber])][phiIndexNeg]);
 
                 
-                hKstlenVsMinv->Fill(ksminv[0], kstlen[0]); // New hist!!!!!!!!!!!!!!!!!!!!!!!!!
+                hKstlenVsMinv->Fill(ksminv[ksCand[0]], kstlen[ksCand[0]]); // New hist!!!!!!!!!!!!!!!!!!!!!!!!!
                 
                 dpsi = piPos.Angle(piNeg);
+                ksTheta = ksth[ksCand[0]];
+                ksPhi = ksphi[ksCand[0]];
+
                 missingMom = -(piPos + piNeg);
                 piPosEn = sqrt(139.57 * 139.57 + piPos.Mag2());
                 piNegEn = sqrt(139.57 * 139.57 + piNeg.Mag2());
@@ -317,20 +324,6 @@ void ksklExp::Loop(std::string histFileName)
                                     - 2 * 2 * emeas0 * piPosEn - 2 * 2 * emeas0 * piNegEn
                                     + 2 * (piPosEn * piNegEn - piPos.Dot(piNeg)));
                 hMissingMass->Fill(missingMass);
-                // if(nph > 1)
-                // {
-                //     for(int ph1 = 0; ph1 < nph; ph1++)
-                //     {
-                //         ph1Vec.SetMagThetaPhi(phen[ph1], phth[ph1], phphi[ph1]);
-                //         for(int ph2 = ph1 + 1; ph2 < nph; ph2++)
-                //         {
-                //             ph2Vec.SetMagThetaPhi(phen[ph2], phth[ph2], phphi[ph2]);
-                //             hGammasPi0Angles->Fill((ph1Vec + ph2Vec).Phi() - missingMom.Phi(), (ph1Vec + ph2Vec).Theta() - missingMom.Theta());
-                //             // hTwoPhotonsTotEn->Fill(phen[ph1] + phen[ph2]);
-                //             hMissingMom->Fill((missingMom - ph1Vec - ph2Vec).Mag());
-                //         }
-                //     }
-                // }
 
 		        hTrackColl->Fill(fabs(tphi[0] - tphi[1]) - TMath::Pi(), tth[0] + tth[1] - TMath::Pi());
                 if(missingMass > 350)
@@ -339,22 +332,18 @@ void ksklExp::Loop(std::string histFileName)
                     hist->Fill(piPos.Mag(), piNeg.Mag()); 
 
                     // Cowboy
-                    if(piPos.Cross(field).XYvector().DeltaPhi(piNeg.XYvector()) < TMath::Pi() / 2)
-                    { 
-                        // dpsi = piNeg.Angle(piPos);
-                        // tNew->Fill(); 
-                        // hist->Fill(piPos.Mag(), piNeg.Mag());    
-                    }
+                    // if(piPos.Cross(field).XYvector().DeltaPhi(piNeg.XYvector()) < TMath::Pi() / 2)
+                    // { 
+                    //     tNew->Fill(); 
+                    //     hist->Fill(piPos.Mag(), piNeg.Mag());    
+                    // }
                     
-                    // Sailor
-                    if(piPos.Cross(field).XYvector().DeltaPhi(piNeg.XYvector()) > TMath::Pi() / 2)
-                    {  
-                        // if(missingMass > 350)
-                        // { 
-                        //     tNew->Fill(); 
-                        //     hist->Fill(piPos.Mag(), piNeg.Mag());    
-                        // }
-                    }
+                    // // Sailor
+                    // if(piPos.Cross(field).XYvector().DeltaPhi(piNeg.XYvector()) > TMath::Pi() / 2)
+                    // {  
+                    //     tNew->Fill(); 
+                    //     hist->Fill(piPos.Mag(), piNeg.Mag());    
+                    // }
                 }
             }
             ksCand.clear();

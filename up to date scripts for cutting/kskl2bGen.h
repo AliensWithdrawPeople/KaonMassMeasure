@@ -384,7 +384,7 @@ kskl2bGen::kskl2bGen(TTree *tree) : fChain(0)
    if (tree == 0) {
       // std::string fname = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/mcgpj/tr_ph v9/KsKl/MCGPJ_KsKl509.5_big.root";
       // std::string fname = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/mcgpj/tr_ph v9/MC_KsKl_WrongEnergy/Merged/MCGPJ_kskl510.5_WrongEnergy_Merged.root";
-      std::string fname = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/mcgpj/tr_ph v9/EnergySmearing/MCGPJ_kskl511.5_Merged.root";
+      std::string fname = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/mcgpj/tr_ph v9/EnergySmearing/MCGPJ_kskl514_Merged.root";
       TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(fname.c_str());
       if (!f || !f->IsOpen()) {
          f = new TFile(fname.c_str());

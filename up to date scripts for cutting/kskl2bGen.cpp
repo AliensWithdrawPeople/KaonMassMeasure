@@ -39,19 +39,23 @@ void kskl2bGen::Loop(std::string histFileName)
     if (fChain == 0)
         return;
 
-    TFile *top = new TFile(("../tr_ph/MC/" + histFileName).c_str(), "recreate");
+    TFile *top = new TFile(("C:/work/Science/BINP/Kaon Mass Measure/tr_ph/MC/" + histFileName).c_str(), "recreate");
     auto tNew = new TTree("ksTree", "Cutted tr_ph (Ks mass meas important data)");
 
     Float_t dpsi;
+    Float_t ksTheta;
+    Float_t ksPhi;
     Float_t Y;
     Float_t eff;
-    Float_t p1; Float_t p2;
+    Float_t posMom, negMom;
     Float_t etrue;
     tNew->Branch("emeas", &emeas, "emeas/F");
     tNew->Branch("etrue", &etrue, "etrue/F");
     tNew->Branch("demeas", &demeas, "demeas/F");
     tNew->Branch("runnum", &runnum, "runnum/I");
     tNew->Branch("ksdpsi", &dpsi, "dpsi/F");
+    tNew->Branch("kstheta", &ksTheta, "kstheta/F");
+    tNew->Branch("ksphi", &ksPhi, "ksphi/F");
     tNew->Branch("Y", &Y, "Y/F");
 
     Double_t halfPi = TMath::Pi() / 2;
@@ -74,7 +78,7 @@ void kskl2bGen::Loop(std::string histFileName)
     // dPhi and dTheta - phi and theta angle between Ks and Kl respectively
     double dPhi = 0;
     double dTheta = 0;
-    int tmpCounter = 0;
+    int KlCounter = 0;
     std::vector<Int_t> ksCand = {};
 
     auto hist = new TH2D("hist", "", 1000, 0, 600, 1000, 0, 600);
@@ -108,13 +112,13 @@ void kskl2bGen::Loop(std::string histFileName)
     auto hKsKlTheta = new TH1D("hKsKlTheta", "", 1000, -1.5, 1.5);
     auto hKsKlThetaGen = new TH1D("hKsKlThetaGen", "", 6000, -1.5, 1.5);
 
-    auto hEVsdTheta = new TH2D("hEVsdTheta", "", 3000, 490, 520, 600, -1, 1);
-    auto hEVsdThetaUncutted = new TH2D("hEVsdThetaUncutted", "", 3000, 490, 520, 600, -1, 1);
-    auto hEVsdThetaGen = new TH2D("hEVsdThetaGen", "", 3000, 490, 520, 600, -1, 1);
-    auto hEVsdThetaGenCut = new TH2D("hEVsdThetaGenCut", "", 3000, 490, 520, 600, -1, 1);
+    auto hEVsdTheta = new TH2D("hEVsdTheta", "", 6000, 480, 540, 600, -1, 1);
+    auto hEVsdThetaUncutted = new TH2D("hEVsdThetaUncutted", "", 6000, 480, 420, 600, -1, 1);
+    auto hEVsdThetaGen = new TH2D("hEVsdThetaGen", "", 6000, 480, 540, 600, -1, 1);
+    auto hEVsdThetaGenCut = new TH2D("hEVsdThetaGenCut", "", 6000, 480, 540, 600, -1, 1);
 
-    auto hEUncutted = new TH1D("hEUncutted", "Uncutted Corrected energy", 3000, 490, 520);
-    auto hE = new TH1D("hE", "Corrected energy", 3000, 490, 520);
+    auto hEUncutted = new TH1D("hEUncutted", "Uncutted Corrected energy", 5000, 480, 540);
+    auto hE = new TH1D("hE", "Corrected energy", 6000, 480, 540);
 
     auto hHit = new TH1D("hHit", "nhits", 40, 0, 40);
     auto hTrackTheta = new TH1D("hTrackTheta", "hTrackTheta", 250, -TMath::Pi() / 2, TMath::Pi() / 2);
@@ -145,10 +149,8 @@ void kskl2bGen::Loop(std::string histFileName)
     TVector3 piPosRec;
     TVector3 piNegRec;
     TVector3 field(0., 0., 1.);
-    int counter1 = 0;
-    int counter2 = 0;
+
     auto dPhiVsEcutFunc = new TF1("dPhiVsEcutFunc", "[1] / ([0] - x) + [2]", 490, 520);
-    double trueEnergy = 0;
     double missingMass = 0;
 
     Long64_t nentries = fChain->GetEntriesFast();
@@ -185,8 +187,8 @@ void kskl2bGen::Loop(std::string histFileName)
                 if(ksalign[k] > 0.85 && (tdedx[ksvind[k][0]] + tdedx[ksvind[k][1]]) / 2 < 5000 &&
                 // abs(kspith[k][0] - TMath::Pi() / 2) <= cutTrackTheta && 
                 // abs(kspith[k][1] - TMath::Pi() / 2) <= cutTrackTheta &&
-                kspith[k][0] < TMath::Pi() - 1 && kspith[k][0] > 1 &&
-                kspith[k][1] < TMath::Pi() - 1 && kspith[k][1] > 1 &&
+                1.1 < kspith[k][0] && kspith[k][0] < TMath::Pi() - 1.1 && 
+                1.1 < kspith[k][1] && kspith[k][1] < TMath::Pi() - 1.1 &&
                 //20 - half of the linear size of Drift Chamber
                 //(20 - ksz0[0]) * fabs(TMath::Tan(kspith[0][0])) > 15 && (20 - ksz0[0]) * fabs(TMath::Tan(kspith[0][1])) > 15 &&
                 // kspipt[k][0] > 120 && kspipt[k][1] > 120 && 
@@ -242,12 +244,12 @@ void kskl2bGen::Loop(std::string histFileName)
                             hClEdPhi->Fill(dPhi, phen0[j]);
                         }
 
-                        trueEnergy = sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2());
+                        etrue = sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2());
                         hEVsdThetaUncutted->Fill(sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2()), dTheta);
-                        // if((dPhi < -TMath::Pi() + 1 || dPhi > TMath::Pi() - 1) && (fabs(dTheta) - dPhiVsEcutFunc->Eval(trueEnergy) < 0 || trueEnergy > emeas - 0.5) && phen0[j] > 40)
+                        // if((dPhi < -TMath::Pi() + 1 || dPhi > TMath::Pi() - 1) && (fabs(dTheta) - dPhiVsEcutFunc->Eval(etrue) < 0 || etrue > emeas - 0.5) && phen0[j] > 40)
                         if((dPhi < -TMath::Pi() + 1 || dPhi > TMath::Pi() - 1) && fabs(dTheta) < 1 && phen0[j] > 40)
                         { 
-                            tmpCounter++; 
+                            KlCounter++; 
                             hPsiCutted->Fill(ks.Angle(kl));
                             // hdThetadPhi->Fill(dPhi, dTheta);
                             if(dPhi < 0)
@@ -260,10 +262,10 @@ void kskl2bGen::Loop(std::string histFileName)
                         } 
                     }        
         
-                    histKlCands->Fill(tmpCounter);
-                    if(tmpCounter > 0 || 1) // '|| 1' if there is no Kl cut
+                    histKlCands->Fill(KlCounter);
+                    if(KlCounter > 0) // '|| 1' if there is no Kl cut
                     { ksCand.push_back(k); }
-                    tmpCounter = 0;
+                    KlCounter = 0;
                 }
             }
 
@@ -273,41 +275,27 @@ void kskl2bGen::Loop(std::string histFileName)
                 for(int i = 0; i < nsim; i++)
                 {
                     if(simtype[i] == 211 && simorig[i] == 310)
-                    { 
-                        piPos.SetMagThetaPhi(simmom[i], simtheta[i], simphi[i]); 
-                        counter1++;
-                    }
+                    { piPos.SetMagThetaPhi(simmom[i], simtheta[i], simphi[i]); }
 
                     if(simtype[i] == -211 && simorig[i] == 310)
-                    { 
-                        piNeg.SetMagThetaPhi(simmom[i], simtheta[i], simphi[i]); 
-                        counter2++;
-                    }
+                    { piNeg.SetMagThetaPhi(simmom[i], simtheta[i], simphi[i]); }
                 }
-            
-                if (tcharge[ksvind[0][0]] > 0)
-                {
-                    Y = kspipt[0][0] / kspipt[0][1];
-                    hist->Fill(kspipt[0][0], kspipt[0][1]);
-                    p1 = kspipt[0][0]; p2 = kspipt[0][1];
-                    piPosRec.SetMagThetaPhi(kspipt[0][0], kspith[0][0], kspiphi[0][0]);
-                    piNegRec.SetMagThetaPhi(kspipt[0][1], kspith[0][1], kspiphi[0][1]);
-                }
-                else
-                {
-                    Y = kspipt[0][1] / kspipt[0][0];
-                    hist->Fill(kspipt[0][1], kspipt[0][0]);
-                    p1 = kspipt[0][1]; p2 = kspipt[0][0];
-                    piPosRec.SetMagThetaPhi(kspipt[0][1], kspith[0][1], kspiphi[0][1]);
-                    piNegRec.SetMagThetaPhi(kspipt[0][0], kspith[0][0], kspiphi[0][0]);
-                }
-                hSumMomTr->Fill(kspipt[0][1] + kspipt[0][0]);
-                dpsi = ksdpsi[0];
-                etrue = sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2());            
 
-                // Y = piPos.Mag() / piNeg.Mag();
-                // dpsi = piPos.Angle(piNeg);
-                // emeas = sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2());
+                int posTrackNumber = tcharge[ksvind[ksCand[0]][0]] > 0 ? 0 : 1;
+                int negTrackNumber = posTrackNumber == 1 ? 0 : 1;
+            
+                Y = kspipt[ksCand[0]][posTrackNumber] / kspipt[ksCand[0]][negTrackNumber];
+                hist->Fill(kspipt[ksCand[0]][posTrackNumber], kspipt[ksCand[0]][negTrackNumber]);
+                posMom = kspipt[ksCand[0]][posTrackNumber]; 
+                negMom = kspipt[ksCand[0]][negTrackNumber];
+                piPosRec.SetMagThetaPhi(kspipt[ksCand[0]][posTrackNumber], kspith[ksCand[0]][posTrackNumber], kspiphi[ksCand[0]][posTrackNumber]);
+                piNegRec.SetMagThetaPhi(kspipt[ksCand[0]][negTrackNumber], kspith[ksCand[0]][negTrackNumber], kspiphi[ksCand[0]][negTrackNumber]);
+
+                hSumMomTr->Fill(kspipt[ksCand[0]][negTrackNumber] + kspipt[ksCand[0]][posTrackNumber]);
+                dpsi = ksdpsi[ksCand[0]];
+                ksTheta = ksth[ksCand[0]];
+                ksPhi = ksphi[ksCand[0]];
+                etrue = sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2());            
                 
                 missingMass = sqrt(4 * emeas * emeas + 2 * 139.57 * 139.57 
                 - 2 * 2 * emeas * sqrt(139.57 * 139.57 + piPosRec.Mag2()) - 2 * 2 * emeas * sqrt(139.57 * 139.57 + piNegRec.Mag2()) 
@@ -317,42 +305,46 @@ void kskl2bGen::Loop(std::string histFileName)
                 hMissingMass->Fill(missingMass);
                 hKsInvMass->Fill(pipiInvMass);
                 hFinalStateId->Fill(finalstate_id);
-                
+
+
+                // Data from the generator
+                // Y = piPos.Mag() / piNeg.Mag();
+                // dpsi = piPos.Angle(piNeg);
+                // emeas = sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2());
+
                 if(missingMass > 350)
-                { tNew->Fill(); }
-                // tNew->Fill();
-                hTrackCollCutted->Fill(fabs(tphi[0] - tphi[1]) - TMath::Pi(), tth[0] + tth[1] - TMath::Pi());
-                // hE->Fill(sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2()));
-                // emeas = sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2());  
-
-                //  Cowboy Type
-                if(piPosRec.Cross(field).XYvector().DeltaPhi(piNegRec.XYvector()) < TMath::Pi() / 2)
                 { 
-                    // if(missingMass > 350)
-                    // { tNew->Fill(); }
+                    tNew->Fill(); 
+                    hTrackCollCutted->Fill(fabs(tphi[0] - tphi[1]) - TMath::Pi(), tth[0] + tth[1] - TMath::Pi());
                     hE->Fill(sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2()));
-                    hDeltaPhiVsPhi->Fill(piPos.XYvector().Phi(), piPos.XYvector().DeltaPhi(piPosRec.XYvector()));
-                    hDeltaPhiRecVsGenCowboy->Fill(fabs(piPos.XYvector().DeltaPhi(piNeg.XYvector())), 
-                                                fabs(piPosRec.XYvector().DeltaPhi(piNegRec.XYvector())) );
 
-                    // hPhi->Fill(piPos.Phi() - piPosRec.Phi()); 
-                    // hPhi->Fill(piNeg.Phi() - piNegRec.Phi()); 
+                    //  Cowboy Type
+                    if(piPosRec.Cross(field).XYvector().DeltaPhi(piNegRec.XYvector()) < TMath::Pi() / 2)
+                    { 
+                        // tNew->Fill(); 
+                        // hE->Fill(sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2()));
+                        hDeltaPhiVsPhi->Fill(piPos.XYvector().Phi(), piPos.XYvector().DeltaPhi(piPosRec.XYvector()));
+                        hDeltaPhiRecVsGenCowboy->Fill(fabs(piPos.XYvector().DeltaPhi(piNeg.XYvector())), 
+                                                    fabs(piPosRec.XYvector().DeltaPhi(piNegRec.XYvector())) );
 
-                    hDeltaMomVsDeltaPhi2->Fill( (piPos.Mag() - piNeg.Mag()) - (piPosRec.Mag() - piNegRec.Mag()),
-                                                piPos.XYvector().DeltaPhi(piNeg.XYvector()) - piPosRec.XYvector().DeltaPhi(piNegRec.XYvector()));
-                }
-                //  Sailor Type
-                if(piPosRec.Cross(field).XYvector().DeltaPhi(piNegRec.XYvector()) > TMath::Pi() / 2)
-                {  
-                    // if(missingMass > 350)
-                    // { tNew->Fill(); }
-                    // hE->Fill(sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2()));
-                    // hDeltaPhiVsPhi->Fill(piPos.XYvector().Phi(), piPos.XYvector().DeltaPhi(piPosRec.XYvector()));
+                        // hPhi->Fill(piPos.Phi() - piPosRec.Phi()); 
+                        // hPhi->Fill(piNeg.Phi() - piNegRec.Phi()); 
 
-                    hDeltaPhiRecVsGenSailor->Fill(fabs(piPos.XYvector().DeltaPhi(piNeg.XYvector())), 
-                                                fabs(piPosRec.XYvector().DeltaPhi(piNegRec.XYvector())) );
-                    hDeltaMomVsDeltaPhi3->Fill(piPos.XYvector().DeltaPhi(piNeg.XYvector()) - piPosRec.XYvector().DeltaPhi(piNegRec.XYvector()), 
-                                            (piPos.Mag() - piNeg.Mag()) - (piPosRec.Mag() - piNegRec.Mag())); 
+                        hDeltaMomVsDeltaPhi2->Fill( (piPos.Mag() - piNeg.Mag()) - (piPosRec.Mag() - piNegRec.Mag()),
+                                                    piPos.XYvector().DeltaPhi(piNeg.XYvector()) - piPosRec.XYvector().DeltaPhi(piNegRec.XYvector()));
+                    }
+                    //  Sailor Type
+                    if(piPosRec.Cross(field).XYvector().DeltaPhi(piNegRec.XYvector()) > TMath::Pi() / 2)
+                    {  
+                        // tNew->Fill();
+                        // hE->Fill(sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2()));
+                        // hDeltaPhiVsPhi->Fill(piPos.XYvector().Phi(), piPos.XYvector().DeltaPhi(piPosRec.XYvector()));
+
+                        hDeltaPhiRecVsGenSailor->Fill(fabs(piPos.XYvector().DeltaPhi(piNeg.XYvector())), 
+                                                    fabs(piPosRec.XYvector().DeltaPhi(piNegRec.XYvector())) );
+                        hDeltaMomVsDeltaPhi3->Fill(piPos.XYvector().DeltaPhi(piNeg.XYvector()) - piPosRec.XYvector().DeltaPhi(piNegRec.XYvector()), 
+                                                (piPos.Mag() - piNeg.Mag()) - (piPosRec.Mag() - piNegRec.Mag())); 
+                    }
                 }
 
                 // hDeltaMomVsDeltaPhi2->Fill(piPos.Phi() - piPosRec.Phi(), piPos.Mag() - piPosRec.Mag());
@@ -407,22 +399,6 @@ void kskl2bGen::Loop(std::string histFileName)
     std::cout << "nentries " << nentries << std::endl;
     std::cout << "e_mc = " <<  eff << std::endl;
     std::cout << "NgoodTrS = " << NgoodTrS << std::endl;
-
-    auto hESmeared = new TH1F("hESmeared", "Smeared Energy", 3000, 490, 520);
-    auto hESmearedUncutted = new TH1F("hESmearedUncutted", "Smeared Energy", 3000, 490, 520);
-    auto g = new TF1("g","gausn", 480, 530);
-
-    for(int i = 1; i < hE->GetNbinsX(); i++)
-    {
-        g->SetParameters(1, hE->GetBinCenter(i), 0.3);
-        hESmeared->FillRandom("g", int(hE->GetBinContent(i)));
-    }
-
-    for(int i = 1; i < hEUncutted->GetNbinsX(); i++)
-    {
-        g->SetParameters(1, hEUncutted->GetBinCenter(i), 0.3);
-        hESmearedUncutted->FillRandom("g", int(hEUncutted->GetBinContent(i)));
-    }
 
     // Drawing hits with cuts
     fChain->Draw("tnhit>>hHit", "", "goff");
@@ -492,7 +468,6 @@ void kskl2bGen::Loop(std::string histFileName)
     // Drawing KsKl Cluster Energy vs dPhi with cuts' lines
 
     std::cout << "Energy point: " << emeas << "; Mean Energy = " << hE->GetMean() << " +/- " << hE->GetMeanError() << "; e_mc = " <<  eff << std::endl;
-    std::cout << "Mean Smeared Energy = " << hESmeared->GetMean() << " +/- " << hESmeared->GetMeanError() << std::endl;
 
     hist->GetYaxis()->SetTitle("P_{#pi^{+}} [MeV/c]");
     hist->GetXaxis()->SetTitle("P_{#pi^{-}} [MeV/c]");
@@ -501,10 +476,6 @@ void kskl2bGen::Loop(std::string histFileName)
     // hPsiUncutted->Draw();
     // hPsiCutted->SetLineColor(kGreen);
     // hPsiCutted->Draw("same");
-
-    // hESmeared->Draw();
-    // hESmearedUncutted->SetLineColor(kGreen);
-    // hESmearedUncutted->DrawNormalized("same", hESmeared->Integral());
 
     // auto tmpForm = new TF1("tmpForm", "[1] / ([0] - x) + [2]", 490, 520);
     // tmpForm->SetParameters(emeas - 0.5, 0.1, 0.1);
