@@ -49,6 +49,28 @@ void kskl2bGen::Loop(std::string histFileName)
     Float_t eff;
     Float_t posMom, negMom;
     Float_t etrue;
+    Float_t dpsi_gen;
+    Float_t Y_gen;
+    Float_t ksTheta_gen;
+    Float_t ksPhi_gen;
+
+    
+    Float_t piThetaPos;
+    Float_t piThetaNeg;
+    Float_t piThetaPos_gen;
+    Float_t piThetaNeg_gen;
+
+    Float_t piPhiPos;
+    Float_t piPhiNeg;
+    Float_t piPhiPos_gen;
+    Float_t piPhiNeg_gen;
+
+    Float_t piMomPos;
+    Float_t piMomNeg;
+    Float_t piMomPos_gen;
+    Float_t piMomNeg_gen;
+
+
     tNew->Branch("emeas", &emeas, "emeas/F");
     tNew->Branch("etrue", &etrue, "etrue/F");
     tNew->Branch("demeas", &demeas, "demeas/F");
@@ -57,6 +79,30 @@ void kskl2bGen::Loop(std::string histFileName)
     tNew->Branch("kstheta", &ksTheta, "kstheta/F");
     tNew->Branch("ksphi", &ksPhi, "ksphi/F");
     tNew->Branch("Y", &Y, "Y/F");
+
+    tNew->Branch("ksdpsi_gen", &dpsi_gen, "ksdpsi_gen/F");
+    tNew->Branch("Y_gen", &Y_gen, "Y_gen/F");
+    tNew->Branch("kstheta_gen", &ksTheta_gen, "kstheta_gen/F");
+    tNew->Branch("ksphi_gen", &ksPhi_gen, "ksphi_gen/F");
+
+
+    tNew->Branch("piThetaPos", &piThetaPos, "piThetaPos/F");
+    tNew->Branch("piThetaNeg", &piThetaNeg, "piThetaNeg/F");
+    tNew->Branch("piThetaPos_gen", &piThetaPos_gen, "piThetaPos_gen/F");
+    tNew->Branch("piThetaNeg_gen", &piThetaNeg_gen, "piThetaNeg_gen/F");
+
+
+    tNew->Branch("piPhiPos", &piPhiPos, "piPhiPos/F");
+    tNew->Branch("piPhiNeg", &piPhiNeg, "piPhiNeg/F");
+    tNew->Branch("piPhiPos_gen", &piPhiPos_gen, "piPhiPos_gen/F");
+    tNew->Branch("piPhiNeg_gen", &piPhiNeg_gen, "piPhiNeg_gen/F");
+
+    tNew->Branch("piMomPos", &piMomPos, "piMomPos/F");
+    tNew->Branch("piMomNeg", &piMomNeg, "piMomNeg/F");
+    tNew->Branch("piMomPos_gen", &piMomPos_gen, "piMomPos_gen/F");
+    tNew->Branch("piMomNeg_gen", &piMomNeg_gen, "piMomNeg_gen/F");
+
+
 
     Double_t halfPi = TMath::Pi() / 2;
     int NgoodTr = 0;
@@ -279,6 +325,12 @@ void kskl2bGen::Loop(std::string histFileName)
 
                     if(simtype[i] == -211 && simorig[i] == 310)
                     { piNeg.SetMagThetaPhi(simmom[i], simtheta[i], simphi[i]); }
+
+                    if(simtype[i] == 310)
+                    {
+                        ksTheta_gen = simtheta[i];
+                        ksPhi_gen = simphi[i];
+                    }
                 }
 
                 int posTrackNumber = tcharge[ksvind[ksCand[0]][0]] > 0 ? 0 : 1;
@@ -308,12 +360,29 @@ void kskl2bGen::Loop(std::string histFileName)
 
 
                 // Data from the generator
-                // Y = piPos.Mag() / piNeg.Mag();
-                // dpsi = piPos.Angle(piNeg);
-                // emeas = sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2());
+                Y_gen = piPos.Mag() / piNeg.Mag();
+                dpsi_gen = piPos.Angle(piNeg);
+                emeas = sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2());
 
                 if(missingMass > 350)
                 { 
+
+                    piThetaPos = piPosRec.Theta();
+                    piThetaNeg = piNegRec.Theta();
+                    piThetaPos_gen = piPos.Theta();
+                    piThetaNeg_gen = piNeg.Theta();
+
+                    piPhiPos = piPosRec.Phi();
+                    piPhiNeg = piNegRec.Phi();
+                    piPhiPos_gen = piPos.Phi();
+                    piPhiNeg_gen = piNeg.Phi();
+
+                    piMomPos = piPosRec.Mag();
+                    piMomNeg = piNegRec.Mag();
+                    piMomPos_gen = piPos.Mag();
+                    piMomNeg_gen = piNeg.Mag();
+
+
                     tNew->Fill(); 
                     hTrackCollCutted->Fill(fabs(tphi[0] - tphi[1]) - TMath::Pi(), tth[0] + tth[1] - TMath::Pi());
                     hE->Fill(sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2()));

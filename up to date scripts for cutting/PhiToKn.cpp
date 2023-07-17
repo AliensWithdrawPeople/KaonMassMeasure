@@ -255,7 +255,7 @@ void PhiToKn::Loop(std::string output_fname, double energy0)
         flag = false; 
     }
     int n_events = tNew->GetEntries();
-    if(energy0 < 506 || energy0 > 513)
+    // if(energy0 < 506 || energy0 > 513)
     {
         auto hMass = new TH1D("hMass", "Mass without background", 160, 420, 580);
         tNew->Draw("mass >> hMass", "", "goff");

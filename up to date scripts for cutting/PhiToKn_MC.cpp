@@ -259,7 +259,7 @@ void PhiToKn_MC::Loop(std::string output_fname, double energy0)
     }
 
     int n_events = tNew->GetEntries();
-    if(energy0 < 506 || energy0 > 511.8)
+    // if(energy0 < 506 || energy0 > 511.8)
     {
         auto hMass = new TH1D("hMass", "Mass without background", 160, 420, 580);
         tNew->Draw("mass >> hMass", "", "goff");
@@ -267,7 +267,7 @@ void PhiToKn_MC::Loop(std::string output_fname, double energy0)
         auto res2 = hMass->Fit("pol0", "SQME", "goff", 420, 465);
         double bckgLevel = (res1->Parameter(0) + res2->Parameter(0)) / 2.;
         double bckgLevelErr = sqrt(res1->ParError(0) * res1->ParError(0) + res2->ParError(0) * res2->ParError(0));
-        // n_events = hMass->Integral(65, 90) -  bckgLevel * 25.;
+        n_events = hMass->Integral(65, 90) -  bckgLevel * 25.;
         
         std::cout << "bckgLevel_Left = " << res1->Parameter(0) << "; bckgLevel_Right = " << res2->Parameter(0) << "; bckgLevel_Avg = " << bckgLevel << std::endl;
         std::cout << "N_bckg = " << bckgLevel * hMass->GetNbinsX() << std::endl;

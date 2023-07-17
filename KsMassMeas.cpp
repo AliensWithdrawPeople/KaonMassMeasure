@@ -37,6 +37,8 @@ private:
     Float_t etrue;
     Float_t ksTheta;
     Float_t ksPhi;
+    Float_t piThetaPos;
+    Float_t piThetaNeg;
     Int_t runnum; Float_t ksdpsi;
     // Momentum ratio = P1/P2, where P1 is the momentum of pi+, P2 is the momentum of pi-.
     Float_t Y;
@@ -132,11 +134,6 @@ public:
 
 MassHandler::MassHandler(std::string fKsKl, std::string badRunsFileName, std::optional<double> energyCorr, std::optional<std::map<int, Float_t>> energyDiff, bool isVerbose)
 {
-    TH2D h2EvsRun("dEdXvsPtot", "", 1000, 100, 120, 659, 60741, 61400);
-    Int_t runnum_;
-    Float_t tdedx[2];
-    Float_t tptot[2];
-
     energyCorrected = energyCorr;
     this->energyDiff = energyDiff;
 
@@ -152,6 +149,10 @@ MassHandler::MassHandler(std::string fKsKl, std::string badRunsFileName, std::op
     TFile *file = TFile::Open(fKsKl.c_str());
     ksTr = (TTree *)file->Get("ksTree");
 
+    std::cout << "\n\n++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
+    std::cout << "KsKl filename: " << fKsKl << std::endl;
+    std::cout << "++++++++++++++++++++++++++++++++++++++++++++++\n\n" << std::endl;
+
     ksTr->SetBranchAddress("emeas", &emeas);
     ksTr->SetBranchAddress("etrue", &etrue);
     etrue = -1;
@@ -161,6 +162,10 @@ MassHandler::MassHandler(std::string fKsKl, std::string badRunsFileName, std::op
     ksTr->SetBranchAddress("Y", &Y);
     ksTr->SetBranchAddress("kstheta", &ksTheta);
     ksTr->SetBranchAddress("ksphi", &ksPhi);
+
+    ksTr->SetBranchAddress("piThetaPos", &piThetaPos);
+    ksTr->SetBranchAddress("piThetaNeg", &piThetaNeg);
+
     
     hMlnY = std::make_unique<TH2D>(TH2D("hMlnY", "M(lnY)", 300, -0.3, 0.3, 600, 480, 520));
     hDeltaM = std::make_unique<TProfile>(TProfile("hDeltaM", "DeltaM(lnY)", 40, -1, 1, -1, 1));
@@ -295,7 +300,7 @@ void MassHandler::CalcSigmas(bool verbose)
     for(int i = 0; i < ksTr->GetEntries(); i++)
     {
         ksTr->GetEntry(i);
-        if(std::find(badRuns.begin(), badRuns.end(), runnum) == badRuns.end() && abs(Y - 1) > 1e-9)
+        if(std::find(badRuns.begin(), badRuns.end(), runnum) == badRuns.end() && abs(Y - 1) > 1e-9 && fabs(ksTheta - TMath::Pi() / 2) > 0.3)
         {
             lnY = log(Y);
             psiBinNum = lnY > -0.4 ? floor((lnY + 0.4 + 1e-12) / 0.05) : 16;
@@ -334,7 +339,7 @@ void MassHandler::CalcSigmas(bool verbose)
         vSigmaRMS.push_back(hist->GetStdDev());
     }
     if(verbose)
-    { std::cout<<std::endl; }
+    { std::cout << "\n" <<std::endl; }
 }
 
 void MassHandler::FillHists(double fitRange, double deltaE, bool withFitSigma, bool useEtrue)
@@ -348,7 +353,7 @@ void MassHandler::FillHists(double fitRange, double deltaE, bool withFitSigma, b
     for(int i = 0; i < ksTr->GetEntries(); i++)
     {
         ksTr->GetEntry(i);
-        if(std::find(badRuns.begin(), badRuns.end(), runnum) == badRuns.end() && abs(Y - 1) > 1e-9)
+        if(std::find(badRuns.begin(), badRuns.end(), runnum) == badRuns.end() && abs(Y - 1) > 1e-9 && fabs(ksTheta - TMath::Pi() / 2) > 0.3)
         {
             lnY = log(Y);
             psiBinNum = lnY > -0.4 ? floor((lnY + 0.4 + 1e-12) / 0.05) : 16;
@@ -388,8 +393,8 @@ void MassHandler::FillHists(double fitRange, double deltaE, bool withFitSigma, b
     grMassLnYFit = FitSlices(hMlnY, 10);
     grPsiLnYFit = FitSlices(hPsilnY, 32, std::make_pair(2, 2), 8);
 
-    std::cout << "Average E cut = " << hEnergySpectrumCut->GetMean() << " +/- " << hEnergySpectrumCut->GetMeanError() << std::endl;
-    std::cout << "Average E  = " << hEnergySpectrum->GetMean() << " +/- " << hEnergySpectrum->GetMeanError() << std::endl;
+    std::cout << std::endl << "Average E cut = " << hEnergySpectrumCut->GetMean() << " +/- " << hEnergySpectrumCut->GetMeanError() << std::endl;
+    std::cout << "Average E  = " << hEnergySpectrum->GetMean() << " +/- " << hEnergySpectrum->GetMeanError() << "\n\n\n" << std::endl;
 }
 
 void MassHandler::DrawGraphs(int drawOpt)
@@ -483,9 +488,11 @@ std::pair<double, double> MassHandler::GetMass(double fitRange, bool useEtrue, d
     double mass = 0;
     double massErr = 0;
 
+    massCrAngle->SetParameter(0, useEtrue? hEnergySpectrumCut->GetMean() : GetCorrectedEnergy(runnum, deltaE));
+
     auto printFitRes = [&verbose, &methodOpt](const TFitResultPtr &res, std::string resName, int methodNum) {
         if(verbose || methodNum == methodOpt) {
-            std::cout << resName << " = " << res->Parameter(0) << " +/- " << res->ParError(0) 
+            std::cout << "\n" << resName << " = " << res->Parameter(0) << " +/- " << res->ParError(0) 
             << "; chi2 / ndf = " << res->Chi2() << "/" << res->Ndf() << "; Prob = " << res->Prob() << std::endl;              
         }
     };
@@ -501,11 +508,12 @@ std::pair<double, double> MassHandler::GetMass(double fitRange, bool useEtrue, d
 
     res3 = hPsilnY->ProfileX("pfxAng")->Fit("pol2", "SQME", "goff", -0.15, 0.15);
     printFitRes(res3, "Psi", 3);  
+    std::cout << "M_crAngle(Psi_cr pfx) = " << massCrAngle->Eval(res3->Parameter(0)) << " +/- " << massCrAngle->Derivative(res3->Parameter(0)) * res3->ParError(0) << "\n" << std::endl;
 
     res4 = grPsiLnYFit->Fit("pol2", "SQME", "goff", -0.15, 0.15);
     printFitRes(res4, "PsiFit", 4);
-
-    massCrAngle->SetParameter(0, useEtrue? hEnergySpectrumCut->GetMean() : GetCorrectedEnergy(runnum, deltaE));
+    std::cout << "M_crAngle(Psi_cr fit) = " << massCrAngle->Eval(res4->Parameter(0)) << " +/- " << massCrAngle->Derivative(res4->Parameter(0)) * res4->ParError(0) << std::endl;
+    std::cout << std::endl;
 
     switch (methodOpt)
     {
@@ -622,10 +630,11 @@ int KsMassMeas()
         radiativeCorrections[energyPoints[i]] = deltaM_RC_Smeared[i]; 
     }
 
-    std::string energyPoint = "509";
+    std::string energyPoint = "510";
     double deltaE = 0.0;
-    std::string fileName = "tr_ph/expKsKl/exp" + energyPoint + "_v9.root";
-    fileName = "tr_ph/MC/KsKl_Smeared/MC" + energyPoint + "_Smeared.root";
+    std::string fileName = "tr_ph/expKsKl/exp" + energyPoint + ".root";
+    // fileName = "tr_ph/MC/KsKl_Smeared/MC" + energyPoint + ".root";
+    // fileName = "tr_ph/MC/KsKl_Smeared/MC" + energyPoint + "_Field.root";
 
     std::string fadRunsFile = "txt/BadRuns.txt";
 
@@ -633,8 +642,9 @@ int KsMassMeas()
     // Scan(meanEnergiesSpectrum, deltaE, false);
     
     auto massHandler = new MassHandler(fileName, fadRunsFile, meanEnergies[energyPoint].first);
+    // auto massHandler = new MassHandler(fileName, fadRunsFile,  508.882);
     auto mass = massHandler->GetMass(0.27, false, 0., true, 0, 0).first;
-    std::cout << "M_NCRC_smeared = " << mass << std::endl;
+    std::cout << "M_NCRC_smeared = " << mass << "\n\n" << std::endl ;
     delete massHandler;
 
     auto end = std::chrono::system_clock::now();
