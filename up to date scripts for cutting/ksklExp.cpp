@@ -67,6 +67,16 @@ void ksklExp::Loop(std::string histFileName)
     Float_t ksPhi;
     Float_t Y;
     Float_t posMom, negMom;
+
+    Float_t piThetaPos;
+    Float_t piThetaNeg;
+
+    Float_t piPhiPos;
+    Float_t piPhiNeg;
+
+    Float_t piMomPos;
+    Float_t piMomNeg;
+
     tNew->Branch("emeas", &emeas0, "emeas/F");
     tNew->Branch("demeas", &demeas0, "demeas/F");
     tNew->Branch("runnum", &runnum, "runnum/I");
@@ -74,6 +84,15 @@ void ksklExp::Loop(std::string histFileName)
     tNew->Branch("kstheta", &ksTheta, "kstheta/F");
     tNew->Branch("ksphi", &ksPhi, "ksphi/F");
     tNew->Branch("Y", &Y, "Y/F");
+
+    tNew->Branch("piThetaPos", &piThetaPos, "piThetaPos/F");
+    tNew->Branch("piThetaNeg", &piThetaNeg, "piThetaNeg/F");
+
+    tNew->Branch("piPhiPos", &piPhiPos, "piPhiPos/F");
+    tNew->Branch("piPhiNeg", &piPhiNeg, "piPhiNeg/F");
+
+    tNew->Branch("piMomPos", &piMomPos, "piMomPos/F");
+    tNew->Branch("piMomNeg", &piMomNeg, "piMomNeg/F");
 
     // pi+ pi- track reconstruction difference correction
     std::vector<double> Pavg = {157, 182, 207, 231, 235, 243, 254, 260};
@@ -229,9 +248,9 @@ void ksklExp::Loop(std::string histFileName)
         {
             for(int k = 0; k < nks; k++)
             {
-                if(ksalign[k] > 0.85 && (tdedx[ksvind[k][0]] + tdedx[ksvind[k][1]]) / 2 < 5000 &&
-                1.1 < kspith[k][0] && kspith[k][0] < TMath::Pi() - 1.1 && 
-                1.1 < kspith[k][1] && kspith[k][1] < TMath::Pi() - 1.1 &&
+                if(ksalign[k] > 0.8 && (tdedx[ksvind[k][0]] + tdedx[ksvind[k][1]]) / 2 < 5000 &&
+                1. < kspith[k][0] && kspith[k][0] < TMath::Pi() - 1. && 
+                1. < kspith[k][1] && kspith[k][1] < TMath::Pi() - 1. &&
                 //20 - half of the linear size of Drift Chamber
                 //(20 - ksz0[0]) * fabs(TMath::Tan(kspith[0][0])) > 15 && (20 - ksz0[0]) * fabs(TMath::Tan(kspith[0][1])) > 15 &&
                 // kspipt[k][0] > 120 && kspipt[k][1] > 120 && 
@@ -328,6 +347,15 @@ void ksklExp::Loop(std::string histFileName)
 		        hTrackColl->Fill(fabs(tphi[0] - tphi[1]) - TMath::Pi(), tth[0] + tth[1] - TMath::Pi());
                 if(missingMass > 350)
                 { 
+                    piThetaPos = piPos.Theta();
+                    piThetaNeg = piNeg.Theta();
+
+                    piPhiPos = piPos.Phi();
+                    piPhiNeg = piNeg.Phi();
+
+                    piMomPos = piPos.Mag();
+                    piMomNeg = piNeg.Mag();
+
                     tNew->Fill(); 
                     hist->Fill(piPos.Mag(), piNeg.Mag()); 
 

@@ -53,6 +53,8 @@ void kskl2bGen::Loop(std::string histFileName)
     Float_t Y_gen;
     Float_t ksTheta_gen;
     Float_t ksPhi_gen;
+    Int_t nhitPos;
+    Int_t nhitNeg;
 
     
     Float_t piThetaPos;
@@ -79,6 +81,8 @@ void kskl2bGen::Loop(std::string histFileName)
     tNew->Branch("kstheta", &ksTheta, "kstheta/F");
     tNew->Branch("ksphi", &ksPhi, "ksphi/F");
     tNew->Branch("Y", &Y, "Y/F");
+    tNew->Branch("nhitPos", &nhitPos, "nhitPos/I");
+    tNew->Branch("nhitNeg", &nhitNeg, "nhitNeg/I");
 
     tNew->Branch("ksdpsi_gen", &dpsi_gen, "ksdpsi_gen/F");
     tNew->Branch("Y_gen", &Y_gen, "Y_gen/F");
@@ -335,6 +339,9 @@ void kskl2bGen::Loop(std::string histFileName)
 
                 int posTrackNumber = tcharge[ksvind[ksCand[0]][0]] > 0 ? 0 : 1;
                 int negTrackNumber = posTrackNumber == 1 ? 0 : 1;
+
+                nhitPos = tnhit[posTrackNumber];
+                nhitNeg = tnhit[negTrackNumber];
             
                 Y = kspipt[ksCand[0]][posTrackNumber] / kspipt[ksCand[0]][negTrackNumber];
                 hist->Fill(kspipt[ksCand[0]][posTrackNumber], kspipt[ksCand[0]][negTrackNumber]);
@@ -362,7 +369,7 @@ void kskl2bGen::Loop(std::string histFileName)
                 // Data from the generator
                 Y_gen = piPos.Mag() / piNeg.Mag();
                 dpsi_gen = piPos.Angle(piNeg);
-                emeas = sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2());
+                // emeas = sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2());
 
                 if(missingMass > 350)
                 { 
