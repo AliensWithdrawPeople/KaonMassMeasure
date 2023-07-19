@@ -31,14 +31,14 @@ int dPsi_RecGenDiff()
 
     TF1 formula("formula", "[0] + [1] * x * x", -2, 2, "");
     formula.SetParameters(0., 0.0001);
-    auto file1  = new TFile("btv.root", "recreate");
+    auto file1  = new TFile("dPsi_RecDiff_out.root", "recreate");
     int counter = 0;
     for (const auto &point : points)
     {
         auto file = std::unique_ptr<TFile>(TFile::Open(filename(point)));
         auto ksTr = std::unique_ptr<TTree>(file->Get<TTree>("ksTree"));
         TH2D hist("hist", "", 250, -1.6, 1.6, 250, -1, 1);
-        ksTr->Draw("ksdpsi_gen - ksdpsi : kstheta - TMath::Pi()/2 >> hist", "fabs(log(Y)) < 0.3 ", "goff");
+        ksTr->Draw("ksdpsi_gen - ksdpsi : kstheta - TMath::Pi()/2 >> hist", "fabs(log(Y)) < 0.3 && nhitPos > 10 && nhitNeg > 10", "goff");
         auto pfx = hist.ProfileX();
     
         pfx->SetName(("pfx" + std::to_string(counter)).c_str());

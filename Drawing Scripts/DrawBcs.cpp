@@ -10,7 +10,7 @@
 
 int DrawBcs()
 {
-    std::string filename = "bcs_16pts_NewFunc.root";
+    std::string filename = "bcs_NewEff_ver3.root";
     std::string fullFilename = "C:/work/Science/BINP/Kaon Mass Measure/PhiMesonFit/" + filename; 
     auto file = TFile::Open(fullFilename.c_str());
     auto bcs = file->Get<TGraphErrors>("bcs");
