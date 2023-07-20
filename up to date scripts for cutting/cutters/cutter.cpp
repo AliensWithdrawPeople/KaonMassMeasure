@@ -4,7 +4,7 @@
 #include <iostream>
 
 int cutter(std::string point) {
-    gROOT->LoadMacro("C:/work/Science/BINP/Kaon Mass Measure/up to date scripts for cutting/PhiToKn.cpp");
+    gROOT->LoadMacro("C:/work/Science/BINP/Kaon Mass Measure/up to date scripts for cutting/PhiToKn/PhiToKn.cpp");
     auto fname = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/KnPrelim/Prelim" + point + ".root";
     auto file = TFile::Open((fname).c_str());
     gROOT->ProcessLine("PhiToKn a(tr_ph)");
