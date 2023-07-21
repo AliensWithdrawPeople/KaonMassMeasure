@@ -14,6 +14,8 @@ lumi_err = np.array([1.05125, 1.70613, 0.866127, 1.12028, 1.8298, 1.53774, 2.488
 
                 
 e_MC = np.array([0.26591, 0.2577, 0.25025, 0.2409, 0.24028, 0.23805, 0.23718, 0.23539, 0.23547, 0.23485, 0.23438, 0.23285, 0.22891, 0.22683, 0.22242, 0.21371])
+e_MC = np.array([0.25922, 0.25138, 0.24396, 0.23382, 0.23255, 0.23099, 0.23027, 0.2285, 0.22779, 0.22737, 0.22637, 0.22265, 0.21986, 0.21707, 0.21214, 0.20391])
+e_MC = np.array([0.25922, 0.25138, 0.24396, 0.23382, 0.23255, 0.23099, 0.23027, 0.22983, 0.22779, 0.22737, 0.22637, 0.22331, 0.21986, 0.21707, 0.21214, 0.20391])
 n_MC = []
 for point in energy_points:
     with up.open(f"C:/work/Science/BINP/Kaon Mass Measure/tr_ph/mcgpj/tr_ph v9/EnergySmearing/MCGPJ_kskl{point}_Merged.root:tr_ph_merged") as tr_ph_merged: # type: ignore
@@ -26,7 +28,7 @@ e_MC_err = np.sqrt(e_MC * (1 - e_MC) / np.array(n_MC))
 # print("e_MC_bigger =", list(np.round(e_MC_bigger, 6)))
 # print("e_MC_bigger_err =", list(np.round(e_MC_bigger_err, 6)))
 
-n_events = [302, 2620, 1735, 27365, 124438, 151469, 591058, 456543, 191690, 85594, 48069, 16469, 8922, 5225, 4018, 2559]
+n_events = [305, 2624, 1736, 26421, 120322, 146898, 573681, 442909, 185693, 82720, 46215, 16475, 8931, 5228, 4045, 2550]
 # for point in energy_points:
 #     with up.open(f"C:/work/Science/BINP/Kaon Mass Measure/tr_ph/PhiXSection/Kn{point}.root:Kn") as KnTree: # type: ignore
 #         n_events.append(len(KnTree['emeas'].array())) # type: ignore
@@ -36,8 +38,8 @@ efficiency = e_MC
 xsec_vis = n_events / lumi
 
 xsec_err_energy_part = np.array([0.00903471, 0.015707, 0.0667149, 1.00209, 6.51135, 4.1341, 3.67391, 6.89706, 4.01397, 1.47482, 1.1773, 0.204747, 0.137859, 0.0518114, 0.019589, 0.0228199])
-xsec_vis_err = np.sqrt( (np.sqrt(n_events) / lumi / efficiency)**2 + (n_events / efficiency / (lumi**2))**2 * lumi_err**2  * (n_events / lumi / (efficiency**2))**2 * e_MC_err**2  + xsec_err_energy_part**2)
-xsec = n_events / lumi / efficiency
+xsec_vis_err = np.sqrt( (np.sqrt(n_events) / lumi / efficiency)**2 + (n_events / efficiency / (lumi**2))**2 * lumi_err**2  * (n_events / lumi / (efficiency**2))**2 * e_MC_err**2)
+xsec = n_events / lumi / efficiency / (1-0.0025) / (1-0.0015)
 
 print("E_beam =", energy_points)
 print("N_events =", n_events)
@@ -46,7 +48,7 @@ print("eff_err =", list(np.round(e_MC_err, 6)))
 print("n_MC =", list(n_MC))
 print("sigma_vis =", list(np.round(n_events / lumi, 5)))
 print("sigma_vis (efficiency accounted)=", list(np.round(xsec, 5)))
-print("sigma^(err)_vis =", list(np.round( xsec_vis_err, 5)) )
+print("sigma^(err)_vis =", list(np.round( xsec_vis_err, 6)) )
 
 # vis_xsection = Xsection(np.array(E), xsec, (500, 515))
 # a, b = vis_xsection.Get_Data()
