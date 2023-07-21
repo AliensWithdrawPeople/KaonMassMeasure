@@ -66,7 +66,6 @@ void ksklExp::Loop(std::string histFileName)
     Float_t ksTheta;
     Float_t ksPhi;
     Float_t Y;
-    Float_t posMom, negMom;
 
     Float_t piThetaPos;
     Float_t piThetaNeg;
@@ -76,6 +75,9 @@ void ksklExp::Loop(std::string histFileName)
 
     Float_t piMomPos;
     Float_t piMomNeg;
+
+    Int_t nhitPos;
+    Int_t nhitNeg;
 
     tNew->Branch("emeas", &emeas0, "emeas/F");
     tNew->Branch("demeas", &demeas0, "demeas/F");
@@ -93,6 +95,9 @@ void ksklExp::Loop(std::string histFileName)
 
     tNew->Branch("piMomPos", &piMomPos, "piMomPos/F");
     tNew->Branch("piMomNeg", &piMomNeg, "piMomNeg/F");
+
+    tNew->Branch("nhitPos", &nhitPos, "nhitPos/I");
+    tNew->Branch("nhitNeg", &nhitNeg, "nhitNeg/I");
 
     // pi+ pi- track reconstruction difference correction
     std::vector<double> Pavg = {157, 182, 207, 231, 235, 243, 254, 260};
@@ -165,7 +170,7 @@ void ksklExp::Loop(std::string histFileName)
     int tmpCounter = 0;
     std::vector<Int_t> ksCand = {};
 
-    auto hist = new TH2D("hist", "", 1000, 0, 600, 1000, 0, 600);
+    auto hist = new TH2D("hMomPosVsNeg", "", 1000, 0, 600, 1000, 0, 600);
     auto histKlCands = new TH1D("histKlCands", "number of Kl candidates for one Ks candidate", 5, 0, 5);
     auto histKsCands = new TH1D("histKsCands", "number of Ks candidates", 5, 0, 5);
     // Angles between tracks.
@@ -249,16 +254,15 @@ void ksklExp::Loop(std::string histFileName)
             for(int k = 0; k < nks; k++)
             {
                 if(ksalign[k] > 0.8 && (tdedx[ksvind[k][0]] + tdedx[ksvind[k][1]]) / 2 < 5000 &&
-                1. < kspith[k][0] && kspith[k][0] < TMath::Pi() - 1. && 
-                1. < kspith[k][1] && kspith[k][1] < TMath::Pi() - 1. &&
+                1.1 < kspith[k][0] && kspith[k][0] < TMath::Pi() - 1.1 && 
+                1.1 < kspith[k][1] && kspith[k][1] < TMath::Pi() - 1.1 &&
                 //20 - half of the linear size of Drift Chamber
                 //(20 - ksz0[0]) * fabs(TMath::Tan(kspith[0][0])) > 15 && (20 - ksz0[0]) * fabs(TMath::Tan(kspith[0][1])) > 15 &&
                 // kspipt[k][0] > 120 && kspipt[k][1] > 120 && 
                 // kspipt[k][0] < 350 && kspipt[k][1] < 350 &&
 		        // (kspipt[k][0]+kspipt[k][1]) > 500 &&
 		        kstlen[k] < 1.7 &&
-                tcharge[ksvind[k][0]] * tcharge[ksvind[k][1]] < 0 && kstype[k] == 0  &&
-                emeas0 > 100) // Added kstype[k] == 0.
+                tcharge[ksvind[k][0]] * tcharge[ksvind[k][1]] < 0 && kstype[k] == 0) // Added kstype[k] == 0.
                 {
                     ks.SetMagThetaPhi(1, ksth[k], ksphi[k]);
 
@@ -319,14 +323,14 @@ void ksklExp::Loop(std::string histFileName)
 
                 phiIndexPos = int(kspiphi[ksCand[0]][posTrackNumber] / (2 * TMath::Pi() / Nchambers));
                 phiIndexNeg = int(kspiphi[ksCand[0]][negTrackNumber] / (2 * TMath::Pi() / Nchambers));
-                posMom = kspipt[ksCand[0]][posTrackNumber] + dPtotPos[PtotBinNumber(kspipt[ksCand[0]][posTrackNumber])][phiIndexPos];
-                negMom = kspipt[ksCand[0]][negTrackNumber] + dPtotNeg[PtotBinNumber(kspipt[ksCand[0]][negTrackNumber])][phiIndexNeg];
+                piMomPos = kspipt[ksCand[0]][posTrackNumber] + dPtotPos[PtotBinNumber(kspipt[ksCand[0]][posTrackNumber])][phiIndexPos];
+                piMomNeg = kspipt[ksCand[0]][negTrackNumber] + dPtotNeg[PtotBinNumber(kspipt[ksCand[0]][negTrackNumber])][phiIndexNeg];
 
-                Y = posMom / negMom;
+                Y = piMomPos / piMomNeg;
     
-                piPos.SetMagThetaPhi(posMom, kspith[ksCand[0]][posTrackNumber], 
+                piPos.SetMagThetaPhi(piMomPos, kspith[ksCand[0]][posTrackNumber], 
                                     kspiphi[ksCand[0]][posTrackNumber] + dPhiPos[PtotBinNumber(kspipt[ksCand[0]][posTrackNumber])][phiIndexPos]);
-                piNeg.SetMagThetaPhi(negMom, kspith[ksCand[0]][negTrackNumber], 
+                piNeg.SetMagThetaPhi(piMomNeg, kspith[ksCand[0]][negTrackNumber], 
                                         kspiphi[ksCand[0]][negTrackNumber] + dPhiNeg[PtotBinNumber(kspipt[ksCand[0]][negTrackNumber])][phiIndexNeg]);
 
                 
@@ -353,8 +357,8 @@ void ksklExp::Loop(std::string histFileName)
                     piPhiPos = piPos.Phi();
                     piPhiNeg = piNeg.Phi();
 
-                    piMomPos = piPos.Mag();
-                    piMomNeg = piNeg.Mag();
+                    nhitPos = tnhit[ksvind[ksCand[0]][posTrackNumber]];
+                    nhitNeg = tnhit[ksvind[ksCand[0]][negTrackNumber]];
 
                     tNew->Fill(); 
                     hist->Fill(piPos.Mag(), piNeg.Mag()); 
@@ -450,8 +454,8 @@ void ksklExp::Loop(std::string histFileName)
     std::cout << "nentries " << nentries << std::endl;
     std::cout << "NgoodTrS = " << NgoodTrS << std::endl;
 
-    hist->GetYaxis()->SetTitle("P_{#pi^{+}} [MeV/c]");
-    hist->GetXaxis()->SetTitle("P_{#pi^{-}} [MeV/c]");
+    hist->GetYaxis()->SetTitle("P_{#pi^{+}}, MeV/c");
+    hist->GetXaxis()->SetTitle("P_{#pi^{-}}, MeV/c");
     hist->Draw("COL");
     // hdThetadPhi->Draw("COL");
     // hPsiUncutted->Draw();

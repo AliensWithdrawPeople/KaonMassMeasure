@@ -234,7 +234,7 @@ void kskl2bGen::Loop(std::string histFileName)
         {
             for(int k = 0; k < nks; k++)
             {
-                if(ksalign[k] > 0.85 && (tdedx[ksvind[k][0]] + tdedx[ksvind[k][1]]) / 2 < 5000 &&
+                if(ksalign[k] > 0.8 && (tdedx[ksvind[k][0]] + tdedx[ksvind[k][1]]) / 2 < 5000 &&
                 // abs(kspith[k][0] - TMath::Pi() / 2) <= cutTrackTheta && 
                 // abs(kspith[k][1] - TMath::Pi() / 2) <= cutTrackTheta &&
                 1.1 < kspith[k][0] && kspith[k][0] < TMath::Pi() - 1.1 && 
