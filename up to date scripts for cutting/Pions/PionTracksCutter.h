@@ -386,9 +386,9 @@ PionTracksCutter::PionTracksCutter(TTree *tree) : fChain(0)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("C:/work/Science/BINP/Kaon Mass Measure/tr_ph/mcgpj/tr_ph v9/pipi/raw/tr_ph_run000003.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("C:/work/Science/BINP/Kaon Mass Measure/tr_ph/mcgpj/tr_ph v9/pipi/MCGPJ_pipi509_Merged.root");
       if (!f || !f->IsOpen()) {
-         f = new TFile("C:/work/Science/BINP/Kaon Mass Measure/tr_ph/mcgpj/tr_ph v9/pipi/raw/tr_ph_run000003.root");
+         f = new TFile("C:/work/Science/BINP/Kaon Mass Measure/tr_ph/mcgpj/tr_ph v9/pipi/MCGPJ_pipi509_Merged.root");
       }
       f->GetObject("tr_ph",tree);
 
