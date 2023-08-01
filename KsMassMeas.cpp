@@ -14,6 +14,7 @@
 #include "TLine.h"
 #include "TVector3.h"
 #include "TSpline.h"
+#include "TRandom.h"
 
 #include "Energy.h"
 
@@ -25,6 +26,7 @@
 #include <memory>
 #include <iostream>
 #include <iomanip>
+#include <cmath>
 
 #include <chrono>
 #include <ctime> 
@@ -32,37 +34,41 @@
 
 double dPsiCorrection(double ksTheta, std::string energy)
 {
-    if(energy == "501") { return -0.000672261 + 0.0160195 * (ksTheta - TMath::Pi() / 2) * (ksTheta - TMath::Pi() / 2); }
+    auto theta = (ksTheta - TMath::Pi() / 2);
+    if(energy == "501") { return -0.000672261 + 0.0160195 * std::pow(theta, 2); }
 
-    if(energy == "503") { return -0.000831758 + 0.0126012 * (ksTheta - TMath::Pi() / 2) * (ksTheta - TMath::Pi() / 2); }
+    if(energy == "503") { return -0.000831758 + 0.0126012 * std::pow(theta, 2); }
 
-    if(energy == "505") { return -0.000967487 + 0.0101455 * (ksTheta - TMath::Pi() / 2) * (ksTheta - TMath::Pi() / 2); }
+    if(energy == "505") { return -0.000967487 + 0.0101455 * std::pow(theta, 2); }
 
-    if(energy == "508") { return -0.0011324 + 0.010266 * (ksTheta - TMath::Pi() / 2) * (ksTheta - TMath::Pi() / 2); }
+    if(energy == "508") { return -0.0011324 + 0.010266 * std::pow(theta, 2); }
 
-    if(energy == "508.5") { return -0.00131057 + 0.0127361 * (ksTheta - TMath::Pi() / 2) * (ksTheta - TMath::Pi() / 2); }
+    if(energy == "508.5") { return -0.00131057 + 0.0127361 * std::pow(theta, 2); }
 
-    if(energy == "509") { return -0.00134738 + 0.0140213 * (ksTheta - TMath::Pi() / 2) * (ksTheta - TMath::Pi() / 2); }
 
-    if(energy == "509.5") { return -0.00122879 + 0.0128762 * (ksTheta - TMath::Pi() / 2) * (ksTheta - TMath::Pi() / 2); }
+    // if(energy == "509") { return -0.00134738 + 0.0140213 * std::pow(theta, 2); }
+    if(energy == "509") { return 8.91930e-04 -1.15960e-02 * std::pow(theta, 2) + 6.31244e-03 * std::pow(theta, 4); }
 
-    if(energy == "510") { return -0.00122787 + 0.0114095 * (ksTheta - TMath::Pi() / 2) * (ksTheta - TMath::Pi() / 2); }
 
-    if(energy == "510.5") { return -0.0012652 + 0.0128049 * (ksTheta - TMath::Pi() / 2) * (ksTheta - TMath::Pi() / 2); }
+    if(energy == "509.5") { return -0.00122879 + 0.0128762 * std::pow(theta, 2); }
 
-    if(energy == "511") { return -0.0010293 + 0.00869987 * (ksTheta - TMath::Pi() / 2) * (ksTheta - TMath::Pi() / 2); }
+    if(energy == "510") { return -0.00122787 + 0.0114095 * std::pow(theta, 2); }
 
-    if(energy == "511.5") { return -0.00102064 + 0.010116 * (ksTheta - TMath::Pi() / 2) * (ksTheta - TMath::Pi() / 2); }
+    if(energy == "510.5") { return -0.0012652 + 0.0128049 * std::pow(theta, 2); }
 
-    if(energy == "514") { return -0.0012627 + 0.0105834 * (ksTheta - TMath::Pi() / 2) * (ksTheta - TMath::Pi() / 2); }
+    if(energy == "511") { return -0.0010293 + 0.00869987 * std::pow(theta, 2); }
 
-    if(energy == "517") { return -0.00101428 + 0.00586478 * (ksTheta - TMath::Pi() / 2) * (ksTheta - TMath::Pi() / 2); }
+    if(energy == "511.5") { return -0.00102064 + 0.010116 * std::pow(theta, 2); }
 
-    if(energy == "520") { return -0.0011453 + 0.00921438 * (ksTheta - TMath::Pi() / 2) * (ksTheta - TMath::Pi() / 2); }
+    if(energy == "514") { return -0.0012627 + 0.0105834 * std::pow(theta, 2); }
 
-    if(energy == "525") { return -0.00149835 + 0.0104855 * (ksTheta - TMath::Pi() / 2) * (ksTheta - TMath::Pi() / 2); }
+    if(energy == "517") { return -0.00101428 + 0.00586478 * std::pow(theta, 2); }
 
-    if(energy == "530") { return -0.000983491 + 0.00858641 * (ksTheta - TMath::Pi() / 2) * (ksTheta - TMath::Pi() / 2); }
+    if(energy == "520") { return -0.0011453 + 0.00921438 * std::pow(theta, 2); }
+
+    if(energy == "525") { return -0.00149835 + 0.0104855 * std::pow(theta, 2); }
+
+    if(energy == "530") { return -0.000983491 + 0.00858641 * std::pow(theta, 2); }
 
     return 0;
 }
@@ -293,7 +299,7 @@ MassHandler::MassHandler(std::string fKsKl, std::string energyPoint, std::string
     hMPsi = std::make_unique<TH2D>(TH2D("MPsi", "M(Psi)", 200, 2, TMath::Pi(), 200, 480, 520));
     hM_CrAnglelnY = std::make_unique<TH2D>(TH2D("hM_CrAnglelnY", "M_CrAngle(lnY)", 30, -0.4, 0.4, 40000, 490, 515));
     hPsilnY = std::make_unique<TH2D>(TH2D("hPsilnY", "Psi(lnY)", 200, -0.4, 0.4, 10000, 2.4, 3.3));
-    hPsi = std::make_unique<TH1D>(TH1D("hPsi", "Psi distr", 1000, 0, 3.15));
+    hPsi = std::make_unique<TH1D>(TH1D("hPsi1", "Psi distr", 20000, -1, 6.3));
     hEnergySpectrum = std::make_unique<TH1D>(TH1D("hEnergySpectrum", "hEnergySpectrum", 6000, 480, 540));
     // After profile cut
     hEnergySpectrumCut = std::make_unique<TH1D>(TH1D("hEnergySpectrumCut", "hEnergySpectrumCut", 6000, 480, 540));
@@ -301,7 +307,7 @@ MassHandler::MassHandler(std::string fKsKl, std::string energyPoint, std::string
     hMassVsKsTheta = std::make_unique<TH2D>(TH2D("hMassVsKsTheta", "M vs KsTheta", 315, 0, 3.15, 600, 480, 520));
     hKsThetaVsLnY = std::make_unique<TH2D>(TH2D("hKsThetaVsLnY", "KsTheta vs lnY", 300, -0.6, 0.6, 315, 0, 3.15));
 
-    hThetaDiffRecGen = std::make_unique<TH2D>(TH2D("hThetaDiffRecGen", "hThetaDiffRecGen", 600, 0, 3, 600, -0.1, 0.1));
+    hThetaDiffRecGen = std::make_unique<TH2D>(TH2D("hThetaDiffRecGen", "hThetaDiffRecGen", 600, -3, 3, 600, -0.1, 0.1));
 
     thetaPos = new TProfile("thetaPos", "thetaPos", 50, 0, 3.14, -0.1, 0.1);
     thetaNeg = new TProfile("thetaNeg", "thetaNeg", 50, 0, 3.14, -0.1, 0.1);
@@ -461,7 +467,7 @@ void MassHandler::CalcSigmas(bool verbose)
     {
         vSigmaMatrixFit.push_back({});
         psiDistrs.push_back(std::vector<std::unique_ptr<TH1D>>());
-        for(int j = 0; j < 8; j++)
+        for(int j = 0; j < 12; j++)
         {
             std::string histName = "py_bin_lnY" + std::to_string(i) + "_kstheta" + std::to_string(j); 
             psiDistrs[i].push_back(std::make_unique<TH1D>(TH1D(histName.c_str(), histName.c_str(), 2000, -3.1415, 3.1415))); 
@@ -477,10 +483,12 @@ void MassHandler::CalcSigmas(bool verbose)
     {
         ksTr->GetEntry(i);
 
-        piPos.SetMagThetaPhi(1, piThetaPos - piPos_Theta_RecGenDiff_Spline->Eval(piThetaPos), piPhiPos);
-        piNeg.SetMagThetaPhi(1, piThetaNeg - piNeg_Theta_RecGenDiff_Spline->Eval(piThetaNeg), piPhiNeg);
+        piPos.SetMagThetaPhi(1, piThetaPos, piPhiPos);
+        piNeg.SetMagThetaPhi(1, piThetaNeg, piPhiNeg);
         ksdpsi = piPos.Angle(piNeg);
         // ksdpsi += dPsiCorrection(ksTheta, energyPoint);
+        auto theta = (ksTheta - TMath::Pi() / 2);
+        ksdpsi -= 8.91930e-04 -1.15960e-02 * std::pow(theta, 2) + 6.31244e-03 * std::pow(theta, 4);
 
         lnY = log(Y);
         massFullRec->SetParameters(emeas, (1 - Y*Y) / (1 + Y*Y));
@@ -491,12 +499,11 @@ void MassHandler::CalcSigmas(bool verbose)
             massFullRecWithEmeas > 490 && massFullRecWithEmeas < 505)
         {
             if(auto psiBinNum = lnY > -0.4 ? int(floor((lnY + 0.4 + 1e-12) / 0.05)) : -1; 
-                psiBinNum >= 0 && psiBinNum < psilnYprojYs.size() && 
-                fabs(ksTheta - TMath::Pi() / 2) < 0.5)
+                psiBinNum >= 0 && psiBinNum < psilnYprojYs.size())
             { psilnYprojYs[psiBinNum]->Fill(ksdpsi); }
             
             auto binY = lnY > -0.3? int(floor((lnY + 0.3) / 0.075)) : -1;
-            auto binKsTheta = ksTheta > -0.5? int(floor((ksTheta - 0.5) / 0.2675)) : -1;
+            auto binKsTheta = ksTheta > 0.57? int(floor((ksTheta - 0.57) / 0.25)) : -1;
             if(binY != -1 && binKsTheta != -1 &&
                binY < psiDistrs.size() && binKsTheta < psiDistrs.back().size())
             { psiDistrs[binY][binKsTheta]->Fill(ksdpsi - ksdpsi_gen); } 
@@ -528,7 +535,8 @@ void MassHandler::CalcSigmas(bool verbose)
         {
             if(psiDistrs[i][j]->GetEntries() < 150)
             { 
-                vSigmaMatrixFit[i].push_back(psiDistrs[i][j]->GetEntries() > 50 ? psiDistrs[i][j]->GetStdDev() : -1); 
+                // vSigmaMatrixFit[i].push_back(psiDistrs[i][j]->GetEntries() > 50 ? psiDistrs[i][j]->GetStdDev() : 0.0); 
+                vSigmaMatrixFit[i].push_back(psiDistrs[i][j]->GetStdDev()); 
                 continue;
             }
 
@@ -576,14 +584,18 @@ void MassHandler::FillHists(double fitRange, double deltaE, bool withFitSigma, b
     double massFullRecWithEmeas = 0;
     double lnY = 0;
 
-    TVector3 piPos(1, 1, 1);
-    TVector3 piNeg(1, 1, 1);
+    TVector3 piPos(1, 0, 0);
+    TVector3 piNeg(1, 0, 0);
 
+    hPsi->Reset();
     for(int i = 0; i < ksTr->GetEntries(); i++)
     {
         ksTr->GetEntry(i);
-        if(std::find(badRuns.begin(), badRuns.end(), runnum) == badRuns.end() && abs(Y - 1) > 1e-9 && nhitPos > 10 && nhitNeg > 10 
-            && fabs(ksTheta - TMath::Pi() / 2) < 0.5
+        if(std::find(badRuns.begin(), badRuns.end(), runnum) == badRuns.end() && abs(Y - 1) > 1e-9 && nhitPos > 10 && nhitNeg > 10 &&
+            1.1 < piThetaPos && piThetaPos < TMath::Pi() - 1.1 &&
+            1.1 < piThetaNeg && piThetaNeg < TMath::Pi() - 1.1 
+            // && fabs(ksTheta - TMath::Pi() / 2) < 0.5
+            // && fabs(ksTheta - TMath::Pi() / 2) < 1
             )
         {
             lnY = log(Y);
@@ -592,17 +604,20 @@ void MassHandler::FillHists(double fitRange, double deltaE, bool withFitSigma, b
             // { sigmaPsi = 0; }
 
             auto binY = lnY > -0.3? int(floor((lnY + 0.3) / 0.075)) : -1;
-            auto binKsTheta = ksTheta > -0.5? int(floor((ksTheta - 0.5) / 0.2675)) : -1;
+            auto binKsTheta = ksTheta > 0.57? int(floor((ksTheta - 0.57) / 0.25)) : -1;
             if(binY != -1 && binKsTheta != -1 &&
                binY < vSigmaMatrixFit.size() && binKsTheta < vSigmaMatrixFit.back().size())
             { sigmaPsi = vSigmaMatrixFit[binY][binKsTheta]; } 
 
 
 
-            piPos.SetMagThetaPhi(1, piThetaPos - 1 * piPos_Theta_RecGenDiff_Spline->Eval(piThetaPos), piPhiPos_gen);
-            piNeg.SetMagThetaPhi(1, piThetaNeg - 1 * piNeg_Theta_RecGenDiff_Spline->Eval(piThetaNeg), piPhiNeg_gen);
+            piPos.SetMagThetaPhi(1, piThetaPos, piPhiPos);
+            piNeg.SetMagThetaPhi(1, piThetaNeg, piPhiNeg);
             ksdpsi = piPos.Angle(piNeg);
-            ksdpsi += dPsiCorrection(ksTheta, energyPoint) + 7.73133e-05;
+            hPsi->Fill(ksdpsi);
+            auto theta = (ksTheta - TMath::Pi() / 2);
+            // ksdpsi -= 8.91930e-04 -1.15960e-02 * std::pow(theta, 2) + 6.31244e-03 * std::pow(theta, 4);
+
 
             massFullRec->SetParameters(emeas, (1 - Y*Y) / (1 + Y*Y));
             massFullRecWithEmeas = massFullRec->Eval(ksdpsi) -  sigmaPsi * sigmaPsi / 2 * massFullRec->Derivative2(ksdpsi);
@@ -618,7 +633,7 @@ void MassHandler::FillHists(double fitRange, double deltaE, bool withFitSigma, b
             hMlnY->Fill(lnY, massFullRecVal);
             if(massFullRecWithEmeas > 490 && massFullRecWithEmeas < 505)
             { 
-                hThetaDiffRecGen->Fill(ksTheta, ksdpsi - ksdpsi_gen);
+                hThetaDiffRecGen->Fill(ksTheta - TMath::Pi() / 2, ksdpsi - ksdpsi_gen);
                 // hThetaDiffRecGen->Fill(ksTheta, lnY);
                 hDeltaM->Fill(lnY, - sigmaPsi * sigmaPsi / 2 * massFullRec->Derivative2(ksdpsi));
                 hMlnYpfx->Fill(lnY, massFullRecVal); 
@@ -628,10 +643,10 @@ void MassHandler::FillHists(double fitRange, double deltaE, bool withFitSigma, b
                 hKsThetaVsLnY->Fill(lnY, ksTheta);
                 if(fabs(lnY) < fitRange + 1e-6)
                 { hEnergySpectrumCut->Fill(etrue); }
+                // hPsi->Fill(ksdpsi);
             }
 
             hMPsi->Fill(ksdpsi, massFullRecVal);
-            hPsi->Fill(ksdpsi);
             hEnergySpectrum->Fill(etrue);
         }
     }
