@@ -31,6 +31,8 @@
 #include <chrono>
 #include <ctime> 
 
+double deltaPsi(double phi1, double theta1, double phi2, double theta2) 
+{ return acos(sin(theta1) * sin(theta2) * cos(phi1 - phi2) + cos(theta1) * cos(theta2)); }
 
 double dPsiCorrection(double ksTheta, std::string energy)
 {
@@ -125,25 +127,26 @@ private:
     Float_t etrue;
     Float_t ksTheta;
     Float_t ksPhi;
+
+    Int_t nhitPos;
+    Int_t nhitNeg;
+
+    Int_t runnum; 
+
+    // Momentum ratio = P1/P2, where P1 is the momentum of pi+, P2 is the momentum of pi-.
+    Float_t Y;
+    Float_t ksdpsi;
     Float_t piThetaPos;
     Float_t piThetaNeg;
     Float_t piPhiPos;
     Float_t piPhiNeg;
 
+    Float_t Y_gen;
+    Float_t ksdpsi_gen;
     Float_t piThetaPos_gen;
     Float_t piThetaNeg_gen;
     Float_t piPhiPos_gen;
     Float_t piPhiNeg_gen;
-
-    Int_t runnum; 
-
-    Float_t ksdpsi;
-    Float_t ksdpsi_gen;
-
-    Int_t nhitPos;
-    Int_t nhitNeg;
-    // Momentum ratio = P1/P2, where P1 is the momentum of pi+, P2 is the momentum of pi-.
-    Float_t Y;
 
     // Sigma_psi(lnY, kstheta) from gaus fit.
     std::vector<std::vector<Float_t>> vSigmaMatrixFit;
@@ -162,6 +165,9 @@ private:
     std::unique_ptr<TProfile> hDeltaM;
     std::unique_ptr<TProfile> hMlnYpfx;
 
+    TProfile* hMlnYpfx_cowboy;
+    TProfile* hMlnYpfx_sailor;
+
     std::unique_ptr<TH1D> hEnergySpectrum;
     // After profile cut
     std::unique_ptr<TH1D> hEnergySpectrumCut;
@@ -171,16 +177,14 @@ private:
     std::unique_ptr<TGraphErrors> grPsiLnYFit;
 
     std::unique_ptr<TH2D> hThetaDiffRecGen;
+    std::unique_ptr<TH2D> hDiffRecGen_cowboy;
+    std::unique_ptr<TH2D> hDiffRecGen_sailor;
 
 
     std::optional<double> energyCorrected;
     std::optional<std::map<int, Float_t>> energyDiff;
 
-
-    TSpline3* piPos_Theta_RecGenDiff_Spline;
-    TSpline3* piNeg_Theta_RecGenDiff_Spline;
-    TProfile* thetaPos;
-    TProfile* thetaNeg;
+    TSpline3* ksdpsi_RecGenDiff_Spline;
 
 
     // Fills badRuns vector and returns number of good runs.
@@ -211,8 +215,17 @@ private:
     * 3 - Psi distribution, 4 - EnergySpectrum (for MC only), 5 - M_FullRec vs lnY;
     */
     void DrawGraphs(int drawOpt);
-    void CreateThetaSplines();
 
+    /*  mode == 0 -- create spline, 
+        mode == 1 -- create spline and save it to the file(spline_filename), 
+        mode == 2 -- read spline from the file(spline_filename).
+    */
+    void CreateSplines(std::string spline_filename = "", int mode = 0);
+
+    /* TO-DO!!!
+        Returns angle between pions momentums psi with applied correction from  ksdpsi_RecGenDiff_Spline.
+    */
+    //double GetCorrectedPsi(double phiPos, double thetaPos, double phiNeg, double thetaNeg);
 public:
 
     /*
@@ -238,15 +251,22 @@ public:
 
     std::vector<int> GetBadRunsList();
 
-
+    /*
+    *splineMode == 0 -- create spline, 
+    *           == 1 -- create spline and save it to the file(spline_filename), 
+    *           == 2 -- read spline from the file(spline_filename).
+    */
     MassHandler(std::string fKsKl, std::string energyPoint, std::string badRunsFileName = "", 
+                std::string splineFilename = "", int splineMode = 0,
                 std::optional<double> energyCorr = std::nullopt, 
                 std::optional<std::map<int, Float_t>> energyDiff = std::nullopt,
                 bool isVerbose = true);
     ~MassHandler();
 };
 
-MassHandler::MassHandler(std::string fKsKl, std::string energyPoint, std::string badRunsFileName, std::optional<double> energyCorr, std::optional<std::map<int, Float_t>> energyDiff, bool isVerbose)
+MassHandler::MassHandler(std::string fKsKl, std::string energyPoint, 
+                        std::string badRunsFileName, std::string splineFilename, int splineMode,
+                        std::optional<double> energyCorr, std::optional<std::map<int, Float_t>> energyDiff, bool isVerbose)
 {
     this->energyPoint = energyPoint;
     energyCorrected = energyCorr;
@@ -276,8 +296,7 @@ MassHandler::MassHandler(std::string fKsKl, std::string energyPoint, std::string
     ksTr->SetBranchAddress("demeas", &demeas);
     ksTr->SetBranchAddress("runnum", &runnum);
     ksTr->SetBranchAddress("ksdpsi", &ksdpsi);
-    ksTr->SetBranchAddress("ksdpsi_gen", &ksdpsi_gen);
-    ksTr->SetBranchAddress("Y_gen", &Y);
+    ksTr->SetBranchAddress("Y", &Y);
     ksTr->SetBranchAddress("nhitPos", &nhitPos);
     ksTr->SetBranchAddress("nhitNeg", &nhitNeg);
     ksTr->SetBranchAddress("kstheta", &ksTheta);
@@ -288,6 +307,8 @@ MassHandler::MassHandler(std::string fKsKl, std::string energyPoint, std::string
     ksTr->SetBranchAddress("piPhiPos", &piPhiPos);
     ksTr->SetBranchAddress("piPhiNeg", &piPhiNeg);
 
+    ksTr->SetBranchAddress("ksdpsi_gen", &ksdpsi_gen);
+    ksTr->SetBranchAddress("Y_gen", &Y_gen);
     ksTr->SetBranchAddress("piPhiPos_gen", &piPhiPos_gen);
     ksTr->SetBranchAddress("piPhiNeg_gen", &piPhiNeg_gen);
     ksTr->SetBranchAddress("piThetaPos_gen", &piThetaPos_gen);
@@ -304,13 +325,15 @@ MassHandler::MassHandler(std::string fKsKl, std::string energyPoint, std::string
     // After profile cut
     hEnergySpectrumCut = std::make_unique<TH1D>(TH1D("hEnergySpectrumCut", "hEnergySpectrumCut", 6000, 480, 540));
 
-    hMassVsKsTheta = std::make_unique<TH2D>(TH2D("hMassVsKsTheta", "M vs KsTheta", 315, 0, 3.15, 600, 480, 520));
+    hMassVsKsTheta = std::make_unique<TH2D>(TH2D("hMassVsKsTheta", "M vs KsTheta", 600, -1.57, 1.57, 40000, 480, 520));
     hKsThetaVsLnY = std::make_unique<TH2D>(TH2D("hKsThetaVsLnY", "KsTheta vs lnY", 300, -0.6, 0.6, 315, 0, 3.15));
 
-    hThetaDiffRecGen = std::make_unique<TH2D>(TH2D("hThetaDiffRecGen", "hThetaDiffRecGen", 600, -3, 3, 600, -0.1, 0.1));
+    hThetaDiffRecGen = std::make_unique<TH2D>(TH2D("hThetaDiffRecGen", "hThetaDiffRecGen", 1200, -6., 6., 20000, -1, 1));
+    hDiffRecGen_cowboy = std::make_unique<TH2D>(TH2D("hDiffRecGen_cowboy", "hDiffRecGen_cowboy", 1200, -6., 6., 20000, -1, 1));
+    hDiffRecGen_sailor = std::make_unique<TH2D>(TH2D("hDiffRecGen_sailor", "hDiffRecGen_sailor", 1200, -6., 6., 20000, -1, 1));
 
-    thetaPos = new TProfile("thetaPos", "thetaPos", 50, 0, 3.14, -0.1, 0.1);
-    thetaNeg = new TProfile("thetaNeg", "thetaNeg", 50, 0, 3.14, -0.1, 0.1);
+    hMlnYpfx_cowboy = new TProfile("hMlnYpfx_cowboy","Profile of M versus lnY, cowboy", 30, -1, 1, 490, 505);
+    hMlnYpfx_sailor = new TProfile("hMlnYpfx_sailor","Profile of M versus lnY, sailor", 30, -1, 1, 490, 505);
 
     hMlnY->GetYaxis()->SetTitle("M_{K^{0}_{S}}, #frac{MeV}{c^{2}}");
     hMlnY->GetXaxis()->SetTitle("ln(Y)");
@@ -322,8 +345,8 @@ MassHandler::MassHandler(std::string fKsKl, std::string energyPoint, std::string
 
     ReadBadRuns(badRunsFileName);
     BadRunSearch();
-
-    CreateThetaSplines();
+    
+    CreateSplines(splineFilename, splineMode);
     CalcSigmas(isVerbose);
 }
 
@@ -420,37 +443,44 @@ Float_t MassHandler::GetCorrectedEnergy(int rnum, double deltaE)
     return energy + deltaE;
 }
 
-void MassHandler::CreateThetaSplines()
+void MassHandler::CreateSplines(std::string spline_filename, int mode)
 {
-    for(int i = 0; i < ksTr->GetEntries(); i++)
+    if(mode != 0 && mode != 1 && mode != 2)
+    { std::cout << "Wrong mode in CreateSplines!!!" << std::endl; }
+
+    if(mode == 0 || mode == 1)
     {
-        ksTr->GetEntry(i);
-        if(std::find(badRuns.begin(), badRuns.end(), runnum) == badRuns.end() && abs(Y - 1) > 1e-9 && 
-            nhitPos > 10 && nhitNeg > 10 && fabs(ksTheta - TMath::Pi() / 2) < 0.5)
+        std::vector<Double_t> psi_delta = {};
+        std::vector<Double_t> ksTheta_bins = {};
+        TProfile psi("psi", "deltaPsi", 50, 0, 3.14, -0.1, 0.1);
+
+        for(int i = 0; i < ksTr->GetEntries(); i++)
         {
-            thetaPos->Fill(piThetaPos, piThetaPos - piThetaPos_gen);
-            thetaNeg->Fill(piThetaNeg, piThetaNeg - piThetaNeg_gen);
+            ksTr->GetEntry(i);
+            if(std::find(badRuns.begin(), badRuns.end(), runnum) == badRuns.end() && abs(Y - 1) > 1e-9 && 
+                nhitPos > 10 && nhitNeg > 10 && fabs(ksTheta - TMath::Pi() / 2) < 0.5)
+            { psi.Fill(ksTheta, ksdpsi - ksdpsi_gen); }
+        }
+
+        for(int i = 0; i < psi.GetNbinsX(); i++)
+        {
+            ksTheta_bins.push_back(psi.GetBinCenter(i));
+            psi_delta.push_back(psi.GetBinContent(i));
+        }
+
+        ksdpsi_RecGenDiff_Spline = new TSpline3("ksdpsi_RecGenDiff_Spline", ksTheta_bins.data(), psi_delta.data(), psi_delta.size());
+        ksdpsi_RecGenDiff_Spline->SetName("ksdpsi_RecGenDiff_Spline");
+        if(mode == 1)
+        { 
+            auto splineFile = TFile::Open(spline_filename.c_str(), "recreate");
+            ksdpsi_RecGenDiff_Spline->Write();
+            splineFile->Close();
+            delete splineFile;
         }
     }
-
-    std::vector<Double_t> thetaPos_delta = {};
-    std::vector<Double_t> thetaPos_deltaErr = {};
-    std::vector<Double_t> thetaNeg_delta = {};
-    std::vector<Double_t> thetaNeg_deltaErr = {};
-
-    std::vector<Double_t> ksTheta_bins = {};
-    for(int i = 0; i < thetaPos->GetNbinsX(); i++)
-    {
-        ksTheta_bins.push_back(thetaPos->GetBinCenter(i));
-
-        thetaPos_delta.push_back(thetaPos->GetBinContent(i));
-        thetaPos_deltaErr.push_back(thetaPos->GetBinError(i));
-
-        thetaNeg_delta.push_back(thetaNeg->GetBinContent(i));
-        thetaNeg_deltaErr.push_back(thetaNeg->GetBinError(i));
-    }
-    piPos_Theta_RecGenDiff_Spline = new TSpline3("piPos_Theta_RecGenDiff_spline", ksTheta_bins.data(), thetaPos_delta.data(), thetaPos_delta.size());
-    piNeg_Theta_RecGenDiff_Spline = new TSpline3("piNeg_Theta_RecGenDiff_spline", ksTheta_bins.data(), thetaNeg_delta.data(), thetaNeg_delta.size());
+    
+    if(mode == 2)
+    { ksdpsi_RecGenDiff_Spline = TFile::Open(spline_filename.c_str())->Get<TSpline3>("ksdpsi_RecGenDiff_Spline"); }
 }
 
 void MassHandler::CalcSigmas(bool verbose)
@@ -486,9 +516,7 @@ void MassHandler::CalcSigmas(bool verbose)
         piPos.SetMagThetaPhi(1, piThetaPos, piPhiPos);
         piNeg.SetMagThetaPhi(1, piThetaNeg, piPhiNeg);
         ksdpsi = piPos.Angle(piNeg);
-        // ksdpsi += dPsiCorrection(ksTheta, energyPoint);
-        auto theta = (ksTheta - TMath::Pi() / 2);
-        ksdpsi -= 8.91930e-04 -1.15960e-02 * std::pow(theta, 2) + 6.31244e-03 * std::pow(theta, 4);
+        ksdpsi -= ksdpsi_RecGenDiff_Spline->Eval(ksTheta);
 
         lnY = log(Y);
         massFullRec->SetParameters(emeas, (1 - Y*Y) / (1 + Y*Y));
@@ -506,7 +534,7 @@ void MassHandler::CalcSigmas(bool verbose)
             auto binKsTheta = ksTheta > 0.57? int(floor((ksTheta - 0.57) / 0.25)) : -1;
             if(binY != -1 && binKsTheta != -1 &&
                binY < psiDistrs.size() && binKsTheta < psiDistrs.back().size())
-            { psiDistrs[binY][binKsTheta]->Fill(ksdpsi - ksdpsi_gen); } 
+            { psiDistrs[binY][binKsTheta]->Fill(ksdpsi); } 
         }
     }
 
@@ -586,6 +614,7 @@ void MassHandler::FillHists(double fitRange, double deltaE, bool withFitSigma, b
 
     TVector3 piPos(1, 0, 0);
     TVector3 piNeg(1, 0, 0);
+    TVector3 field(0., 0., 1.);
 
     hPsi->Reset();
     for(int i = 0; i < ksTr->GetEntries(); i++)
@@ -594,14 +623,11 @@ void MassHandler::FillHists(double fitRange, double deltaE, bool withFitSigma, b
         if(std::find(badRuns.begin(), badRuns.end(), runnum) == badRuns.end() && abs(Y - 1) > 1e-9 && nhitPos > 10 && nhitNeg > 10 &&
             1.1 < piThetaPos && piThetaPos < TMath::Pi() - 1.1 &&
             1.1 < piThetaNeg && piThetaNeg < TMath::Pi() - 1.1 
-            // && fabs(ksTheta - TMath::Pi() / 2) < 0.5
-            // && fabs(ksTheta - TMath::Pi() / 2) < 1
+            // && fabs(ksTheta - TMath::Pi() / 2) > 0.3
+            && fabs(ksTheta - TMath::Pi() / 2) < 0.7
             )
         {
             lnY = log(Y);
-            // if(auto psiBinNum = lnY > -0.4 ? int(floor((lnY + 0.4 + 1e-12) / 0.05)) : -1; psiBinNum >= 0 && psiBinNum < vSigmaFit.size())
-            // { sigmaPsi = withFitSigma? vSigmaFit[psiBinNum] : sigmas[psiBinNum]; }
-            // { sigmaPsi = 0; }
 
             auto binY = lnY > -0.3? int(floor((lnY + 0.3) / 0.075)) : -1;
             auto binKsTheta = ksTheta > 0.57? int(floor((ksTheta - 0.57) / 0.25)) : -1;
@@ -609,48 +635,56 @@ void MassHandler::FillHists(double fitRange, double deltaE, bool withFitSigma, b
                binY < vSigmaMatrixFit.size() && binKsTheta < vSigmaMatrixFit.back().size())
             { sigmaPsi = vSigmaMatrixFit[binY][binKsTheta]; } 
 
-
-
             piPos.SetMagThetaPhi(1, piThetaPos, piPhiPos);
             piNeg.SetMagThetaPhi(1, piThetaNeg, piPhiNeg);
             ksdpsi = piPos.Angle(piNeg);
-            hPsi->Fill(ksdpsi);
-            auto theta = (ksTheta - TMath::Pi() / 2);
-            // ksdpsi -= 8.91930e-04 -1.15960e-02 * std::pow(theta, 2) + 6.31244e-03 * std::pow(theta, 4);
+            auto theta = ksTheta - TMath::Pi() / 2;
 
+            auto dpsi = ksdpsi - (ksdpsi_RecGenDiff_Spline->Eval(ksTheta) + 3e-4);
 
             massFullRec->SetParameters(emeas, (1 - Y*Y) / (1 + Y*Y));
-            massFullRecWithEmeas = massFullRec->Eval(ksdpsi) -  sigmaPsi * sigmaPsi / 2 * massFullRec->Derivative2(ksdpsi);
+            massFullRecWithEmeas = massFullRec->Eval(dpsi) - sigmaPsi * sigmaPsi / 2 * massFullRec->Derivative2(dpsi);
 
             emeas = useEtrue? etrue : GetCorrectedEnergy(runnum, deltaE);
 
             massFullRec->SetParameters(emeas, (1 - Y*Y) / (1 + Y*Y));
             massCrAngle->SetParameter(0, emeas);
 
-            auto massFullRecVal = massFullRec->Eval(ksdpsi) - sigmaPsi * sigmaPsi / 2 * massFullRec->Derivative2(ksdpsi);
-            hM_CrAnglelnY->Fill(lnY, massCrAngle->Eval(ksdpsi) - sigmaPsi * sigmaPsi / 2 * massCrAngle->Derivative2(ksdpsi));
+            auto massFullRecVal = massFullRec->Eval(dpsi) - sigmaPsi * sigmaPsi / 2 * massFullRec->Derivative2(dpsi);
+            hM_CrAnglelnY->Fill(lnY, massCrAngle->Eval(dpsi) - sigmaPsi * sigmaPsi / 2 * massCrAngle->Derivative2(dpsi));
 
             hMlnY->Fill(lnY, massFullRecVal);
             if(massFullRecWithEmeas > 490 && massFullRecWithEmeas < 505)
             { 
-                hThetaDiffRecGen->Fill(ksTheta - TMath::Pi() / 2, ksdpsi - ksdpsi_gen);
-                // hThetaDiffRecGen->Fill(ksTheta, lnY);
-                hDeltaM->Fill(lnY, - sigmaPsi * sigmaPsi / 2 * massFullRec->Derivative2(ksdpsi));
-                hMlnYpfx->Fill(lnY, massFullRecVal); 
-                hPsilnY->Fill(lnY, ksdpsi); 
+                hDeltaM->Fill(lnY, - sigmaPsi * sigmaPsi / 2 * massFullRec->Derivative2(dpsi));
+                hMlnYpfx->Fill(lnY, massFullRecVal);
 
-                hMassVsKsTheta->Fill(ksTheta, massFullRecVal);
+                if(piPos.Cross(field).XYvector().DeltaPhi(piNeg.XYvector()) < TMath::Pi() / 2)
+                { 
+                    hDiffRecGen_cowboy->Fill(ksdpsi, ksdpsi - ksdpsi_gen);
+                    hMlnYpfx_cowboy->Fill(lnY, massFullRecVal); 
+                }
+
+                if(piPos.Cross(field).XYvector().DeltaPhi(piNeg.XYvector()) > TMath::Pi() / 2)
+                { 
+                    hDiffRecGen_sailor->Fill(ksdpsi, ksdpsi - ksdpsi_gen);
+                    hMlnYpfx_sailor->Fill(lnY, massFullRecVal); 
+                }
+
+                hPsilnY->Fill(lnY, dpsi); 
+
+                if(fabs(lnY) < 0.27)
+                { hMassVsKsTheta->Fill(ksTheta - TMath::Pi() / 2, massFullRecVal); }
                 hKsThetaVsLnY->Fill(lnY, ksTheta);
                 if(fabs(lnY) < fitRange + 1e-6)
                 { hEnergySpectrumCut->Fill(etrue); }
-                // hPsi->Fill(ksdpsi);
+                hPsi->Fill(dpsi);
             }
 
             hMPsi->Fill(ksdpsi, massFullRecVal);
             hEnergySpectrum->Fill(etrue);
         }
     }
-
     // grMassLnYFit = FitSlices(hMlnY, 10);
     // grPsiLnYFit = FitSlices(hPsilnY, 16, std::make_pair(2, 1), 8);
 
@@ -674,18 +708,21 @@ void MassHandler::DrawGraphs(int drawOpt)
         hMlnYpfx->GetXaxis()->SetRangeUser(-0.5, 0.5);
         hMlnYpfx->DrawClone();
         massLine->DrawClone("same");
-        // piPos_Theta_RecGenDiff_Spline->DrawClone();
-        // thetaPos->DrawClone("same");
-        hThetaDiffRecGen->DrawClone("col");
-        // hMassVsKsTheta->DrawClone("col");
-        // hKsThetaVsLnY->DrawClone("col");
+        hMassVsKsTheta->DrawClone();
+
+        hMlnYpfx_cowboy->GetXaxis()->SetRangeUser(-0.5, 0.5);
+        hMlnYpfx_sailor->GetXaxis()->SetRangeUser(-0.5, 0.5);
+        hMlnYpfx_cowboy->DrawClone();
+        hMlnYpfx_sailor->DrawClone();
+        hDiffRecGen_cowboy->DrawClone("same");
+        hDiffRecGen_sailor->DrawClone("same");
         break;
     case 1:
         hM_CrAnglelnY->DrawClone();
         break;
     case 2:
-        // hPsilnY->ProfileX()->DrawClone();
-        grPsiLnYFit->DrawClone();
+        hPsilnY->ProfileX()->DrawClone();
+        // grPsiLnYFit->DrawClone();
         break;
     case 3:
         hPsi->DrawClone();
@@ -828,20 +865,26 @@ int Scan(const std::map<std::string, std::pair<double, double>> &meanEnergies, d
         else 
         { lnYrange = 0.27; }
 
+        std::string splineFilename = "C:/work/Science/BINP/Kaon Mass Measure/ksdpsi_splines/spline_" + energyPoint + ".root";
+        int splineMode;
+
+
         if(isExp)
         {
             fadRunsFile = "txt/BadRuns.txt";
             filename = "tr_ph/expKsKl/exp" + energyPoint + ".root";
             energyFilename = "C://work/Science/BINP/Kaon Mass Measure/tr_ph/expKpKm/kchExp" + energyPoint + ".root";
+            splineMode = 2;
         }
         else
         {
+            splineMode = 0;
             fadRunsFile = "";
             energyFilename = "C://work/Science/BINP/Kaon Mass Measure/tr_ph/expKpKm/kchExp" + energyPoint + ".root";
             filename = "tr_ph/MC/KsKl_Smeared/Field/MC" + energyPoint + "_Field.root";
         }
 
-        auto massHandler = new MassHandler(filename, energyPoint, fadRunsFile, meanEnergy.first);
+        auto massHandler = new MassHandler(filename, energyPoint, fadRunsFile, splineFilename, splineMode, meanEnergy.first);
 
         std::cout << "\n\n" << "++++++++++++++++++++++++++++++++++++++++++++++++++++" << 
                     "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << 
@@ -898,16 +941,20 @@ int KsMassMeas()
     std::string energyPoint = "509";
     double deltaE = 0.0;
     std::string fileName = "tr_ph/expKsKl/exp" + energyPoint + ".root";
-    fileName = "tr_ph/MC/KsKl_Smeared/MC" + energyPoint + ".root";
+    // fileName = "tr_ph/MC/KsKl_Smeared/MC" + energyPoint + ".root";
     // fileName = "tr_ph/MC/KsKl_Smeared/Field/MC" + energyPoint + "_Field.root";
 
     std::string fadRunsFile = "txt/BadRuns.txt";
+    std::string splineFilename = "C:/work/Science/BINP/Kaon Mass Measure/ksdpsi_splines/spline_" + energyPoint + ".root";
+    // TO-DO!!! Create enum witm splineMode.
+    int splineMode = 2;
+
 
     // Scan(meanEnergies, deltaE, false, true);
     // Scan(meanEnergiesSpectrum, deltaE, false, false);
     
-    auto massHandler = new MassHandler(fileName, energyPoint, fadRunsFile, meanEnergies[energyPoint].first);
-    auto mass = massHandler->GetMass(0.27, true, 0., true, 0, 0, true).first;
+    auto massHandler = new MassHandler(fileName, energyPoint, fadRunsFile, splineFilename, splineMode, meanEnergies[energyPoint].first);
+    auto mass = massHandler->GetMass(0.27, false, 0., true, 0, 0, true).first;
     std::cout << "M_NCRC_smeared = " << mass << "\n\n" << std::endl ;
     delete massHandler;
 
