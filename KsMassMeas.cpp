@@ -168,6 +168,7 @@ private:
     TProfile* hMlnYpfx_cowboy;
     TProfile* hMlnYpfx_sailor;
 
+    std::unique_ptr<TH1D> hPsiCor;
     std::unique_ptr<TH1D> hEnergySpectrum;
     // After profile cut
     std::unique_ptr<TH1D> hEnergySpectrumCut;
@@ -176,7 +177,7 @@ private:
     std::unique_ptr<TGraphErrors> grMassLnYFit;
     std::unique_ptr<TGraphErrors> grPsiLnYFit;
 
-    std::unique_ptr<TH2D> hThetaDiffRecGen;
+    std::unique_ptr<TH2D> hDiffRecGen;
     std::unique_ptr<TH2D> hDiffRecGen_cowboy;
     std::unique_ptr<TH2D> hDiffRecGen_sailor;
 
@@ -185,6 +186,8 @@ private:
     std::optional<std::map<int, Float_t>> energyDiff;
 
     TSpline3* ksdpsi_RecGenDiff_Spline;
+
+    TGraphErrors* thetaSigmas;
 
 
     // Fills badRuns vector and returns number of good runs.
@@ -324,16 +327,19 @@ MassHandler::MassHandler(std::string fKsKl, std::string energyPoint,
     hEnergySpectrum = std::make_unique<TH1D>(TH1D("hEnergySpectrum", "hEnergySpectrum", 6000, 480, 540));
     // After profile cut
     hEnergySpectrumCut = std::make_unique<TH1D>(TH1D("hEnergySpectrumCut", "hEnergySpectrumCut", 6000, 480, 540));
+    hPsiCor = std::make_unique<TH1D>(TH1D("hPsiCor", "hPsiCor", 400, -0.002, 0.002));
 
     hMassVsKsTheta = std::make_unique<TH2D>(TH2D("hMassVsKsTheta", "M vs KsTheta", 600, -1.57, 1.57, 40000, 480, 520));
     hKsThetaVsLnY = std::make_unique<TH2D>(TH2D("hKsThetaVsLnY", "KsTheta vs lnY", 300, -0.6, 0.6, 315, 0, 3.15));
 
-    hThetaDiffRecGen = std::make_unique<TH2D>(TH2D("hThetaDiffRecGen", "hThetaDiffRecGen", 1200, -6., 6., 20000, -1, 1));
-    hDiffRecGen_cowboy = std::make_unique<TH2D>(TH2D("hDiffRecGen_cowboy", "hDiffRecGen_cowboy", 1200, -6., 6., 20000, -1, 1));
-    hDiffRecGen_sailor = std::make_unique<TH2D>(TH2D("hDiffRecGen_sailor", "hDiffRecGen_sailor", 1200, -6., 6., 20000, -1, 1));
+    hDiffRecGen = std::make_unique<TH2D>(TH2D("hDiffRecGen", "hDiffRecGen", 600, -3., 3., 20000, -1, 1));
+    hDiffRecGen_cowboy = std::make_unique<TH2D>(TH2D("hDiffRecGen_cowboy", "hDiffRecGen_cowboy", 600, -3., 3., 20000, -1, 1));
+    hDiffRecGen_sailor = std::make_unique<TH2D>(TH2D("hDiffRecGen_sailor", "hDiffRecGen_sailor", 600, -3., 3., 20000, -1, 1));
 
     hMlnYpfx_cowboy = new TProfile("hMlnYpfx_cowboy","Profile of M versus lnY, cowboy", 30, -1, 1, 490, 505);
     hMlnYpfx_sailor = new TProfile("hMlnYpfx_sailor","Profile of M versus lnY, sailor", 30, -1, 1, 490, 505);
+
+    thetaSigmas = new TGraphErrors();
 
     hMlnY->GetYaxis()->SetTitle("M_{K^{0}_{S}}, #frac{MeV}{c^{2}}");
     hMlnY->GetXaxis()->SetTitle("ln(Y)");
@@ -491,6 +497,12 @@ void MassHandler::CalcSigmas(bool verbose)
         psilnYprojYs.push_back(std::make_unique<TH1D>(TH1D(("py" + std::to_string(i + 1)).c_str(), ("Y" + std::to_string(i + 1)).c_str(), 10000, 2.4, 3.3)));
     }
 
+    std::vector<std::unique_ptr<TH1D>> piThetaProjs;
+    for(int i = 0; i < 10; i++)
+    { 
+        piThetaProjs.push_back(std::make_unique<TH1D>(TH1D(("piThetaProjs" + std::to_string(i + 1)).c_str(), ("piThetaProjs" + std::to_string(i + 1)).c_str(), 1000, -0.1, 0.1)));
+    }
+
     // Distributions of ksdpsi (angle between pions' momentums) in different bins (lnY, kstheta).
     std::vector<std::vector<std::unique_ptr<TH1D>>> psiDistrs;
     for(int i = 0; i < 8; i++)
@@ -508,6 +520,10 @@ void MassHandler::CalcSigmas(bool verbose)
     double lnY = 0;
     TVector3 piPos(1, 1, 1);
     TVector3 piNeg(1, 1, 1);
+    double sigmaPhi = 7.12804e-03;
+    auto sigmaTheta = [](double ksTheta) { return 0.018 - 0.0226347 * (ksTheta - TMath::Pi()/2) * (ksTheta - TMath::Pi()/2); };
+    TF1 psiFunc("psiFunc", "acos(sin(x) * sin([0]) * cos([1] - [2]) + cos(x) * cos([0]))");
+    TF1 psiFuncPhi("psiFuncPhi", "acos(sin([1]) * sin([2]) * cos(x - [0]) + cos([1]) * cos([2]))");
 
     for(int i = 0; i < ksTr->GetEntries(); i++)
     {
@@ -515,13 +531,25 @@ void MassHandler::CalcSigmas(bool verbose)
 
         piPos.SetMagThetaPhi(1, piThetaPos, piPhiPos);
         piNeg.SetMagThetaPhi(1, piThetaNeg, piPhiNeg);
-        ksdpsi = piPos.Angle(piNeg);
-        ksdpsi -= ksdpsi_RecGenDiff_Spline->Eval(ksTheta);
+
+        psiFunc.SetParameters(piThetaNeg, piPhiPos, piPhiNeg);
+        psiFuncPhi.SetParameters(piPhiNeg, piThetaPos, piThetaNeg);
+        auto psiCor = sigmaTheta(ksTheta) * sigmaTheta(ksTheta) / 2 * psiFunc.Derivative2(piThetaPos) + sigmaPhi * sigmaPhi / 2 * psiFuncPhi.Derivative2(piPhiPos);
+
+        psiFunc.SetParameters(piThetaPos, piPhiNeg, piPhiPos);
+        psiFuncPhi.SetParameters(piPhiPos, piThetaPos, piThetaNeg);
+        psiCor += sigmaTheta(ksTheta) * sigmaTheta(ksTheta) / 2 * psiFunc.Derivative2(piThetaNeg) + sigmaPhi * sigmaPhi / 2 * psiFuncPhi.Derivative2(piPhiNeg);
+        ksdpsi = piPos.Angle(piNeg) + psiCor;
+
+        // ksdpsi = piPos.Angle(piNeg);
+        // ksdpsi -= ksdpsi_RecGenDiff_Spline->Eval(ksTheta);
 
         lnY = log(Y);
         massFullRec->SetParameters(emeas, (1 - Y*Y) / (1 + Y*Y));
         massFullRecWithEmeas = massFullRec->Eval(ksdpsi);
-        if(std::find(badRuns.begin(), badRuns.end(), runnum) == badRuns.end() && abs(Y - 1) > 1e-9 && nhitPos > 10 && nhitNeg > 10 &&
+        if(std::find(badRuns.begin(), badRuns.end(), runnum) == badRuns.end() && 
+            abs(Y - 1) > 1e-9 && 
+            nhitPos > 10 && nhitNeg > 10 &&
             1.1 < piThetaPos && piThetaPos < TMath::Pi() - 1.1 &&
             1.1 < piThetaNeg && piThetaNeg < TMath::Pi() - 1.1 &&
             massFullRecWithEmeas > 490 && massFullRecWithEmeas < 505)
@@ -529,6 +557,12 @@ void MassHandler::CalcSigmas(bool verbose)
             if(auto psiBinNum = lnY > -0.4 ? int(floor((lnY + 0.4 + 1e-12) / 0.05)) : -1; 
                 psiBinNum >= 0 && psiBinNum < psilnYprojYs.size())
             { psilnYprojYs[psiBinNum]->Fill(ksdpsi); }
+
+            if(auto bin = int(floor((piThetaPos - 1.1) / 0.094)); bin < 10 && fabs(lnY) < 0.27)
+            { piThetaProjs[bin]->Fill(piThetaPos - piThetaPos_gen); }
+
+            if(auto bin = int(floor((piThetaNeg - 1.1) / 0.094)); bin < 10 && fabs(lnY) < 0.27)
+            { piThetaProjs[bin]->Fill(piThetaNeg - piThetaNeg_gen); }
             
             auto binY = lnY > -0.3? int(floor((lnY + 0.3) / 0.075)) : -1;
             auto binKsTheta = ksTheta > 0.57? int(floor((ksTheta - 0.57) / 0.25)) : -1;
@@ -555,6 +589,12 @@ void MassHandler::CalcSigmas(bool verbose)
         r = psilnYprojYs[i]->Fit("gaus", "SEQ", "", r->Parameter(1) - 2 * r->Parameter(2), r->Parameter(1) + 2 * r->Parameter(2));
         vSigmaFit.push_back(r->Parameter(2));
         vSigmaRMS.push_back(psilnYprojYs[i]->GetStdDev());
+    }
+
+    for(int i = 0; i < piThetaProjs.size(); i++)
+    {
+        thetaSigmas->AddPoint(1.1 + (i + i + 1) / 2 * 0.094 - TMath::Pi() / 2, piThetaProjs[i]->GetRMS());
+        thetaSigmas->SetPointError(i, 0, piThetaProjs[i]->GetRMSError());
     }
 
     for(int i = 0; i < 8; i++)
@@ -608,6 +648,12 @@ void MassHandler::FillHists(double fitRange, double deltaE, bool withFitSigma, b
 {
     auto sigmas = std::vector<double>({0.0303571, 0.0244383, 0.0230856, 0.0203081, 0.0182954, 0.0188669, 0.0167881, 0.0151023, 0.0154767, 0.0172125, 0.0169003, 0.0184711, 0.0220203, 0.0231788, 0.0256208, 0.0287016});
     double sigmaPsi = 0;
+    double sigmaPhi = 7.12804e-03;
+    auto sigmaTheta = [=](double piTheta) 
+    { return  thetaSigmas->Eval(piTheta - TMath::Pi()/2); };
+    // { return  1.65880e-02 - 1.66948e-02 * (piTheta - TMath::Pi()/2) * (piTheta - TMath::Pi()/2); };
+    // { return 0.018 -  0.0226347 * (piTheta - TMath::Pi()/2) * (piTheta - TMath::Pi()/2); };
+
     double energy = 0;
     double massFullRecWithEmeas = 0;
     double lnY = 0;
@@ -616,6 +662,13 @@ void MassHandler::FillHists(double fitRange, double deltaE, bool withFitSigma, b
     TVector3 piNeg(1, 0, 0);
     TVector3 field(0., 0., 1.);
 
+    auto psi_thetaDerivative = [](double phi1, double theta1, double phi2, double theta2){
+        return -1 / sqrt(1 - std::pow(cos(deltaPsi(phi1, theta1, phi2, theta2)), 2.)) * (cos(phi1 - phi2) * cos(theta1) * sin(theta2) - sin(theta1) * cos(theta2));
+    };
+    
+    TF1 psiFunc("psiFunc", "acos(sin(x) * sin([0]) * cos([1] - [2]) + cos(x) * cos([0]))");
+    TF1 psiFuncPhi("psiFuncPhi", "acos(sin([1]) * sin([2]) * cos(x - [0]) + cos([1]) * cos([2]))");
+    
     hPsi->Reset();
     for(int i = 0; i < ksTr->GetEntries(); i++)
     {
@@ -623,8 +676,10 @@ void MassHandler::FillHists(double fitRange, double deltaE, bool withFitSigma, b
         if(std::find(badRuns.begin(), badRuns.end(), runnum) == badRuns.end() && abs(Y - 1) > 1e-9 && nhitPos > 10 && nhitNeg > 10 &&
             1.1 < piThetaPos && piThetaPos < TMath::Pi() - 1.1 &&
             1.1 < piThetaNeg && piThetaNeg < TMath::Pi() - 1.1 
+            // && fabs(piThetaPos - TMath::Pi() / 2) < 0.1
+            // && fabs(piThetaNeg - TMath::Pi() / 2) < 0.1
             // && fabs(ksTheta - TMath::Pi() / 2) > 0.3
-            && fabs(ksTheta - TMath::Pi() / 2) < 0.7
+            && fabs(ksTheta - TMath::Pi() / 2) < 0.5
             )
         {
             lnY = log(Y);
@@ -637,13 +692,23 @@ void MassHandler::FillHists(double fitRange, double deltaE, bool withFitSigma, b
 
             piPos.SetMagThetaPhi(1, piThetaPos, piPhiPos);
             piNeg.SetMagThetaPhi(1, piThetaNeg, piPhiNeg);
-            ksdpsi = piPos.Angle(piNeg);
-            auto theta = ksTheta - TMath::Pi() / 2;
 
-            auto dpsi = ksdpsi - (ksdpsi_RecGenDiff_Spline->Eval(ksTheta) + 3e-4);
+            psiFunc.SetParameters(piThetaNeg, piPhiPos, piPhiNeg);
+            psiFuncPhi.SetParameters(piPhiNeg, piThetaPos, piThetaNeg);
+            auto psiCor = sigmaTheta(piThetaPos) * sigmaTheta(piThetaPos) / 2 * psiFunc.Derivative2(piThetaPos) + sigmaPhi * sigmaPhi / 2 * psiFuncPhi.Derivative2(piPhiPos);
+
+            psiFunc.SetParameters(piThetaPos, piPhiNeg, piPhiPos);
+            psiFuncPhi.SetParameters(piPhiPos, piThetaPos, piThetaNeg);
+            psiCor += sigmaTheta(piThetaNeg) * sigmaTheta(piThetaNeg) / 2 * psiFunc.Derivative2(piThetaNeg) + sigmaPhi * sigmaPhi / 2 * psiFuncPhi.Derivative2(piPhiNeg);
+            
+            hPsiCor->Fill(psiCor);
+            ksdpsi = piPos.Angle(piNeg) + psiCor;
+
+            // auto dpsi = ksdpsi - (ksdpsi_RecGenDiff_Spline->Eval(ksTheta) + 3e-4);
+            auto dpsi = ksdpsi;
 
             massFullRec->SetParameters(emeas, (1 - Y*Y) / (1 + Y*Y));
-            massFullRecWithEmeas = massFullRec->Eval(dpsi) - sigmaPsi * sigmaPsi / 2 * massFullRec->Derivative2(dpsi);
+            massFullRecWithEmeas = massFullRec->Eval(dpsi) - sigmaPsi * sigmaPsi / 2 * massFullRec->Derivative2(dpsi);    
 
             emeas = useEtrue? etrue : GetCorrectedEnergy(runnum, deltaE);
 
@@ -654,20 +719,22 @@ void MassHandler::FillHists(double fitRange, double deltaE, bool withFitSigma, b
             hM_CrAnglelnY->Fill(lnY, massCrAngle->Eval(dpsi) - sigmaPsi * sigmaPsi / 2 * massCrAngle->Derivative2(dpsi));
 
             hMlnY->Fill(lnY, massFullRecVal);
-            if(massFullRecWithEmeas > 490 && massFullRecWithEmeas < 505)
+            if(massFullRecWithEmeas > 490 && massFullRecWithEmeas < 505 && fabs(lnY) < 0.27)
             { 
                 hDeltaM->Fill(lnY, - sigmaPsi * sigmaPsi / 2 * massFullRec->Derivative2(dpsi));
                 hMlnYpfx->Fill(lnY, massFullRecVal);
+                hDiffRecGen->Fill(ksTheta - TMath::Pi() / 2, ksdpsi - ksdpsi_gen);
+                // hDiffRecGen->Fill(lnY, ksdpsi - ksdpsi_gen);
 
                 if(piPos.Cross(field).XYvector().DeltaPhi(piNeg.XYvector()) < TMath::Pi() / 2)
                 { 
-                    hDiffRecGen_cowboy->Fill(ksdpsi, ksdpsi - ksdpsi_gen);
+                    hDiffRecGen_cowboy->Fill(ksTheta - TMath::Pi() / 2, ksdpsi - ksdpsi_gen);
                     hMlnYpfx_cowboy->Fill(lnY, massFullRecVal); 
                 }
 
                 if(piPos.Cross(field).XYvector().DeltaPhi(piNeg.XYvector()) > TMath::Pi() / 2)
                 { 
-                    hDiffRecGen_sailor->Fill(ksdpsi, ksdpsi - ksdpsi_gen);
+                    hDiffRecGen_sailor->Fill(ksTheta - TMath::Pi() / 2, ksdpsi - ksdpsi_gen);
                     hMlnYpfx_sailor->Fill(lnY, massFullRecVal); 
                 }
 
@@ -716,6 +783,13 @@ void MassHandler::DrawGraphs(int drawOpt)
         hMlnYpfx_sailor->DrawClone();
         hDiffRecGen_cowboy->DrawClone("same");
         hDiffRecGen_sailor->DrawClone("same");
+
+        hPsiCor->DrawClone();
+        hDiffRecGen->GetXaxis()->SetRangeUser(-0.6, 0.6);
+        hDiffRecGen->ProfileX("pfx")->DrawClone();
+        // hDiffRecGen->ProjectionY("py")->DrawClone();
+        // hDiffRecGen->DrawClone("col");
+        // thetaSigmas->DrawClone("AP");
         break;
     case 1:
         hM_CrAnglelnY->DrawClone();
@@ -941,7 +1015,7 @@ int KsMassMeas()
     std::string energyPoint = "509";
     double deltaE = 0.0;
     std::string fileName = "tr_ph/expKsKl/exp" + energyPoint + ".root";
-    // fileName = "tr_ph/MC/KsKl_Smeared/MC" + energyPoint + ".root";
+    fileName = "tr_ph/MC/KsKl_Smeared/MC" + energyPoint + ".root";
     // fileName = "tr_ph/MC/KsKl_Smeared/Field/MC" + energyPoint + "_Field.root";
 
     std::string fadRunsFile = "txt/BadRuns.txt";
@@ -954,7 +1028,7 @@ int KsMassMeas()
     // Scan(meanEnergiesSpectrum, deltaE, false, false);
     
     auto massHandler = new MassHandler(fileName, energyPoint, fadRunsFile, splineFilename, splineMode, meanEnergies[energyPoint].first);
-    auto mass = massHandler->GetMass(0.27, false, 0., true, 0, 0, true).first;
+    auto mass = massHandler->GetMass(0.27, true, 0., true, 0, 0, true).first;
     std::cout << "M_NCRC_smeared = " << mass << "\n\n" << std::endl ;
     delete massHandler;
 
