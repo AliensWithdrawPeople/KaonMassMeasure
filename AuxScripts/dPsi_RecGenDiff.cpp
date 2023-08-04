@@ -34,7 +34,7 @@ int dPsi_RecGenDiff()
     formula.SetParameters(0., 0., 0.0001);
     formula.FixParameter(1, 0.);
 
-    auto file1  = new TFile("dPsi_RecDiff_out.root", "recreate");
+    auto file1  = new TFile("dPsi_RecGenDiff_out.root", "recreate");
     int counter = 0;
     for (const auto &point : points)
     {
@@ -89,6 +89,11 @@ int dPsi_RecGenDiff()
         counter++;
     }
     
+    for(int i = 0; i < constY.size(); i++)
+    {
+        std::cout << "if(energy == \"" << points[i] << "\") { return " << constY[i] << "; }\n" << std::endl; 
+    }
+
     TGraphErrors grDiff(energy.size(), energy.data(), diff.data(), energyErr.data(), diffErr.data());
     TGraphErrors grConstPar(energy.size(), energy.data(), constPar.data(), energyErr.data(), constParErr.data());
 
