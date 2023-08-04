@@ -390,6 +390,11 @@ void kskl2bGen::Loop(std::string histFileName)
                     piMomNeg_gen = piNeg.Mag();
 
 
+                    // piPhiPos = kspiphi[ksCand[0]][posTrackNumber];
+                    // piPhiNeg = kspiphi[ksCand[0]][negTrackNumber];
+                    // piPhiPos_gen = piPos.Phi();
+                    // piPhiNeg_gen = piNeg.Phi();
+
                     tNew->Fill(); 
                     hTrackCollCutted->Fill(fabs(tphi[0] - tphi[1]) - TMath::Pi(), tth[0] + tth[1] - TMath::Pi());
                     hE->Fill(sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2()));

@@ -14,6 +14,9 @@
 #include <TFitResult.h>
 #include <TFitResultPtr.h>
 
+#include <set>
+#include <fstream>
+
 void PhiToKn::Loop(std::string output_fname, double energy0)
 {
 //   In a ROOT session, you can do:
@@ -103,8 +106,9 @@ void PhiToKn::Loop(std::string output_fname, double energy0)
 
 
     bool flag = false; 
-    int prevRunnum = 0;
-    
+    int prevRunnum = -1;
+    std::set<int> runNums = {};
+
     double lumi = 0;
     double lumi_err = 0;
 
@@ -143,6 +147,7 @@ void PhiToKn::Loop(std::string output_fname, double energy0)
         std::vector<int> KsCand = {};
         std::vector<double> KlCandMasses = {};
         std::vector<double> KsCandMasses = {};
+
         for(int k = 0; k < nks; k++)
         {
             if( isGoodTrack(ksvind[k][0]) && isGoodTrack(ksvind[k][1]) &&
@@ -233,6 +238,7 @@ void PhiToKn::Loop(std::string output_fname, double energy0)
                     lumi += lumoff;
                     lumi_err += lumofferr * lumofferr;
                     prevRunnum = runnum;
+                    runNums.insert(runnum);
                 }
                 
                 mass = KsCandMasses[candNum];
@@ -271,8 +277,15 @@ void PhiToKn::Loop(std::string output_fname, double energy0)
         std::cout << "res1 chi2 /ndf = " << res1->Chi2() / res1->Ndf() << std::endl;
         std::cout << "res1 chi2 /ndf = " << res2->Chi2() / res2->Ndf() << std::endl;
     }
+
     std::cout << "luminosity = " << lumi << std::endl;
     std::cout << "luminosity_err = " << sqrt(lumi_err) << std::endl;
     std::cout << "entries = " << n_events << std::endl;
+    std::cout << "runCounter = " << runNums.size() << std::endl;
+
+    std::ofstream output_Runs("C:/work/Science/BINP/Kaon Mass Measure/tr_ph/PhiXSection/Runs/runs_" + std::to_string(energy0) + ".txt");
+    for(auto& run : runNums)
+    { output_Runs << run << std::endl; }
+
     top->Write();
 }

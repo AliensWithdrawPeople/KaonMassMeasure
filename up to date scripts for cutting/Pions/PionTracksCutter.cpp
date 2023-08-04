@@ -50,6 +50,12 @@ void PionTracksCutter::Loop()
     double thetaPos_MC, thetaNeg_MC;
     double phiPos_MC, phiNeg_MC;
 
+    TVector3 piPos_Rec(1, 1, 1);
+    TVector3 piPos_Gen(1, 1, 1);
+
+    TVector3 piNeg_Rec(1, 1, 1);
+    TVector3 piNeg_Gen(1, 1, 1);
+
     Long64_t nbytes = 0, nb = 0;
     for (Long64_t jentry=0; jentry<nentries;jentry++) 
     {
@@ -89,11 +95,13 @@ void PionTracksCutter::Loop()
                     {
                         if(simtype[j] == 211 && simorig[j] == 0)
                         {
+
+                            piPos_Rec.SetMagThetaPhi(1, tth[goodTr[posTrackNumber]], tphi[goodTr[posTrackNumber]]);
+                            piPos_Gen.SetMagThetaPhi(1, simtheta[j], simphi[j]);
                             thetaPos_MC = simtheta[j];
                             phiPos_MC = simphi[j];
-
                             hThetaDiff_PosTr->Fill(tth[goodTr[posTrackNumber]], tth[goodTr[posTrackNumber]] - simtheta[j]);
-                            hPhiDiff_PosTr->Fill(tphi[goodTr[posTrackNumber]], tphi[goodTr[posTrackNumber]] - simphi[j]);
+                            hPhiDiff_PosTr->Fill(tphi[goodTr[posTrackNumber]], piPos_Rec.XYvector().DeltaPhi(piPos_Gen.XYvector()));
 
                             hThetaDiff_PosTrV->Fill(tthv[goodTr[posTrackNumber]], tthv[goodTr[posTrackNumber]] - simtheta[j]);
                             hPhiDiff_PosTrV->Fill(tphiv[goodTr[posTrackNumber]], tphiv[goodTr[posTrackNumber]] - simphi[j]);
@@ -101,11 +109,14 @@ void PionTracksCutter::Loop()
 
                         if(simtype[j] == -211 && simorig[j] == 0)
                         {
+                            piNeg_Rec.SetMagThetaPhi(1, tth[goodTr[negTrackNumber]], tphi[goodTr[negTrackNumber]]);
+                            piNeg_Gen.SetMagThetaPhi(1, simtheta[j], simphi[j]);
+
                             thetaNeg_MC = simtheta[j];
                             phiNeg_MC = simphi[j];
 
                             hThetaDiff_NegTr->Fill(tth[goodTr[negTrackNumber]], tth[goodTr[negTrackNumber]] - simtheta[j]);
-                            hPhiDiff_NegTr->Fill(tphi[goodTr[negTrackNumber]], tphi[goodTr[negTrackNumber]] - simphi[j]);
+                            hPhiDiff_NegTr->Fill(tphi[goodTr[negTrackNumber]], piNeg_Rec.XYvector().DeltaPhi(piNeg_Gen.XYvector()));
 
                             hThetaDiff_NegTrV->Fill(tthv[goodTr[negTrackNumber]], tthv[goodTr[negTrackNumber]] - simtheta[j]);
                             hPhiDiff_NegTrV->Fill(tphiv[goodTr[negTrackNumber]], tphiv[goodTr[negTrackNumber]] - simphi[j]);
