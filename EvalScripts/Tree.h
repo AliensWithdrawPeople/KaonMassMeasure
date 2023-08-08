@@ -2,57 +2,78 @@
 #define Tree_h
 
 #include <memory>
+#include <optional>
+#include <stdexcept>
+
 #include "TFile.h"
 #include "TTree.h"
 
+
 struct track {
-    double theta;
-    double phi;
+    float theta;
+    float phi;
     int nhit;
 };
 
 class Tree 
 {
+public:
+    /** @brief iterator for the Tree class. Mostly usable in range-based for loop. 
+    */
+    class iterator {
+    private:
+        int entryNum;
+        Tree* tr;
+
+    public:
+        iterator(int entryNum, Tree* tr): entryNum(entryNum), tr(tr) 
+        {}
+
+        iterator operator++() 
+        { 
+            ++entryNum; 
+            tr->GetEntry(entryNum);
+            return *this; 
+        }
+
+        bool operator!=(const iterator & other) const 
+        { return entryNum != other.entryNum;  }
+
+        const int& operator*() const 
+        { return entryNum; }
+    };
+
 private:
     std::unique_ptr<TTree> tree;
-    int Nentries;
-    int entry;
     
 public:
+    const int Nentries;
+
     int runnum; 
-    double emeas; 
+    float emeas; 
     // Kaon energy calculated as invariant mass of pi+pi-.
-    double etrue;
+    float etrue;
 
     struct {
         // Momentum ratio = P1/P2, where P1 is the momentum of pi+, P2 is the momentum of pi-.
-        double Y;
-        double ksdpsi;
+        float Y;
+        float ksdpsi;
         track piPos;
         track piNeg;
         track ks;
     } reco, gen;
 
-    Tree(std::string filename);
+    Tree(std::string filename, bool isExp = false);
+
+    iterator begin() { return iterator(0, this); }
+    iterator end() { return iterator(Nentries, this); }
 
     int GetEntry(int entryNum)
     { return tree->GetEntry(entryNum); }
-
-    /* 
-    * Gets next entry if the tree has one and returns true. 
-    * Otherwise returns false and set next entry to entryNum = 0.
-    */
-    bool NextEntry();
-    bool SetEntry(int entryNum);
-    int GetCurrentEntry(); 
 };
 
-Tree::Tree(std::string filename) 
+Tree::Tree(std::string filename, bool isExp): tree(std::unique_ptr<TTree>(TFile::Open(filename.c_str())->Get<TTree>("ksTree"))), Nentries(tree->GetEntries())
 {
-    tree = std::make_unique<TTree>(TFile::Open(filename.c_str())->Get<TTree>("ksTree"));
-    Nentries = tree->GetEntries();
-    entry = -1;
-
     tree->SetBranchAddress("emeas", &emeas);
     tree->SetBranchAddress("etrue", &etrue);
     tree->SetBranchAddress("runnum", &runnum);
@@ -72,44 +93,21 @@ Tree::Tree(std::string filename)
     tree->SetBranchAddress("piThetaNeg", &reco.piNeg.theta);
 
     // gen
-    tree->SetBranchAddress("Y_gen", &gen.Y);
-    tree->SetBranchAddress("ksdpsi_gen", &gen.ksdpsi);
-    tree->SetBranchAddress("kstheta_gen", &gen.ks.theta);
-    tree->SetBranchAddress("ksphi_gen", &gen.ks.phi);
-
-    tree->SetBranchAddress("nhitPos_gen", &gen.piPos.nhit);
-    tree->SetBranchAddress("piPhiPos_gen", &gen.piPos.phi);
-    tree->SetBranchAddress("piThetaPos_gen", &gen.piPos.theta);
-
-    tree->SetBranchAddress("nhitNeg_gen", &gen.piNeg.nhit);
-    tree->SetBranchAddress("piPhiNeg_gen", &gen.piNeg.phi);
-    tree->SetBranchAddress("piThetaNeg_gen", &gen.piNeg.theta);
-}
-
-bool Tree::NextEntry()
-{ 
-    entry++;
-    if(entry < Nentries)
-    {   
-        GetEntry(entry);
-        return true;
-    }
-
-    entry = -1; 
-    return false; 
-}
-
-bool Tree::SetEntry(int entryNum)
-{
-    if(entryNum < Nentries)
+    if(!isExp)
     {
-        entry = entryNum;
-        return true;
-    }
-    return false;
-}
+        tree->SetBranchAddress("Y_gen", &gen.Y);
+        tree->SetBranchAddress("ksdpsi_gen", &gen.ksdpsi);
+        tree->SetBranchAddress("kstheta_gen", &gen.ks.theta);
+        tree->SetBranchAddress("ksphi_gen", &gen.ks.phi);
 
-int Tree::GetCurrentEntry() 
-{ return entry; } 
+        tree->SetBranchAddress("nhitPos", &gen.piPos.nhit);
+        tree->SetBranchAddress("piPhiPos_gen", &gen.piPos.phi);
+        tree->SetBranchAddress("piThetaPos_gen", &gen.piPos.theta);
+
+        tree->SetBranchAddress("nhitNeg", &gen.piNeg.nhit);
+        tree->SetBranchAddress("piPhiNeg_gen", &gen.piNeg.phi);
+        tree->SetBranchAddress("piThetaNeg_gen", &gen.piNeg.theta);
+    }
+}
 
 #endif

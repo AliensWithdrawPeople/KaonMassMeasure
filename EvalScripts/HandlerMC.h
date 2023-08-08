@@ -5,6 +5,7 @@
 #include "Tree.h"
 #include "HistContainer.h"
 #include "Spline.h"
+#include "CalcSigmas.h"
 
 #include <memory>
 
@@ -21,16 +22,16 @@ private:
     HistContainer container;
 
     // Sigma_psi(lnY, kstheta) from gaus fit.
-    std::vector<std::vector<Float_t>> vSigmaMatrixFit;
-
-    std::vector<Float_t> vSigmaFit;
-    std::vector<Float_t> vSigmaRMS;
+    std::vector<std::vector<double>> vSigmaMatrixFit;
     
     /**
     * Correction to psi_reco (dpsi = psi_reco - psi_gen).
     * psi_corrected = psi_reco - deltaPsi_RecGenDiff->Eval(kstheta_reco).
     */
     Spline deltaPsi_RecGenDiff;
+
+    // Resolution of theta as a function of ksTheta.
+    Spline thetaSigma;
 
     /**
     * Creates deltaPsi_RecGenDiff -- correction to psi_reco (dpsi = psi_reco - psi_gen).
@@ -50,7 +51,8 @@ public:
 HandlerMC::HandlerMC(std::string fKsKl, std::string energyPoint, std::optional<double> meanEnergy, 
                     bool saveSplines, bool isVerbose = true): energyPoint{energyPoint}, energy{meanEnergy}, verbose{isVerbose} 
 {
-    tree = std::make_unique<Tree>(new Tree(fKsKl));
+    tree = std::unique_ptr<Tree>(new Tree(fKsKl));
+
     container.Add("hMlnY", new TH2D("hMlnY", "M(lnY)", 300, -0.3, 0.3, 600, 480, 520));
     container.Add("hDeltaM", new TProfile("hDeltaM", "DeltaM(lnY)", 40, -1, 1, -1, 1));
     container.Add("hMlnYpfx", new TProfile("hMlnYpfx","Profile of M versus lnY", 30, -1, 1, 490, 505));
@@ -83,15 +85,33 @@ HandlerMC::HandlerMC(std::string fKsKl, std::string energyPoint, std::optional<d
 
     deltaPsi_RecGenDiff = CreateDeltaPsiSpline(tree, 
                         "C:/work/Science/BINP/Kaon Mass Measure/ksdpsi_splines/spline_" + energyPoint + ".root", saveSplines);
+
+    //TODO: Create and fill vector of good entries.
+    vSigmaMatrixFit = Sigmas::GetSigmaMatrix(tree, goodEntries);
+    auto [ksThetaBinCenters, deltaTheta, deltaThetaError] = Sigmas::GetThetaSigmas(tree, goodEntries);
+    thetaSigma = Spline(ksThetaBinCenters, deltaTheta);
 }
 
-//TODO: Implement CreateDeltaPsiSpline
 Spline HandlerMC::CreateDeltaPsiSpline(std::unique_ptr<Tree> const &tree, std::string spline_filename, bool save)
 {
+    std::vector<Double_t> psi_delta = {};
+    std::vector<Double_t> ksTheta_bins = {};
+    TProfile psi("psi", "deltaPsi", 50, 0, 3.14, -0.1, 0.1);
 
+    for(const auto &entry : *tree)
+    {
+        if(abs(tree->reco.Y - 1) > 1e-9 && tree->reco.piPos.nhit > 10 && tree->reco.piNeg.nhit > 10 && fabs(tree->reco.ks.theta - TMath::Pi() / 2) < 0.5)
+        { psi.Fill(tree->reco.ks.theta, tree->reco.ksdpsi - tree->gen.ksdpsi); }
+    }
+
+
+    for(int i = 0; i < psi.GetNbinsX(); i++)
+    {
+        ksTheta_bins.push_back(psi.GetBinCenter(i));
+        psi_delta.push_back(psi.GetBinContent(i));
+    }
+
+    return Spline(ksTheta_bins, psi_delta);
 }
-
-//TODO: Implement CalcSigmas (in CalcSigmas.h) and use it here.
-
 
 #endif
