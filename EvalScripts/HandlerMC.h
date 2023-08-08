@@ -1,4 +1,4 @@
-#ifndef HandlerMC_
+#ifndef HandlerMC_h
 #define HandlerMC_h
 
 #include "Evaluator.h"
@@ -6,6 +6,7 @@
 #include "HistContainer.h"
 #include "Spline.h"
 #include "CalcSigmas.h"
+#include "MassFunc.h"
 
 #include <memory>
 
@@ -21,15 +22,18 @@ private:
     std::unique_ptr<Tree> tree;
     HistContainer container;
 
+    double fitRange;
+    bool useTrueEnergy = false;
+
+    // Numbers of entries that satisfy all selection cuts.
+    std::vector<int> goodEntries = {};
     // Sigma_psi(lnY, kstheta) from gaus fit.
     std::vector<std::vector<double>> vSigmaMatrixFit;
-    
     /**
     * Correction to psi_reco (dpsi = psi_reco - psi_gen).
     * psi_corrected = psi_reco - deltaPsi_RecGenDiff->Eval(kstheta_reco).
     */
     Spline deltaPsi_RecGenDiff;
-
     // Resolution of theta as a function of ksTheta.
     Spline thetaSigma;
 
@@ -38,18 +42,25 @@ private:
     * @param tree reference to Tree object storing data about events,
     * @param spline_filename name of .root file where spline will be saved.
     */
-    static Spline CreateDeltaPsiSpline(std::unique_ptr<Tree> const &tree, std::string spline_filename = "", bool save = false);
+    Spline CreateDeltaPsiSpline(std::string spline_filename = "", bool save = false);
+
+    void FillHists(bool useTrueEnergy);
 
 public:
-    HandlerMC(std::string fKsKl, std::string energyPoint, std::optional<double> meanEnergy, 
+    HandlerMC(std::string fKsKl, std::string energyPoint, double fitRange, std::optional<double> meanEnergy, 
                 bool saveSplines = false, bool isVerbose = true);
     HandlerMC(std::string fKsKl, std::string energyPoint, bool saveSplines = false, bool isVerbose = true): 
-            HandlerMC(fKsKl, energyPoint, std::nullopt, saveSplines, isVerbose) {}
+            HandlerMC(fKsKl, energyPoint, 0.27, std::nullopt, saveSplines, isVerbose) {}
 
+    HandlerMC(std::string fKsKl, std::string energyPoint, double fitRange, bool saveSplines = false, bool isVerbose = true): 
+            HandlerMC(fKsKl, energyPoint, fitRange, std::nullopt, saveSplines, isVerbose) {}
+
+    void UseTrueEnergy(bool yes) 
+    { useTrueEnergy = yes; }
 };
 
-HandlerMC::HandlerMC(std::string fKsKl, std::string energyPoint, std::optional<double> meanEnergy, 
-                    bool saveSplines, bool isVerbose = true): energyPoint{energyPoint}, energy{meanEnergy}, verbose{isVerbose} 
+HandlerMC::HandlerMC(std::string fKsKl, std::string energyPoint, double fitRange, std::optional<double> meanEnergy, 
+                    bool saveSplines, bool isVerbose = true): energyPoint{energyPoint}, fitRange{fitRange}, energy{meanEnergy}, verbose{isVerbose} 
 {
     tree = std::unique_ptr<Tree>(new Tree(fKsKl));
 
@@ -83,27 +94,40 @@ HandlerMC::HandlerMC(std::string fKsKl, std::string energyPoint, std::optional<d
     container.Get("hM_CrAnglelnY").value()->GetXaxis()->SetTitle("lnY");
     container.Get("hM_CrAnglelnY").value()->GetYaxis()->SetTitle("M_{K^{0}_{S}}, #frac{MeV}{c^{2}}");
 
-    deltaPsi_RecGenDiff = CreateDeltaPsiSpline(tree, 
-                        "C:/work/Science/BINP/Kaon Mass Measure/ksdpsi_splines/spline_" + energyPoint + ".root", saveSplines);
+    for(const auto &entry : *tree)
+    {
+        if(abs(tree->reco.Y - 1) > 5e-7 && fabs(tree->reco.ks.theta - TMath::Pi() / 2) < 0.5 &&
+            tree->reco.piPos.nhit > 10 && tree->reco.piNeg.nhit > 10 && 
+            1.1 < tree->reco.piPos.theta && tree->reco.piPos.theta < TMath::Pi() - 1.1 &&
+            1.1 < tree->reco.piNeg.theta && tree->reco.piNeg.theta < TMath::Pi() - 1.1
+        )
+        {
+            auto massFullRecWithEmeas = FullRecMassFunc::Eval(tree->reco.ksdpsi, tree->emeas, tree->reco.Y);    
+            if(massFullRecWithEmeas > 490 && massFullRecWithEmeas < 505 && abs(log(tree->reco.Y)) < 0.27)
+            { goodEntries.push_back(entry); }
+        }
+    }
 
-    //TODO: Create and fill vector of good entries.
     vSigmaMatrixFit = Sigmas::GetSigmaMatrix(tree, goodEntries);
     auto [ksThetaBinCenters, deltaTheta, deltaThetaError] = Sigmas::GetThetaSigmas(tree, goodEntries);
     thetaSigma = Spline(ksThetaBinCenters, deltaTheta);
+
+    std::string spline_filename = "C:/work/Science/BINP/Kaon Mass Measure/ksdpsi_splines/spline_" + energyPoint + ".root";
+    deltaPsi_RecGenDiff = CreateDeltaPsiSpline(spline_filename, saveSplines);
 }
 
-Spline HandlerMC::CreateDeltaPsiSpline(std::unique_ptr<Tree> const &tree, std::string spline_filename, bool save)
+Spline HandlerMC::CreateDeltaPsiSpline(std::string spline_filename, bool save)
 {
     std::vector<Double_t> psi_delta = {};
     std::vector<Double_t> ksTheta_bins = {};
     TProfile psi("psi", "deltaPsi", 50, 0, 3.14, -0.1, 0.1);
 
-    for(const auto &entry : *tree)
+    for(const auto &entry : goodEntries)
     {
+        tree->GetEntry(entry);
         if(abs(tree->reco.Y - 1) > 1e-9 && tree->reco.piPos.nhit > 10 && tree->reco.piNeg.nhit > 10 && fabs(tree->reco.ks.theta - TMath::Pi() / 2) < 0.5)
         { psi.Fill(tree->reco.ks.theta, tree->reco.ksdpsi - tree->gen.ksdpsi); }
     }
-
 
     for(int i = 0; i < psi.GetNbinsX(); i++)
     {
@@ -114,4 +138,13 @@ Spline HandlerMC::CreateDeltaPsiSpline(std::unique_ptr<Tree> const &tree, std::s
     return Spline(ksTheta_bins, psi_delta);
 }
 
+// TODO: Implement FillHists!
+void HandlerMC::FillHists(bool useTrueEnergy)
+{
+    for(const auto &entry : goodEntries)
+    {
+        tree->GetEntry(entry);
+        
+    }
+}
 #endif
