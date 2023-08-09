@@ -5,6 +5,7 @@
 
 #include <memory>
 #include <tuple>
+#include <iomanip>
 
 #include "TMath.h"
 #include "TH1D.h"
@@ -13,22 +14,20 @@
 #include "TFitResultPtr.h"
 
 namespace Sigmas {
-    /**
-     * @brief Calc \sigma^{(M_K)}_{\psi} [lnY][ksTheta].
-     * @param tree -- pointer to a tree with data;
-     * @param goodEntries -- numbers of entries that satisfy all selection cuts.
-     * @returns std::vector<std::vector<double>> vSigmaFitMatrix with shape (8, 12).
-    */
+    /// @brief Calc sigma^{(M_K)}_{psi} [lnY][ksTheta].
+    /// @param tree -- pointer to a tree with data;
+    /// @param goodEntries -- numbers of entries that satisfy all selection cuts.
+    /// @returns std::vector<std::vector<double>> vSigmaFitMatrix with shape (8, 12).
     std::pair<int, int> GetSigmaMatrix_bin(double lnY, double ksTheta)
     {
         auto binY = lnY > -0.3? int(floor((lnY + 0.3) / 0.075)) : -1;
         auto binKsTheta = ksTheta > 0.57? int(floor((ksTheta - 0.57) / 0.25)) : -1;
         binY = binY < 8? binY : -1;
-        binKsTheta = binKsTheta < 12? binKsTheta : -1;
+        binKsTheta = binKsTheta < 8? binKsTheta : -1;
         return {binY, binKsTheta};
     }
 
-    std::vector<std::vector<double>> GetSigmaMatrix(std::unique_ptr<Tree> const &tree, const std::vector<int> &goodEntries)
+    std::vector<std::vector<double>> GetSigmaMatrix(std::unique_ptr<Tree> const &tree, const std::vector<int> &goodEntries, bool isVerbose)
     {
         // Distributions of ksdpsi (angle between pions' momentums) in different bins (lnY, kstheta).
         std::vector<std::vector<std::unique_ptr<TH1D>>> psiDistrs;
@@ -37,7 +36,7 @@ namespace Sigmas {
         {
             vSigmaMatrixFit.push_back({});
             psiDistrs.push_back(std::vector<std::unique_ptr<TH1D>>());
-            for(int j = 0; j < 12; j++)
+            for(int j = 0; j < 8; j++)
             {
                 std::string histName = "py_bin_lnY" + std::to_string(i) + "_kstheta" + std::to_string(j); 
                 psiDistrs[i].push_back(std::make_unique<TH1D>(TH1D(histName.c_str(), histName.c_str(), 2000, -3.1415, 3.1415))); 
@@ -45,7 +44,7 @@ namespace Sigmas {
         }
 
         for(const auto &entry : goodEntries)
-        {
+        {   
             tree->GetEntry(entry);
             auto [binY, binKsTheta] = GetSigmaMatrix_bin(log(tree->reco.Y), tree->reco.ks.theta);
             if(binY != -1 && binKsTheta != -1)
@@ -55,7 +54,7 @@ namespace Sigmas {
         TFitResultPtr r;
         for(int i = 0; i < 8; i++)
         {
-            for(int j = 0; j < 12; j++)
+            for(int j = 0; j < 8; j++)
             {
                 if(psiDistrs[i][j]->GetEntries() < 150)
                 { 
@@ -74,6 +73,18 @@ namespace Sigmas {
             }
         }
 
+        if(isVerbose)
+        {
+            auto default_precision = std::cout.precision();
+            std::cout << "vSigmaMatrixFit:" << std::endl;
+            for(int i = 0; i < 8; i++)
+            {
+                for(int j = 0; j < 8; j++)
+                { std::cout << std::left << std::setprecision(4) << std::setw(8) << vSigmaMatrixFit[i][j] << " "; }
+                std::cout << std::endl;
+            }
+            std::cout << std::setprecision(default_precision) << std::endl;
+        }
         return vSigmaMatrixFit;
     }
 
@@ -84,12 +95,10 @@ namespace Sigmas {
         return bin > -1 && bin < 10? bin : -1;
     }
 
-    /**
-     * @brief Calc \sigma^{(\psi)}_{\theta} and its error for different ksTheta.
-     * @param tree -- pointer to a tree with data;
-     * @param goodEntries -- numbers of entries that satisfy all selection cuts.
-     * @returns tuple<ksTheta bin centers, sigmas, errors of sigma>.
-    */
+    /// @brief Calc sigma^{(psi)}_{theta} and its error for different ksTheta.
+    /// @param tree -- pointer to a tree with data;
+    /// @param goodEntries -- numbers of entries that satisfy all selection cuts.
+    /// @returns tuple<ksTheta bin centers, sigmas, errors of sigma>.
     std::tuple<std::vector<double>, std::vector<double>, std::vector<double>> GetThetaSigmas(std::unique_ptr<Tree> const &tree, const std::vector<int> &goodEntries)
     {
         // Theta distributions for different ksTheta.
@@ -120,6 +129,13 @@ namespace Sigmas {
         }
 
         return {binCenters, sigmas, sigmaErrors};
+    }
+
+    /// @brief Calc sigma^{(psi)}_{phi}.
+    /// @return sigmaPhi.
+    double GetPhiSigma()
+    {
+        return 7.12804e-03;
     }
 }
 

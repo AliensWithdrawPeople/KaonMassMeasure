@@ -4,13 +4,14 @@
 #include "Tree.h"
 
 #include <string>
+#include <utility>
 
 
 class Evaluator
 {
 public:
-    virtual double Eval() = 0;
-    virtual void Draw(std::string key) = 0;
+    virtual std::pair<double, double> Eval() = 0;
+    virtual void Draw(std::string name) = 0;
 };
 
 #endif

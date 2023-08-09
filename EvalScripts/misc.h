@@ -17,13 +17,23 @@ namespace misc {
         return triangle;
     }
 
+    // Derivative with Richardson extrapolation.
     double derivative(std::function<double(double)> func, double x, double dx, int n) 
     {
         std::vector<int> binomial = pascalsTriangle(n);
-        float result = 0.0;
-        for (int i = 0; i <= n; i++) 
-        { result += pow(-1, i) * binomial[i] * func(x + (n / 2 - i) * dx); }
-        return result / pow(dx, n);
+        auto deriv = [&binomial, &func, &x, &n](double dx) {
+            double result = 0.0;
+            for (int i = 0; i <= n; i++) 
+            { result += pow(-1, i) * binomial[i] * func(x + (n / 2. - i) * dx); }
+            return result / pow(dx, n);
+        };
+        
+        return (4 * deriv(dx / 2) - deriv(dx)) / 3;
+    }
+
+    double derivative2(std::function<double(double)> func, double x, double dx, int n) 
+    {
+        return (func(x + dx) - 2 * func(x) + func(x - dx)) / dx / dx;
     }
 }
 

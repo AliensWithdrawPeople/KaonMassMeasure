@@ -5,6 +5,7 @@
 #include <map>
 #include <iostream>
 #include <optional>
+#include <stdexcept>
 
 #include "TFile.h"
 #include "TObject.h"
@@ -12,17 +13,20 @@
 #include "TH1.h"
 #include "TH1D.h"
 #include "TProfile.h"
-#include "TGraphErrors.h" 
+
 
 class HistContainer
 {
+private:
     std::map<std::string, TH1*> container{};
+
 public:
     ~HistContainer();
 
+
     bool Add(std::string name, TH1* obj);
     bool Erase(std::string name);
-    std::optional<TH1*> Get(std::string name);
+    TH1* operator[](std::string name);
     bool Save(std::string filename);
 };
 
@@ -34,9 +38,10 @@ HistContainer::~HistContainer()
 
 bool HistContainer::Add(std::string name, TH1* obj)
 {
-    if(container.find(name) != container.end())
-    { std::cout << "Warning: Object with such name (" << name << ") already exists. The obj was not added." << std::endl; }
     auto [it, isInserted] = container.try_emplace(name, obj);
+    if(!isInserted)
+    { std::cout << "Warning: Object with such name (" << name << ") already exists. The obj was not added." << std::endl; }
+    
     return isInserted;
 }
 
@@ -46,14 +51,12 @@ bool HistContainer::Erase(std::string name)
     return removedElements == 1? true : false;
 }
 
-std::optional<TH1*> HistContainer::Get(std::string name)
+TH1* HistContainer::operator[](std::string name)
 {
-    if(container.find(name) == container.end())
-    { 
-        std::cout << "Warning: There is no object with name " << name << ". " << std::endl; 
-        return std::nullopt;
-    }
-    return container[name];
+    try
+    { return container.at(name); }
+    catch(const std::out_of_range& e)
+    { throw std::out_of_range("Error in HistContainer operator[]: There is no object with name " + name + "."); }
 }
 
 bool HistContainer::Save(std::string filename)
@@ -63,6 +66,8 @@ bool HistContainer::Save(std::string filename)
     { val->Write(name.c_str()); }
     file->Close();
     delete file;
+
+    return true;
 }
 
 #endif
