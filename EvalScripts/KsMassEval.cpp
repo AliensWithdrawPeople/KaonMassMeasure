@@ -2,7 +2,8 @@
 #include <ctime> 
 #include <iostream> 
 
-#include "HandlerMC.h"
+// #include "HandlerMC.h"
+#include "HandlerExp.h"
 
 
 int KsMassEval()
@@ -32,15 +33,25 @@ int KsMassEval()
     }
 
     std::string energyPoint = "509";
-    std::string fileName = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/MC/KsKl_Smeared/MC" + energyPoint + ".root";
+    std::string fileNameMC = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/MC/KsKl_Smeared/MC" + energyPoint + ".root";
     // fileName = "tr_ph/MC/KsKl_Smeared/Field/MC" + energyPoint + "_Field.root";
 
-    auto handler = new HandlerMC(fileName, energyPoint, 0.27, std::nullopt, true);
-    auto [mass, massErr] = handler->Eval();
+    // auto handlerMC = new HandlerMC(fileName, energyPoint, 0.27, std::nullopt, true);
+    // auto [mass, massErr] = handlerMC->Eval();
+    // std::cout << mass << " + " << massErr << std::endl;
+    // handlerMC->Draw("hMlnYpfx", {-0.4, 0.4});
+    // // handlerMC->SaveHists("/hist/MC" + energyPoint + ".root");
+    // handlerMC->SaveSplines("C:/work/Science/BINP/Kaon Mass Measure/splines/spline_" + energyPoint + ".root");
+    // delete handlerMC;
+
+    std::string fileNameExp = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/expKsKl/exp" + energyPoint + ".root";
+    auto handlerExp = new HandlerExp(fileNameExp, energyPoint, 0.27, true);
+    auto [mass, massErr] = handlerExp->Eval();
     std::cout << mass << " + " << massErr << std::endl;
-    handler->Draw("hMlnYpfx", {-0.4, 0.4});
-    // handler->SaveHists("hists" + energyPoint + ".root");
-    delete handler;
+    handlerExp->Draw("hMlnYpfx", {-0.4, 0.4});
+    // handler->SaveHists("/hist/MC" + energyPoint + ".root");
+    delete handlerExp;
+
 
     auto end = std::chrono::system_clock::now();
     std::chrono::duration<double> diff = end - start; 

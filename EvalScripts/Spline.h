@@ -16,38 +16,36 @@
 class Spline
 {
 private:
-    std::optional<TSpline3> deltaPsi_RecGenDiff;
+    std::optional<TSpline3> spline;
+    std::string name;
     std::vector<double> dataX; 
     std::vector<double> dataY;
 
 public:
-    Spline(std::vector<double> xs, std::vector<double> ys, bool createSpline = true);
-    Spline(): Spline({}, {}, false) {}
+    Spline(std::vector<double> xs, std::vector<double> ys, std::string name, bool createSpline = true);
+    Spline(std::string name): Spline({}, {}, name, false) {}
+    Spline(): Spline({}, {}, "spline", false) {}
 
-    /**
-     * @brief Reads spline from .root file.
-    */
-    Spline(std::string inputFilename, std::string splineName = "deltaPsi_RecGenDiff");
+    /// @brief Reads spline from .root file.
+    Spline(std::string inputFilename, std::string splineName);
 
-    /**
-     * @brief Creates spline from earlier passed data.
-    */
+    /// @brief Creates spline from earlier passed data.
     void CreateSpline();
     double operator()(double x) const;
 
-    /**
-     * @brief Save spline as TSpline3 to a \b filename .root file. File recreates.
-     * @returns \b true if spline was saved and \b false otherwise.
-    */
-    bool Save(std::string filename);
+    /// @brief Save spline as TSpline3 to a filename .root file. File recreates
+    /// @param filename Name of the file where spline will be saved,
+    /// @param recreate Recreate file or not,
+    /// @return true if spline was saved and false otherwise.
+    bool Save(std::string filename, bool recreate);
 };
 
-Spline::Spline(std::vector<double> xs, std::vector<double> ys, bool createSpline)
+Spline::Spline(std::vector<double> xs, std::vector<double> ys, std::string name, bool createSpline) : name(name)
 {
     if(xs.size() != ys.size())
-    { throw std::logic_error("Error during constructing Spline: xs doesn't have the same size as ys."); }
+    { throw std::logic_error("Error during constructing Spline " + name + ": xs is not of the same size as ys."); }
 
-    deltaPsi_RecGenDiff = std::nullopt;
+    spline = std::nullopt;
     dataX = xs;
     dataY = ys;
 
@@ -55,40 +53,39 @@ Spline::Spline(std::vector<double> xs, std::vector<double> ys, bool createSpline
     { CreateSpline(); }
 }
 
-Spline::Spline(std::string inputFilename, std::string splineName)
+Spline::Spline(std::string inputFilename, std::string splineName): name(splineName)
 {
     dataX = {};
     dataY = {};
-    
-    auto file = TFile::Open(inputFilename.c_str());
-    deltaPsi_RecGenDiff.emplace(TSpline3(*file->Get<TSpline3>("splineName")));
+    auto file = TFile::Open(inputFilename.c_str(), "read");
+    spline.emplace(TSpline3(*file->Get<TSpline3>(name.c_str())));
     file->Close();
     delete file;
 }
 
 void Spline::CreateSpline()
 {
-    if(deltaPsi_RecGenDiff.has_value())
+    if(spline.has_value())
     { std::cout << "Warning in Spline::CreateSpline(): Spline has been already created. \
                     It was recreated with x and y that you might not provided." << std::endl; }
 
-    deltaPsi_RecGenDiff.emplace(TSpline3("ksdpsi_RecGenDiff_Spline", dataX.data(), dataY.data(), dataX.size()));
+    spline.emplace(TSpline3(name.c_str(), dataX.data(), dataY.data(), dataX.size()));
 }
 
 double Spline::operator()(double x) const
 { 
-    if(!deltaPsi_RecGenDiff.has_value())
-    { throw std::runtime_error("Error in Spline class in operator() call: spline was not created"); } 
+    if(!spline.has_value())
+    { throw std::runtime_error("Error in Spline class in operator() call: spline " + name + " was not created"); } 
     else
-    { return deltaPsi_RecGenDiff.value().Eval(x); }
+    { return spline.value().Eval(x); }
 }
 
-bool Spline::Save(std::string filename)
+bool Spline::Save(std::string filename, bool recreate)
 {
-    if(deltaPsi_RecGenDiff.has_value())
+    if(spline.has_value())
     {
-        auto file = TFile::Open(filename.c_str(), "recreate");
-        deltaPsi_RecGenDiff.value().Write("deltaPsi_RecGenDiff");
+        auto file = TFile::Open(filename.c_str(), (recreate? "recreate" : "update"));
+        spline.value().Write(name.c_str());
         file->Close();
         delete file;
         return true;

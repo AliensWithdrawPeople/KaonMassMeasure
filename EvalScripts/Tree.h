@@ -18,8 +18,7 @@ struct track {
 class Tree 
 {
 public:
-    /** @brief iterator for the Tree class. Mostly usable in range-based for loop. 
-    */
+    /// @brief iterator for the Tree class. Mostly usable in range-based for loop. 
     class iterator {
     private:
         int entryNum = 0;
@@ -68,7 +67,7 @@ public:
     Tree(std::string filename, bool isExp = false);
 
     iterator begin() { return iterator(0, this); }
-    iterator end() { return iterator(Nentries - 1, this); }
+    iterator end() { return iterator(Nentries, this); }
 
     int GetEntry(int entryNum)
     { return tree->GetEntry(entryNum); }
