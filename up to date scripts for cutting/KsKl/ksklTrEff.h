@@ -386,12 +386,12 @@ ksklTrEff::ksklTrEff(TTree *tree) : fChain(0)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      std::string fname = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/mcgpj/tr_ph v9/EnergySmearing/MCGPJ_kskl514_Merged.root";
+      std::string fname = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/mcgpj/tr_ph v9/EnergySmearing/MCGPJ_kskl505_Merged.root";
       TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(fname.c_str());
       if (!f || !f->IsOpen()) {
          f = new TFile(fname.c_str());
       }
-      f->GetObject("tr_ph_merged",tree);
+      f->GetObject("tr_ph",tree);
 
    }
    Init(tree);
