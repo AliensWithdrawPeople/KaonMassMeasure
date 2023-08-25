@@ -1,8 +1,8 @@
-#ifndef Funcs_h
-#define Funcs_h
+#ifndef Funcs_hpp
+#define Funcs_hpp
 
-#include "misc.h"
-#include "Tree.h"
+#include "misc.hpp"
+#include "Tree.hpp"
 
 #include <math.h>
 

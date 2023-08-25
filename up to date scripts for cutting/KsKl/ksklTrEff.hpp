@@ -1,12 +1,12 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Fri Jan 27 09:48:42 2023 by ROOT version 6.22/08
-// from TTree tr_ph/Tree with the non-collinear events
-// found on file: root://cmd//scan2018_omphi/scan2018_omphi_tr_ph_fc_e509_v9.root
+// Fri Jul 21 13:42:27 2023 by ROOT version 6.28/04
+// from TTree tr_ph_merged/Tree with the non-collinear events
+// found on file: ./MCGPJ_kskl509_Merged.root
 //////////////////////////////////////////////////////////
 
-#ifndef kpkmExp_h
-#define kpkmExp_h
+#ifndef ksklTrEff_hpp
+#define ksklTrEff_hpp
 
 #include <TROOT.h>
 #include <TChain.h>
@@ -14,7 +14,7 @@
 
 // Header file for the classes stored in the TTree if any.
 
-class kpkmExp {
+class ksklTrEff {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
@@ -92,24 +92,24 @@ public :
    Int_t           tenconv[10];   //[nt]
    Int_t           nks_total;
    Int_t           nks;
-   Int_t           ksvind[6][2];   //[nks]
-   Int_t           kstype[6];   //[nks]
-   Int_t           ksfstatus[6];   //[nks]
-   Float_t         ksvchi[6];   //[nks]
-   Float_t         ksvxyz[6][3];   //[nks]
-   Float_t         ksminv[6];   //[nks]
-   Float_t         ksalign[6];   //[nks]
-   Float_t         kstlen[6];   //[nks]
-   Float_t         ksdpsi[6];   //[nks]
-   Float_t         kslen[6];   //[nks]
-   Float_t         ksz0[6];   //[nks]
-   Float_t         ksphi[6];   //[nks]
-   Float_t         ksth[6];   //[nks]
-   Float_t         ksptot[6];   //[nks]
-   Float_t         kspiphi[6][2];   //[nks]
-   Float_t         kspith[6][2];   //[nks]
-   Float_t         kspipt[6][2];   //[nks]
-   Float_t         kserr[6][3][3];   //[nks]
+   Int_t           ksvind[5][2];   //[nks]
+   Int_t           kstype[5];   //[nks]
+   Int_t           ksfstatus[5];   //[nks]
+   Float_t         ksvchi[5];   //[nks]
+   Float_t         ksvxyz[5][3];   //[nks]
+   Float_t         ksminv[5];   //[nks]
+   Float_t         ksalign[5];   //[nks]
+   Float_t         kstlen[5];   //[nks]
+   Float_t         ksdpsi[5];   //[nks]
+   Float_t         kslen[5];   //[nks]
+   Float_t         ksz0[5];   //[nks]
+   Float_t         ksphi[5];   //[nks]
+   Float_t         ksth[5];   //[nks]
+   Float_t         ksptot[5];   //[nks]
+   Float_t         kspiphi[5][2];   //[nks]
+   Float_t         kspith[5][2];   //[nks]
+   Float_t         kspipt[5][2];   //[nks]
+   Float_t         kserr[5][3][3];   //[nks]
    Int_t           ntlxe_total;
    Int_t           ntlxe;
    Int_t           ntlxelayers[10];   //[ntlxe]
@@ -126,71 +126,70 @@ public :
    Float_t         tlxesen_layers[10][14];   //[ntlxe]
    Int_t           nph_total;
    Int_t           nph;
-   Float_t         phen[34];   //[nph]
-   Float_t         phth[34];   //[nph]
-   Float_t         phphi[34];   //[nph]
-   Float_t         phrho[34];   //[nph]
-   Float_t         phrad[34];   //[nph]
-   Float_t         phen0[34];   //[nph]
-   Float_t         phth0[34];   //[nph]
-   Float_t         phphi0[34];   //[nph]
-   Float_t         phlxe[34];   //[nph]
-   Float_t         phslxe_layers[34][14];   //[nph]
-   Float_t         pherr[34][3];   //[nph]
-   Float_t         phcsi[34];   //[nph]
-   Float_t         phbgo[34];   //[nph]
-   Int_t           phflag[34];   //[nph]
-   Int_t           phconv[34];   //[nph]
-   Int_t           phfc[34];   //[nph]
+   Float_t         phen[13];   //[nph]
+   Float_t         phth[13];   //[nph]
+   Float_t         phphi[13];   //[nph]
+   Float_t         phrho[13];   //[nph]
+   Float_t         phen0[13];   //[nph]
+   Float_t         phth0[13];   //[nph]
+   Float_t         phphi0[13];   //[nph]
+   Float_t         phlxe[13];   //[nph]
+   Float_t         phslxe_layers[13][14];   //[nph]
+   Float_t         pherr[13][3];   //[nph]
+   Float_t         phcsi[13];   //[nph]
+   Float_t         phbgo[13];   //[nph]
+   Int_t           phflag[13];   //[nph]
+   Int_t           phconv[13];   //[nph]
+   Int_t           phfc[13];   //[nph]
    Int_t           nzcs_total;
    Int_t           nzcs;
-   Int_t           zcsch[1];   //[nzcs]
-   Int_t           zcsstat[1];   //[nzcs]
-   Float_t         zcsamp[1];   //[nzcs]
-   Float_t         zcstime[1];   //[nzcs]
-   Float_t         zcsphi[1];   //[nzcs]
+   Int_t           zcsch[19];   //[nzcs]
+   Int_t           zcsstat[19];   //[nzcs]
+   Float_t         zcsamp[19];   //[nzcs]
+   Float_t         zcstime[19];   //[nzcs]
+   Float_t         zcsphi[19];   //[nzcs]
    Int_t           nzcc_total;
    Int_t           nzcc;
-   Int_t           zccl[1];   //[nzcc]
-   Int_t           zccns[1];   //[nzcc]
-   Float_t         zccamp[1];   //[nzcc]
-   Int_t           zcct[1];   //[nzcc]
-   Float_t         zccz[1];   //[nzcc]
-   Int_t           zccvalid[1];   //[nzcc]
+   Int_t           zccl[20];   //[nzcc]
+   Int_t           zccns[20];   //[nzcc]
+   Float_t         zccamp[20];   //[nzcc]
+   Int_t           zcct[20];   //[nzcc]
+   Float_t         zccz[20];   //[nzcc]
+   Int_t           zccvalid[20];   //[nzcc]
    Int_t           nant;
-   Int_t           antch[175];   //[nant]
-   Float_t         antt0[175];   //[nant]
-   Float_t         antt1[175];   //[nant]
-   Float_t         anta0[175];   //[nant]
-   Float_t         anta1[175];   //[nant]
-   Float_t         antphi[175];   //[nant]
-   Int_t           antst[175];   //[nant]
+   Int_t           antch[16];   //[nant]
+   Float_t         antt0[16];   //[nant]
+   Float_t         antt1[16];   //[nant]
+   Float_t         anta0[16];   //[nant]
+   Float_t         anta1[16];   //[nant]
+   Float_t         antphi[16];   //[nant]
+   Int_t           antst[16];   //[nant]
    Int_t           nmu;
-   Int_t           much[48];   //[nmu]
-   Float_t         mut0[48];   //[nmu]
-   Float_t         mut1[48];   //[nmu]
-   Float_t         mut2[48];   //[nmu]
-   Float_t         mut3[48];   //[nmu]
-   Float_t         mua0[48];   //[nmu]
-   Float_t         mua1[48];   //[nmu]
-   Float_t         mua2[48];   //[nmu]
-   Float_t         mua3[48];   //[nmu]
-   Int_t           must[48];   //[nmu]
+   Int_t           much[10];   //[nmu]
+   Float_t         mut0[10];   //[nmu]
+   Float_t         mut1[10];   //[nmu]
+   Float_t         mut2[10];   //[nmu]
+   Float_t         mut3[10];   //[nmu]
+   Float_t         mua0[10];   //[nmu]
+   Float_t         mua1[10];   //[nmu]
+   Float_t         mua2[10];   //[nmu]
+   Float_t         mua3[10];   //[nmu]
+   Int_t           must[10];   //[nmu]
    Int_t           nsim;
-   Int_t           simtype[1];   //[nsim]
-   Int_t           simorig[1];   //[nsim]
-   Float_t         simmom[1];   //[nsim]
-   Float_t         simphi[1];   //[nsim]
-   Float_t         simtheta[1];   //[nsim]
-   Float_t         simvtx[1];   //[nsim]
-   Float_t         simvty[1];   //[nsim]
-   Float_t         simvtz[1];   //[nsim]
+   Int_t           simtype[21];   //[nsim]
+   Int_t           simorig[21];   //[nsim]
+   Float_t         simmom[21];   //[nsim]
+   Float_t         simphi[21];   //[nsim]
+   Float_t         simtheta[21];   //[nsim]
+   Float_t         simvtx[21];   //[nsim]
+   Float_t         simvty[21];   //[nsim]
+   Float_t         simvtz[21];   //[nsim]
    Int_t           ncorr;
-   Int_t           idcorr[6];   //[ncorr]
-   Int_t           bitcorr[6];   //[ncorr]
+   Int_t           idcorr[1];   //[ncorr]
+   Int_t           bitcorr[1];   //[ncorr]
    Int_t           nbadbank;
    Int_t           nbadbankg;
-   Int_t           nbadbanks[60];   //[nbadbankg]
+   Int_t           nbadbanks[1];   //[nbadbankg]
    Int_t           nlostbanks;
    Int_t           ncorruptedbanks;
    Int_t           has_frontend[3];
@@ -304,7 +303,6 @@ public :
    TBranch        *b_phth;   //!
    TBranch        *b_phphi;   //!
    TBranch        *b_phrho;   //!
-   TBranch        *b_phrad;   //!
    TBranch        *b_phen0;   //!
    TBranch        *b_phth0;   //!
    TBranch        *b_phphi0;   //!
@@ -369,26 +367,26 @@ public :
    TBranch        *b_ncorruptedbanks;   //!
    TBranch        *b_has_frontend;   //!
 
-   kpkmExp(TTree *tree=0);
-   virtual ~kpkmExp();
+   ksklTrEff(TTree *tree=0);
+   virtual ~ksklTrEff();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree);
-   virtual void     Loop(std::string histFileName);
+   virtual void     Loop(std::string outFileName);
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
 };
 
 #endif
 
-#ifdef kpkmExp_cxx
-kpkmExp::kpkmExp(TTree *tree) : fChain(0) 
+#ifdef ksklTrEff_cxx
+ksklTrEff::ksklTrEff(TTree *tree) : fChain(0) 
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      std::string fname = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/mcgpj/tr_ph v9/KpKm/tr_ph_run000009.root";
+      std::string fname = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/mcgpj/tr_ph v9/EnergySmearing/MCGPJ_kskl505_Merged.root";
       TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(fname.c_str());
       if (!f || !f->IsOpen()) {
          f = new TFile(fname.c_str());
@@ -399,19 +397,19 @@ kpkmExp::kpkmExp(TTree *tree) : fChain(0)
    Init(tree);
 }
 
-kpkmExp::~kpkmExp()
+ksklTrEff::~ksklTrEff()
 {
    if (!fChain) return;
    delete fChain->GetCurrentFile();
 }
 
-Int_t kpkmExp::GetEntry(Long64_t entry)
+Int_t ksklTrEff::GetEntry(Long64_t entry)
 {
 // Read contents of entry.
    if (!fChain) return 0;
    return fChain->GetEntry(entry);
 }
-Long64_t kpkmExp::LoadTree(Long64_t entry)
+Long64_t ksklTrEff::LoadTree(Long64_t entry)
 {
 // Set the environment to read one entry
    if (!fChain) return -5;
@@ -424,7 +422,7 @@ Long64_t kpkmExp::LoadTree(Long64_t entry)
    return centry;
 }
 
-void kpkmExp::Init(TTree *tree)
+void ksklTrEff::Init(TTree *tree)
 {
    // The Init() function is called when the selector needs to initialize
    // a new tree or chain. Typically here the branch addresses and branch
@@ -548,7 +546,6 @@ void kpkmExp::Init(TTree *tree)
    fChain->SetBranchAddress("phth", phth, &b_phth);
    fChain->SetBranchAddress("phphi", phphi, &b_phphi);
    fChain->SetBranchAddress("phrho", phrho, &b_phrho);
-   fChain->SetBranchAddress("phrad", phrad, &b_phrad);
    fChain->SetBranchAddress("phen0", phen0, &b_phen0);
    fChain->SetBranchAddress("phth0", phth0, &b_phth0);
    fChain->SetBranchAddress("phphi0", phphi0, &b_phphi0);
@@ -562,19 +559,19 @@ void kpkmExp::Init(TTree *tree)
    fChain->SetBranchAddress("phfc", phfc, &b_phfc);
    fChain->SetBranchAddress("nzcs_total", &nzcs_total, &b_nzcs_total);
    fChain->SetBranchAddress("nzcs", &nzcs, &b_nzcs);
-   fChain->SetBranchAddress("zcsch", &zcsch, &b_zcsch);
-   fChain->SetBranchAddress("zcsstat", &zcsstat, &b_zcsstat);
-   fChain->SetBranchAddress("zcsamp", &zcsamp, &b_zcsamp);
-   fChain->SetBranchAddress("zcstime", &zcstime, &b_zcstime);
-   fChain->SetBranchAddress("zcsphi", &zcsphi, &b_zcsphi);
+   fChain->SetBranchAddress("zcsch", zcsch, &b_zcsch);
+   fChain->SetBranchAddress("zcsstat", zcsstat, &b_zcsstat);
+   fChain->SetBranchAddress("zcsamp", zcsamp, &b_zcsamp);
+   fChain->SetBranchAddress("zcstime", zcstime, &b_zcstime);
+   fChain->SetBranchAddress("zcsphi", zcsphi, &b_zcsphi);
    fChain->SetBranchAddress("nzcc_total", &nzcc_total, &b_nzcc_total);
    fChain->SetBranchAddress("nzcc", &nzcc, &b_nzcc);
-   fChain->SetBranchAddress("zccl", &zccl, &b_zccl);
-   fChain->SetBranchAddress("zccns", &zccns, &b_zccns);
-   fChain->SetBranchAddress("zccamp", &zccamp, &b_zccamp);
-   fChain->SetBranchAddress("zcct", &zcct, &b_zcct);
-   fChain->SetBranchAddress("zccz", &zccz, &b_zccz);
-   fChain->SetBranchAddress("zccvalid", &zccvalid, &b_zccvalid);
+   fChain->SetBranchAddress("zccl", zccl, &b_zccl);
+   fChain->SetBranchAddress("zccns", zccns, &b_zccns);
+   fChain->SetBranchAddress("zccamp", zccamp, &b_zccamp);
+   fChain->SetBranchAddress("zcct", zcct, &b_zcct);
+   fChain->SetBranchAddress("zccz", zccz, &b_zccz);
+   fChain->SetBranchAddress("zccvalid", zccvalid, &b_zccvalid);
    fChain->SetBranchAddress("nant", &nant, &b_nant);
    fChain->SetBranchAddress("antch", antch, &b_antch);
    fChain->SetBranchAddress("antt0", antt0, &b_antt0);
@@ -595,27 +592,27 @@ void kpkmExp::Init(TTree *tree)
    fChain->SetBranchAddress("mua3", mua3, &b_mua3);
    fChain->SetBranchAddress("must", must, &b_must);
    fChain->SetBranchAddress("nsim", &nsim, &b_nsim);
-   fChain->SetBranchAddress("simtype", &simtype, &b_simtype);
-   fChain->SetBranchAddress("simorig", &simorig, &b_simorig);
-   fChain->SetBranchAddress("simmom", &simmom, &b_simmom);
-   fChain->SetBranchAddress("simphi", &simphi, &b_simphi);
-   fChain->SetBranchAddress("simtheta", &simtheta, &b_simtheta);
-   fChain->SetBranchAddress("simvtx", &simvtx, &b_simvtx);
-   fChain->SetBranchAddress("simvty", &simvty, &b_simvty);
-   fChain->SetBranchAddress("simvtz", &simvtz, &b_simvtz);
+   fChain->SetBranchAddress("simtype", simtype, &b_simtype);
+   fChain->SetBranchAddress("simorig", simorig, &b_simorig);
+   fChain->SetBranchAddress("simmom", simmom, &b_simmom);
+   fChain->SetBranchAddress("simphi", simphi, &b_simphi);
+   fChain->SetBranchAddress("simtheta", simtheta, &b_simtheta);
+   fChain->SetBranchAddress("simvtx", simvtx, &b_simvtx);
+   fChain->SetBranchAddress("simvty", simvty, &b_simvty);
+   fChain->SetBranchAddress("simvtz", simvtz, &b_simvtz);
    fChain->SetBranchAddress("ncorr", &ncorr, &b_ncorr);
-   fChain->SetBranchAddress("idcorr", idcorr, &b_idcorr);
-   fChain->SetBranchAddress("bitcorr", bitcorr, &b_bitcorr);
+   fChain->SetBranchAddress("idcorr", &idcorr, &b_idcorr);
+   fChain->SetBranchAddress("bitcorr", &bitcorr, &b_bitcorr);
    fChain->SetBranchAddress("nbadbank", &nbadbank, &b_nbadbank);
    fChain->SetBranchAddress("nbadbankg", &nbadbankg, &b_nbadbankg);
-   fChain->SetBranchAddress("nbadbanks", nbadbanks, &b_nbadbanks);
+   fChain->SetBranchAddress("nbadbanks", &nbadbanks, &b_nbadbanks);
    fChain->SetBranchAddress("nlostbanks", &nlostbanks, &b_nlostbanks);
    fChain->SetBranchAddress("ncorruptedbanks", &ncorruptedbanks, &b_ncorruptedbanks);
    fChain->SetBranchAddress("has_frontend", has_frontend, &b_has_frontend);
    Notify();
 }
 
-Bool_t kpkmExp::Notify()
+Bool_t ksklTrEff::Notify()
 {
    // The Notify() function is called when a new file is opened. This
    // can be either for a new TTree in a TChain or when when a new TTree
@@ -626,18 +623,18 @@ Bool_t kpkmExp::Notify()
    return kTRUE;
 }
 
-void kpkmExp::Show(Long64_t entry)
+void ksklTrEff::Show(Long64_t entry)
 {
 // Print contents of entry.
 // If entry is not specified, print current entry
    if (!fChain) return;
    fChain->Show(entry);
 }
-Int_t kpkmExp::Cut(Long64_t entry)
+Int_t ksklTrEff::Cut(Long64_t entry)
 {
 // This function may be called from Loop.
 // returns  1 if entry is accepted.
 // returns -1 otherwise.
    return 1;
 }
-#endif // #ifdef kpkmExp_cxx
+#endif // #ifdef ksklTrEff_cxx

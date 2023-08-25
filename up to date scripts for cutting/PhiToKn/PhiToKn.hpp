@@ -1,12 +1,12 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Thu Jun 29 21:15:02 2023 by ROOT version 6.22/08
+// Mon Jul  3 11:13:22 2023 by ROOT version 6.28/04
 // from TTree tr_ph/Tree with the non-collinear events
-// found on file: root://cmd//scan2018_omphi/scan2018_omphi_tr_ph_fc_e509_v9.root
+// found on file: ./Prelim501.root
 //////////////////////////////////////////////////////////
 
-#ifndef prelim_h
-#define prelim_h
+#ifndef PhiToKn_hpp
+#define PhiToKn_hpp
 
 #include <TROOT.h>
 #include <TChain.h>
@@ -14,7 +14,7 @@
 
 // Header file for the classes stored in the TTree if any.
 
-class prelim {
+class PhiToKn {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
@@ -126,22 +126,22 @@ public :
    Float_t         tlxesen_layers[10][14];   //[ntlxe]
    Int_t           nph_total;
    Int_t           nph;
-   Float_t         phen[34];   //[nph]
-   Float_t         phth[34];   //[nph]
-   Float_t         phphi[34];   //[nph]
-   Float_t         phrho[34];   //[nph]
-   Float_t         phrad[34];   //[nph]
-   Float_t         phen0[34];   //[nph]
-   Float_t         phth0[34];   //[nph]
-   Float_t         phphi0[34];   //[nph]
-   Float_t         phlxe[34];   //[nph]
-   Float_t         phslxe_layers[34][14];   //[nph]
-   Float_t         pherr[34][3];   //[nph]
-   Float_t         phcsi[34];   //[nph]
-   Float_t         phbgo[34];   //[nph]
-   Int_t           phflag[34];   //[nph]
-   Int_t           phconv[34];   //[nph]
-   Int_t           phfc[34];   //[nph]
+   Float_t         phen[23];   //[nph]
+   Float_t         phth[23];   //[nph]
+   Float_t         phphi[23];   //[nph]
+   Float_t         phrho[23];   //[nph]
+   Float_t         phrad[23];   //[nph]
+   Float_t         phen0[23];   //[nph]
+   Float_t         phth0[23];   //[nph]
+   Float_t         phphi0[23];   //[nph]
+   Float_t         phlxe[23];   //[nph]
+   Float_t         phslxe_layers[23][14];   //[nph]
+   Float_t         pherr[23][3];   //[nph]
+   Float_t         phcsi[23];   //[nph]
+   Float_t         phbgo[23];   //[nph]
+   Int_t           phflag[23];   //[nph]
+   Int_t           phconv[23];   //[nph]
+   Int_t           phfc[23];   //[nph]
    Int_t           nzcs_total;
    Int_t           nzcs;
    Int_t           zcsch[1];   //[nzcs]
@@ -177,20 +177,20 @@ public :
    Float_t         mua3[48];   //[nmu]
    Int_t           must[48];   //[nmu]
    Int_t           nsim;
-   Int_t           simtype[40];   //[nsim]
-   Int_t           simorig[40];   //[nsim]
-   Float_t         simmom[40];   //[nsim]
-   Float_t         simphi[40];   //[nsim]
-   Float_t         simtheta[40];   //[nsim]
-   Float_t         simvtx[40];   //[nsim]
-   Float_t         simvty[40];   //[nsim]
-   Float_t         simvtz[40];   //[nsim]
+   Int_t           simtype[1];   //[nsim]
+   Int_t           simorig[1];   //[nsim]
+   Float_t         simmom[1];   //[nsim]
+   Float_t         simphi[1];   //[nsim]
+   Float_t         simtheta[1];   //[nsim]
+   Float_t         simvtx[1];   //[nsim]
+   Float_t         simvty[1];   //[nsim]
+   Float_t         simvtz[1];   //[nsim]
    Int_t           ncorr;
-   Int_t           idcorr[6];   //[ncorr]
-   Int_t           bitcorr[6];   //[ncorr]
+   Int_t           idcorr[5];   //[ncorr]
+   Int_t           bitcorr[5];   //[ncorr]
    Int_t           nbadbank;
    Int_t           nbadbankg;
-   Int_t           nbadbanks[60];   //[nbadbankg]
+   Int_t           nbadbanks[43];   //[nbadbankg]
    Int_t           nlostbanks;
    Int_t           ncorruptedbanks;
    Int_t           has_frontend[3];
@@ -369,29 +369,29 @@ public :
    TBranch        *b_ncorruptedbanks;   //!
    TBranch        *b_has_frontend;   //!
 
-   prelim(TTree *tree=0);
-   virtual ~prelim();
+   PhiToKn(TTree *tree=0);
+   virtual ~PhiToKn();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree);
-   virtual void     Loop(std::string histFileName);
+   virtual void     Loop(std::string output_fname, double energy);
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
 };
 
 #endif
 
-#ifdef prelim_cxx
-prelim::prelim(TTree *tree) : fChain(0) 
+#ifdef PhiToKn_cxx
+PhiToKn::PhiToKn(TTree *tree) : fChain(0) 
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      std::string fname = "root://cmd//scan2018_omphi/scan2018_omphi_tr_ph_fc_e509_v9.root";
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(fname.c_str());
+      auto fname = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/KnPrelim/Prelim505.root";
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(fname);
       if (!f || !f->IsOpen()) {
-         f = new TFile(fname.c_str());
+         f = new TFile(fname);
       }
       f->GetObject("tr_ph",tree);
 
@@ -399,19 +399,19 @@ prelim::prelim(TTree *tree) : fChain(0)
    Init(tree);
 }
 
-prelim::~prelim()
+PhiToKn::~PhiToKn()
 {
    if (!fChain) return;
    delete fChain->GetCurrentFile();
 }
 
-Int_t prelim::GetEntry(Long64_t entry)
+Int_t PhiToKn::GetEntry(Long64_t entry)
 {
 // Read contents of entry.
    if (!fChain) return 0;
    return fChain->GetEntry(entry);
 }
-Long64_t prelim::LoadTree(Long64_t entry)
+Long64_t PhiToKn::LoadTree(Long64_t entry)
 {
 // Set the environment to read one entry
    if (!fChain) return -5;
@@ -424,7 +424,7 @@ Long64_t prelim::LoadTree(Long64_t entry)
    return centry;
 }
 
-void prelim::Init(TTree *tree)
+void PhiToKn::Init(TTree *tree)
 {
    // The Init() function is called when the selector needs to initialize
    // a new tree or chain. Typically here the branch addresses and branch
@@ -615,7 +615,7 @@ void prelim::Init(TTree *tree)
    Notify();
 }
 
-Bool_t prelim::Notify()
+Bool_t PhiToKn::Notify()
 {
    // The Notify() function is called when a new file is opened. This
    // can be either for a new TTree in a TChain or when when a new TTree
@@ -626,18 +626,18 @@ Bool_t prelim::Notify()
    return kTRUE;
 }
 
-void prelim::Show(Long64_t entry)
+void PhiToKn::Show(Long64_t entry)
 {
 // Print contents of entry.
 // If entry is not specified, print current entry
    if (!fChain) return;
    fChain->Show(entry);
 }
-Int_t prelim::Cut(Long64_t entry)
+Int_t PhiToKn::Cut(Long64_t entry)
 {
 // This function may be called from Loop.
 // returns  1 if entry is accepted.
 // returns -1 otherwise.
    return 1;
 }
-#endif // #ifdef prelim_cxx
+#endif // #ifdef PhiToKn_cxx

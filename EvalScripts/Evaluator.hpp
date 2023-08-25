@@ -1,7 +1,7 @@
 #ifndef Evaluator_h
 #define Evaluator_h
 
-#include "Tree.h"
+#include "Tree.hpp"
 
 #include <string>
 #include <utility>

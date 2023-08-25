@@ -1,5 +1,5 @@
 #define pipiCut_cxx
-#include "pipiCut.h"
+#include "pipiCut.hpp"
 #include <TH2.h>
 #include <TH1D.h>
 #include <TF1.h>

@@ -1,5 +1,5 @@
 #define kpkmExp_cxx
-#include "kpkmExp.h"
+#include "kpkmExp.hpp"
 #include <TH2.h>
 #include <TH1D.h>
 #include <TF1.h>

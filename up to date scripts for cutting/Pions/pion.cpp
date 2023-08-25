@@ -1,5 +1,5 @@
 #define pion_cxx
-#include "pion.h"
+#include "pion.hpp"
 #include <TH2.h>
 #include <TStyle.h>
 #include <TCanvas.h>
@@ -38,12 +38,17 @@ void pion::Loop(std::string filename)
    TFile *top = new TFile(filename.c_str(), "recreate");
    auto tNew = new TTree("pion", "Cutted tr_ph (pi+pi- events)");
 
+   auto hMTracks = new TH1D("hMTracks", "hMTracks", 1000, -200, 200);
+   auto hCalEnergy_bhabha = new TH1D("hCalEnergy_bhabha", "hCalEnergy_bhabha", 1000, 0, 1000);
+
    double phiPos;
    double thetaPos;
    double momPos;
    double phiNeg;
    double thetaNeg;
    double momNeg;
+   double CalEnergyPos;
+   double CalEnergyNeg;
 
    double phiPos_v;
    double thetaPos_v;
@@ -60,6 +65,8 @@ void pion::Loop(std::string filename)
    tNew->Branch("phiNeg", &phiNeg, "phiNeg/D");
    tNew->Branch("thetaNeg", &thetaNeg, "thetaNeg/D");
    tNew->Branch("momNeg", &momNeg, "momNeg/D");
+   tNew->Branch("CalEnergyPos", &CalEnergyPos, "CalEnergyPos/D");
+   tNew->Branch("CalEnergyNeg", &CalEnergyNeg, "CalEnergyNeg/D");
 
    tNew->Branch("phiPos_v", &phiPos_v, "phiPos_v/D");
    tNew->Branch("thetaPos_v", &thetaPos_v, "thetaPos_v/D");
@@ -103,6 +110,7 @@ void pion::Loop(std::string filename)
             tdedx[i] < 5e3)
          { counter++; }
 
+
          if(counter > 2)
          { break; }
       }
@@ -118,6 +126,9 @@ void pion::Loop(std::string filename)
          thetaNeg = tth[negIndex];
          momNeg = tptot[negIndex]; 
 
+         CalEnergyPos = ten[posIndex];
+         CalEnergyNeg = ten[negIndex];
+
          phiPos_v = tphiv[posIndex];
          thetaPos_v = tthv[posIndex];
          momPos_v = tptotv[posIndex];
@@ -125,13 +136,18 @@ void pion::Loop(std::string filename)
          thetaNeg_v = tthv[negIndex];
          momNeg_v = tptotv[negIndex]; 
 
+         if(is_bhabha == 1)
+         { hCalEnergy_bhabha->Fill((ten[posIndex] + ten[negIndex]) / 2); }
+
          pos3.SetMagThetaPhi(momPos_v, thetaPos_v, phiPos_v);
          neg3.SetMagThetaPhi(momNeg_v, thetaNeg_v, phiNeg_v);
 
          pos.SetVectM(pos3, 139.570);
          neg.SetVectM(neg3, 139.570);
 
-         if(fabs((pos + neg).M() - 2 * emeas) < 0.05 * 2 * emeas)
+         hMTracks->Fill((pos + neg).M() - 2 * emeas);
+
+         if(fabs((pos + neg).M() - 2 * emeas) < 0.05 * 2 * emeas && is_bhabha != 1)
          { tNew->Fill(); }
       }
 

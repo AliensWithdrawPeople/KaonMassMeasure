@@ -1,5 +1,5 @@
 #define prelim_cxx
-#include "prelim.h"
+#include "prelim.hpp"
 #include <TH2.h>
 #include <TH1D.h>
 #include <TF1.h>

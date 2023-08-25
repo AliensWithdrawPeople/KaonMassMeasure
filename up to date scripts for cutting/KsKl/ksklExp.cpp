@@ -1,5 +1,5 @@
 #define ksklExp_cxx
-#include "ksklExp.h"
+#include "ksklExp.hpp"
 #include <TH2.h>
 #include <TH1D.h>
 #include <TF1.h>

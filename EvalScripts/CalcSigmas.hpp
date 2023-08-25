@@ -1,7 +1,7 @@
-#ifndef CalcSigmas_h
-#define CalcSigmas_h
+#ifndef CalcSigmas_hpp
+#define CalcSigmas_hpp
 
-#include "Tree.h"
+#include "Tree.hpp"
 
 #include <memory>
 #include <tuple>

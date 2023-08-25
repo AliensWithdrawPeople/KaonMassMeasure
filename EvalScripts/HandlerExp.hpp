@@ -1,23 +1,24 @@
-#ifndef HandlerMC_h
-#define HandlerMC_h
+#ifndef HandlerExp_h
+#define HandlerExp_h
 
-#include "Evaluator.h"
-#include "Tree.h"
-#include "HistContainer.h"
-#include "Spline.h"
-#include "CalcSigmas.h"
-#include "Funcs.h"
-#include "Painter.h"
+#include "Evaluator.hpp"
+#include "Tree.hpp"
+#include "HistContainer.hpp"
+#include "Spline.hpp"
+#include "CalcSigmas.hpp"
+#include "Funcs.hpp"
+#include "Painter.hpp"
 
 #include <memory>
 #include <utility>
 #include <iostream>
+#include <stdexcept>
 
 #include "TMath.h"
 #include "TVector3.h"
 
 
-class HandlerMC: Evaluator
+class HandlerExp: Evaluator
 {
 private:
     std::string energyPoint;
@@ -29,34 +30,35 @@ private:
     std::unique_ptr<Painter> painter;
 
     double fitRange;
-    bool useTrueEnergy = false;
+    bool useCorrectedEnergy = true;
 
     /// @brief Numbers of entries that satisfy all selection cuts.
     std::vector<int> goodEntries = {};
     /// @brief Sigma_psi(lnY, kstheta) from gaus fit.
     std::vector<std::vector<double>> vSigmaMatrixFit;
-    
-    /// @brief Correction to psi_reco (dpsi = psi_reco - psi_gen).
+
+
+    /// @brief Correction to psi_reco (dpsi = psi_reco - psi_gen). 
     Spline deltaPsi_RecGenDiff;
     /// @brief Resolution of theta as a function of track's theta.
     Spline sigmaTheta;
 
-    /// @brief Creates deltaPsi_RecGenDiff -- correction to psi_reco (dpsi = psi_reco - psi_gen).
-    /// @param tree reference to Tree object storing data about events,
-    Spline CreateDeltaPsiSpline();
+    /// @brief Load ksdpsiRecGenDiff_spline and sigmaTheta_spline from the file.
+    /// @param spline_filename name of .root file where splines are saved. 
+    /// @return std::pair<ksdpsiRecGenDiff_spline, sigmaTheta_spline>.
+    std::pair<Spline, Spline> LoadSplines(std::string spline_filename);
 
-    void FillHists(bool useTrueEnergy);
+    void FillHists(bool useCorrectedEnergy);
 
 public:
-    HandlerMC(std::string fKsKl, std::string energyPoint, double fitRange, std::optional<double> meanEnergy, 
-                bool useTrueEnergy, bool saveSplines = false, bool isVerbose = true);
+    HandlerExp(std::string fKsKl, std::string energyPoint, double fitRange, std::optional<double> meanEnergy, 
+                        bool useCorrectedEnergy, bool isVerbose = true);
 
-    HandlerMC(std::string fKsKl, std::string energyPoint, bool useTrueEnergy, bool saveSplines = false, bool isVerbose = true): 
-            HandlerMC(fKsKl, energyPoint, 0.27, std::nullopt, useTrueEnergy, saveSplines, isVerbose) {}
+    HandlerExp(std::string fKsKl, std::string energyPoint, bool useCorrectedEnergy, bool isVerbose = true): 
+            HandlerExp(fKsKl, energyPoint, 0.27, std::nullopt, useCorrectedEnergy, isVerbose) {}
 
-    HandlerMC(std::string fKsKl, std::string energyPoint, double fitRange, 
-                bool useTrueEnergy, bool saveSplines = false, bool isVerbose = true): 
-            HandlerMC(fKsKl, energyPoint, fitRange, std::nullopt, useTrueEnergy, saveSplines, isVerbose) {}
+    HandlerExp(std::string fKsKl, std::string energyPoint, double fitRange, bool useCorrectedEnergy): 
+            HandlerExp(fKsKl, energyPoint, fitRange, std::nullopt, useCorrectedEnergy, true) {}
 
     std::pair<double, double> GetMass(double fitRange = 0.27);
     
@@ -64,15 +66,16 @@ public:
     void Draw(std::string name) override;
     void Draw(std::string name, Range range);
     void SaveHists(std::string output_filename);
-    void SaveSplines(std::string spline_filename);
 };
 
-HandlerMC::HandlerMC(std::string fKsKl, std::string energyPoint, double fitRange, std::optional<double> meanEnergy, 
-                        bool useTrueEnergy, bool saveSplines, bool isVerbose = true): 
-    energyPoint{energyPoint}, fitRange{fitRange}, meanEnergy{meanEnergy}, useTrueEnergy{useTrueEnergy}, verbose{isVerbose} 
+HandlerExp::HandlerExp(std::string fKsKl, std::string energyPoint, double fitRange, std::optional<double> meanEnergy, 
+                        bool useCorrectedEnergy, bool isVerbose = true): 
+    energyPoint{energyPoint}, fitRange{fitRange}, meanEnergy{meanEnergy}, useCorrectedEnergy{useCorrectedEnergy}, verbose{isVerbose} 
 {
-    tree = std::unique_ptr<Tree>(new Tree(fKsKl));
+    tree = std::unique_ptr<Tree>(new Tree(fKsKl, true));
     painter = std::unique_ptr<Painter>(new Painter(&container));
+
+    tree->SetReco(true);
     data = tree->data; 
 
     container.Add("hMlnY", new TH2D("hMlnY", "M(lnY)", 300, -0.3, 0.3, 600, 480, 520));
@@ -80,12 +83,7 @@ HandlerMC::HandlerMC(std::string fKsKl, std::string energyPoint, double fitRange
     container.Add("MPsi", new TH2D("MPsi", "M(Psi)", 200, 2, TMath::Pi(), 200, 480, 520));
     container.Add("hM_CrAnglelnY", new TH2D("hM_CrAnglelnY", "M_CrAngle(lnY)", 30, -0.4, 0.4, 40000, 490, 515));
     container.Add("hPsilnY", new TH2D("hPsilnY", "Psi(lnY)", 200, -0.4, 0.4, 10000, 2.4, 3.3));
-    container.Add("hEnergySpectrum", new TH1D("hEnergySpectrum", "hEnergySpectrum", 6000, 480, 540));
     container.Add("hMassVsKsTheta", new TH2D("hMassVsKsTheta", "M vs KsTheta", 600, -1.57, 1.57, 40000, 480, 520));
-
-    container.Add("hDiffRecGen", new TH2D("hDiffRecGen", "hDiffRecGen", 1200, -6., 6., 20000, -1, 1));
-    container.Add("hDiffRecGen_cowboy", new TH2D("hDiffRecGen_cowboy", "hDiffRecGen_cowboy", 1200, -6., 6., 20000, -1, 1));
-    container.Add("hDiffRecGen_sailor", new TH2D("hDiffRecGen_sailor", "hDiffRecGen_sailor", 1200, -6., 6., 20000, -1, 1));
 
     container.Add("hMlnYpfx", new TProfile("hMlnYpfx","Profile of M versus lnY", 30, -1, 1, 490, 505));
     container.Add("hMlnYpfx_cowboy", new TProfile("hMlnYpfx_cowboy", "Profile of M versus lnY, cowboy", 30, -1, 1, 490, 505));
@@ -104,43 +102,16 @@ HandlerMC::HandlerMC(std::string fKsKl, std::string energyPoint, double fitRange
             { goodEntries.push_back(entry); }
         }
     }
-
-    vSigmaMatrixFit = Sigmas::GetSigmaMatrix(tree, goodEntries, verbose);
-    auto [ksThetaBinCenters, deltaTheta, deltaThetaError] = Sigmas::GetThetaSigmas(tree, goodEntries);
-    sigmaTheta = Spline(ksThetaBinCenters, deltaTheta, "sigmaTheta_spline");
-
+    vSigmaMatrixFit = Sigmas::GetSigmaMatrix(tree, goodEntries, verbose); 
     std::string spline_filename = misc::GetSplineFilename(energyPoint);
-    deltaPsi_RecGenDiff = CreateDeltaPsiSpline();
-
-    if(saveSplines)
-    { SaveSplines(spline_filename); }
-    
-    FillHists(useTrueEnergy);
+    std::tie(deltaPsi_RecGenDiff, sigmaTheta) = LoadSplines(spline_filename);
+    FillHists(useCorrectedEnergy);
 }
 
-Spline HandlerMC::CreateDeltaPsiSpline()
-{
-    std::vector<Double_t> psi_delta = {};
-    std::vector<Double_t> ksTheta_bins = {};
-    TProfile psi("psi", "deltaPsi", 50, 0, 3.14, -0.1, 0.1);
+std::pair<Spline, Spline> HandlerExp::LoadSplines(std::string spline_filename)
+{ return {Spline(spline_filename, "ksdpsiRecGenDiff_spline"), Spline(spline_filename, "sigmaTheta_spline")}; }
 
-    for(const auto &entry : goodEntries)
-    {
-        tree->GetEntry(entry);
-        if(abs(tree->reco.Y - 1) > 1e-9 && tree->reco.piPos.nhit > 10 && tree->reco.piNeg.nhit > 10 && fabs(tree->reco.ks.theta - TMath::Pi() / 2) < 0.5)
-        { psi.Fill(tree->reco.ks.theta, tree->reco.ksdpsi - tree->gen.ksdpsi); }
-    }
-
-    for(int i = 0; i < psi.GetNbinsX(); i++)
-    {
-        ksTheta_bins.push_back(psi.GetBinCenter(i));
-        psi_delta.push_back(psi.GetBinContent(i));
-    }
-
-    return Spline(ksTheta_bins, psi_delta, "ksdpsiRecGenDiff_spline");
-}
-
-void HandlerMC::FillHists(bool useTrueEnergy)
+void HandlerExp::FillHists(bool useCorrectedEnergy)
 {
     auto sigmaPhi = Sigmas::GetPhiSigma();
 
@@ -157,7 +128,8 @@ void HandlerMC::FillHists(bool useTrueEnergy)
                         sigmaPhi * sigmaPhi / 2 * PsiFunc::Derivative(PsiFunc::Var::phiNeg, data->piPos, data->piNeg, 2);
         auto dpsi = tree->reco.ksdpsi +  psiCor;
 
-        auto energy = useTrueEnergy? tree->etrue : meanEnergy.value_or(tree->emeas);
+        auto energy = meanEnergy.value_or(tree->emeas);
+        energy = useCorrectedEnergy? misc::GetCorrectedEnergy(tree->runnum, energy) : energy;
 
         auto [binY, binKsTheta] = Sigmas::GetSigmaMatrix_bin(lnY, data->ks.theta);
         auto sigmaPsi = (binY != -1 && binKsTheta != -1)? vSigmaMatrixFit[binY][binKsTheta] : 0.;
@@ -169,26 +141,20 @@ void HandlerMC::FillHists(bool useTrueEnergy)
         container["hDeltaM"]->Fill(lnY, massCorr);
         container["hMlnYpfx"]->Fill(lnY, mass); 
 
-        container["hDiffRecGen"]->Fill(data->ks.theta - TMath::Pi() / 2, dpsi - tree->gen.ksdpsi);
         container["hMassVsKsTheta"]->Fill(data->ks.theta - TMath::Pi() / 2, mass); 
         auto eventType = misc::GetEventType(data->piPos, data->piNeg);
         if(eventType == misc::EventType::cowboy)
         { 
-            container["hDiffRecGen_cowboy"]->Fill(data->ks.theta - TMath::Pi() / 2, dpsi - tree->gen.ksdpsi);
             container["hMlnYpfx_cowboy"]->Fill(lnY, mass); 
         }
 
         if(eventType == misc::EventType::sailor)
-        { 
-            container["hDiffRecGen_sailor"]->Fill(data->ks.theta - TMath::Pi() / 2, dpsi - tree->gen.ksdpsi);
-            container["hMlnYpfx_sailor"]->Fill(lnY, mass); 
-        }
+        { container["hMlnYpfx_sailor"]->Fill(lnY, mass); }
         container["hPsilnY"]->Fill(lnY, dpsi); 
-        container["hEnergySpectrum"]->Fill(tree->etrue);
     }
 }
 
-std::pair<double, double> HandlerMC::GetMass(double fitRange)
+std::pair<double, double> HandlerExp::GetMass(double fitRange)
 {   
     auto printFitRes = [](const TFitResultPtr &res, std::string resName) {
         std::cout << "\n" << resName << " = " << res->Parameter(0) << " +/- " << res->ParError(0) 
@@ -205,23 +171,15 @@ std::pair<double, double> HandlerMC::GetMass(double fitRange)
     return std::pair(mass, massErr);
 }
 
-void HandlerMC::Draw(std::string name)
+void HandlerExp::Draw(std::string name)
 {
     painter->Draw(name);
 }
 
-void HandlerMC::Draw(std::string name, Range range)
-{
-    painter->Draw(name, "", range);
-}
+void HandlerExp::Draw(std::string name, Range range)
+{ painter->Draw(name, "", range); }
 
-void HandlerMC::SaveHists(std::string output_filename)
+void HandlerExp::SaveHists(std::string output_filename)
 { container.Save(output_filename); }
-
-void HandlerMC::SaveSplines(std::string spline_filename)
-{
-    deltaPsi_RecGenDiff.Save(spline_filename, true);
-    sigmaTheta.Save(spline_filename, false);
-}
 
 #endif

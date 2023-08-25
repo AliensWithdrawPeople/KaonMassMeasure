@@ -1,5 +1,5 @@
 #define ksklTrEff_cxx
-#include "ksklTrEff.h"
+#include "ksklTrEff.hpp"
 #include <TH2.h>
 #include <TH1D.h>
 #include <TF1.h>

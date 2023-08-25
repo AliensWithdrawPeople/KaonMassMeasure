@@ -1,6 +1,5 @@
-#pragma once
-#ifndef Energy_h
-#define Energy_h
+#ifndef Energy_hpp
+#define Energy_hpp
 
 #include <vector>
 #include <set>

@@ -1,7 +1,7 @@
-#ifndef misc_h
-#define misc_h
+#ifndef misc_hpp
+#define misc_hpp
 
-#include "Tree.h"
+#include "Tree.hpp"
 
 #include <functional>
 #include <vector>

@@ -1,5 +1,5 @@
-#ifndef HistContainer_h
-#define HistContainer_h
+#ifndef HistContainer_hpp
+#define HistContainer_hpp
 
 #include <memory>
 #include <map>

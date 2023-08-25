@@ -1,12 +1,12 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Fri Aug  4 16:47:50 2023 by ROOT version 6.22/08
+// Thu Jun 29 21:15:02 2023 by ROOT version 6.22/08
 // from TTree tr_ph/Tree with the non-collinear events
-// found on file: root://cmd//scan2018/scan2018_tr_ph_fc_e274_v9.root
+// found on file: root://cmd//scan2018_omphi/scan2018_omphi_tr_ph_fc_e509_v9.root
 //////////////////////////////////////////////////////////
 
-#ifndef pion_h
-#define pion_h
+#ifndef prelim_hpp
+#define prelim_hpp
 
 #include <TROOT.h>
 #include <TChain.h>
@@ -14,7 +14,7 @@
 
 // Header file for the classes stored in the TTree if any.
 
-class pion {
+class prelim {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
@@ -92,24 +92,24 @@ public :
    Int_t           tenconv[10];   //[nt]
    Int_t           nks_total;
    Int_t           nks;
-   Int_t           ksvind[11][2];   //[nks]
-   Int_t           kstype[11];   //[nks]
-   Int_t           ksfstatus[11];   //[nks]
-   Float_t         ksvchi[11];   //[nks]
-   Float_t         ksvxyz[11][3];   //[nks]
-   Float_t         ksminv[11];   //[nks]
-   Float_t         ksalign[11];   //[nks]
-   Float_t         kstlen[11];   //[nks]
-   Float_t         ksdpsi[11];   //[nks]
-   Float_t         kslen[11];   //[nks]
-   Float_t         ksz0[11];   //[nks]
-   Float_t         ksphi[11];   //[nks]
-   Float_t         ksth[11];   //[nks]
-   Float_t         ksptot[11];   //[nks]
-   Float_t         kspiphi[11][2];   //[nks]
-   Float_t         kspith[11][2];   //[nks]
-   Float_t         kspipt[11][2];   //[nks]
-   Float_t         kserr[11][3][3];   //[nks]
+   Int_t           ksvind[6][2];   //[nks]
+   Int_t           kstype[6];   //[nks]
+   Int_t           ksfstatus[6];   //[nks]
+   Float_t         ksvchi[6];   //[nks]
+   Float_t         ksvxyz[6][3];   //[nks]
+   Float_t         ksminv[6];   //[nks]
+   Float_t         ksalign[6];   //[nks]
+   Float_t         kstlen[6];   //[nks]
+   Float_t         ksdpsi[6];   //[nks]
+   Float_t         kslen[6];   //[nks]
+   Float_t         ksz0[6];   //[nks]
+   Float_t         ksphi[6];   //[nks]
+   Float_t         ksth[6];   //[nks]
+   Float_t         ksptot[6];   //[nks]
+   Float_t         kspiphi[6][2];   //[nks]
+   Float_t         kspith[6][2];   //[nks]
+   Float_t         kspipt[6][2];   //[nks]
+   Float_t         kserr[6][3][3];   //[nks]
    Int_t           ntlxe_total;
    Int_t           ntlxe;
    Int_t           ntlxelayers[10];   //[ntlxe]
@@ -177,14 +177,14 @@ public :
    Float_t         mua3[48];   //[nmu]
    Int_t           must[48];   //[nmu]
    Int_t           nsim;
-   Int_t           simtype[1];   //[nsim]
-   Int_t           simorig[1];   //[nsim]
-   Float_t         simmom[1];   //[nsim]
-   Float_t         simphi[1];   //[nsim]
-   Float_t         simtheta[1];   //[nsim]
-   Float_t         simvtx[1];   //[nsim]
-   Float_t         simvty[1];   //[nsim]
-   Float_t         simvtz[1];   //[nsim]
+   Int_t           simtype[40];   //[nsim]
+   Int_t           simorig[40];   //[nsim]
+   Float_t         simmom[40];   //[nsim]
+   Float_t         simphi[40];   //[nsim]
+   Float_t         simtheta[40];   //[nsim]
+   Float_t         simvtx[40];   //[nsim]
+   Float_t         simvty[40];   //[nsim]
+   Float_t         simvtz[40];   //[nsim]
    Int_t           ncorr;
    Int_t           idcorr[6];   //[ncorr]
    Int_t           bitcorr[6];   //[ncorr]
@@ -369,28 +369,29 @@ public :
    TBranch        *b_ncorruptedbanks;   //!
    TBranch        *b_has_frontend;   //!
 
-   pion(TTree *tree=0);
-   virtual ~pion();
+   prelim(TTree *tree=0);
+   virtual ~prelim();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree);
-   virtual void     Loop(std::string filename);
+   virtual void     Loop(std::string histFileName);
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
 };
 
 #endif
 
-#ifdef pion_cxx
-pion::pion(TTree *tree) : fChain(0) 
+#ifdef prelim_cxx
+prelim::prelim(TTree *tree) : fChain(0) 
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("root://cmd//scan2018/scan2018_tr_ph_fc_e274_v9.root");
+      std::string fname = "root://cmd//scan2018_omphi/scan2018_omphi_tr_ph_fc_e509_v9.root";
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(fname.c_str());
       if (!f || !f->IsOpen()) {
-         f = new TFile("root://cmd//scan2018/scan2018_tr_ph_fc_e274_v9.root");
+         f = new TFile(fname.c_str());
       }
       f->GetObject("tr_ph",tree);
 
@@ -398,19 +399,19 @@ pion::pion(TTree *tree) : fChain(0)
    Init(tree);
 }
 
-pion::~pion()
+prelim::~prelim()
 {
    if (!fChain) return;
    delete fChain->GetCurrentFile();
 }
 
-Int_t pion::GetEntry(Long64_t entry)
+Int_t prelim::GetEntry(Long64_t entry)
 {
 // Read contents of entry.
    if (!fChain) return 0;
    return fChain->GetEntry(entry);
 }
-Long64_t pion::LoadTree(Long64_t entry)
+Long64_t prelim::LoadTree(Long64_t entry)
 {
 // Set the environment to read one entry
    if (!fChain) return -5;
@@ -423,7 +424,7 @@ Long64_t pion::LoadTree(Long64_t entry)
    return centry;
 }
 
-void pion::Init(TTree *tree)
+void prelim::Init(TTree *tree)
 {
    // The Init() function is called when the selector needs to initialize
    // a new tree or chain. Typically here the branch addresses and branch
@@ -614,7 +615,7 @@ void pion::Init(TTree *tree)
    Notify();
 }
 
-Bool_t pion::Notify()
+Bool_t prelim::Notify()
 {
    // The Notify() function is called when a new file is opened. This
    // can be either for a new TTree in a TChain or when when a new TTree
@@ -625,18 +626,18 @@ Bool_t pion::Notify()
    return kTRUE;
 }
 
-void pion::Show(Long64_t entry)
+void prelim::Show(Long64_t entry)
 {
 // Print contents of entry.
 // If entry is not specified, print current entry
    if (!fChain) return;
    fChain->Show(entry);
 }
-Int_t pion::Cut(Long64_t entry)
+Int_t prelim::Cut(Long64_t entry)
 {
 // This function may be called from Loop.
 // returns  1 if entry is accepted.
 // returns -1 otherwise.
    return 1;
 }
-#endif // #ifdef pion_cxx
+#endif // #ifdef prelim_cxx

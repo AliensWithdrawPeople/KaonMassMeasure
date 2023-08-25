@@ -1,5 +1,5 @@
-#ifndef Spline_h
-#define Spline_h
+#ifndef Spline_hpp
+#define Spline_hpp
 
 #include <optional>
 #include <functional>

@@ -1,5 +1,5 @@
-#ifndef Tree_h
-#define Tree_h
+#ifndef Tree_hpp
+#define Tree_hpp
 
 #include <memory>
 #include <optional>

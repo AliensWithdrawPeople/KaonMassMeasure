@@ -1,7 +1,7 @@
-#ifndef Painter_h
-#define Painter_h
+#ifndef Painter_hpp
+#define Painter_hpp
 
-#include "HistContainer.h"
+#include "HistContainer.hpp"
 
 struct Range{
     double min;

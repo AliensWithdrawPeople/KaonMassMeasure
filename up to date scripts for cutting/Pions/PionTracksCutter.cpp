@@ -1,5 +1,5 @@
 #define PionTracksCutter_cxx
-#include "PionTracksCutter.h"
+#include "PionTracksCutter.hpp"
 #include <TH1D.h>
 #include <TH2D.h>
 #include <TF1.h>

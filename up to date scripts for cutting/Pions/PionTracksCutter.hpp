@@ -1,12 +1,12 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Fri Jul 21 13:42:27 2023 by ROOT version 6.28/04
-// from TTree tr_ph_merged/Tree with the non-collinear events
-// found on file: ./MCGPJ_kskl509_Merged.root
+// Wed Jul 19 16:53:57 2023 by ROOT version 6.28/04
+// from TTree tr_ph/Tree with the non-collinear events
+// found on file: ./tr_ph_run000030.root
 //////////////////////////////////////////////////////////
 
-#ifndef ksklTrEff_h
-#define ksklTrEff_h
+#ifndef PionTracksCutter_hpp
+#define PionTracksCutter_hpp
 
 #include <TROOT.h>
 #include <TChain.h>
@@ -14,7 +14,7 @@
 
 // Header file for the classes stored in the TTree if any.
 
-class ksklTrEff {
+class PionTracksCutter {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
@@ -57,39 +57,39 @@ public :
    Float_t         vxyz[5][3];   //[nv]
    Int_t           nt;
    Int_t           it[2];
-   Int_t           tnhit[10];   //[nt]
-   Float_t         tlength[10];   //[nt]
-   Float_t         tphi[10];   //[nt]
-   Float_t         tth[10];   //[nt]
-   Float_t         tptot[10];   //[nt]
-   Float_t         tphiv[10];   //[nt]
-   Float_t         tthv[10];   //[nt]
-   Float_t         tptotv[10];   //[nt]
-   Float_t         trho[10];   //[nt]
-   Float_t         tdedx[10];   //[nt]
-   Float_t         tz[10];   //[nt]
-   Float_t         tt0[10];   //[nt]
-   Float_t         tant[10];   //[nt]
-   Float_t         tchi2r[10];   //[nt]
-   Float_t         tchi2z[10];   //[nt]
-   Float_t         tchi2ndf[10];   //[nt]
-   Int_t           tcharge[10];   //[nt]
-   Float_t         ten[10];   //[nt]
-   Float_t         tfc[10];   //[nt]
-   Float_t         tenlxe[10];   //[nt]
-   Float_t         tlengthlxe[10];   //[nt]
-   Float_t         tenslxe_layers[10][14];   //[nt]
-   Float_t         tencsi[10];   //[nt]
-   Float_t         tenbgo[10];   //[nt]
-   Float_t         tclth[10];   //[nt]
-   Float_t         tclphi[10];   //[nt]
-   Float_t         terr[10][3][3];   //[nt]
-   Float_t         terr0[10][6][6];   //[nt]
-   Int_t           tindlxe[10];   //[nt]
-   Float_t         tzcc[10][2];   //[nt]
-   Float_t         txyzatcl[10][3];   //[nt]
-   Float_t         txyzatlxe[10][3];   //[nt]
-   Int_t           tenconv[10];   //[nt]
+   Int_t           tnhit[9];   //[nt]
+   Float_t         tlength[9];   //[nt]
+   Float_t         tphi[9];   //[nt]
+   Float_t         tth[9];   //[nt]
+   Float_t         tptot[9];   //[nt]
+   Float_t         tphiv[9];   //[nt]
+   Float_t         tthv[9];   //[nt]
+   Float_t         tptotv[9];   //[nt]
+   Float_t         trho[9];   //[nt]
+   Float_t         tdedx[9];   //[nt]
+   Float_t         tz[9];   //[nt]
+   Float_t         tt0[9];   //[nt]
+   Float_t         tant[9];   //[nt]
+   Float_t         tchi2r[9];   //[nt]
+   Float_t         tchi2z[9];   //[nt]
+   Float_t         tchi2ndf[9];   //[nt]
+   Int_t           tcharge[9];   //[nt]
+   Float_t         ten[9];   //[nt]
+   Float_t         tfc[9];   //[nt]
+   Float_t         tenlxe[9];   //[nt]
+   Float_t         tlengthlxe[9];   //[nt]
+   Float_t         tenslxe_layers[9][14];   //[nt]
+   Float_t         tencsi[9];   //[nt]
+   Float_t         tenbgo[9];   //[nt]
+   Float_t         tclth[9];   //[nt]
+   Float_t         tclphi[9];   //[nt]
+   Float_t         terr[9][3][3];   //[nt]
+   Float_t         terr0[9][6][6];   //[nt]
+   Int_t           tindlxe[9];   //[nt]
+   Float_t         tzcc[9][2];   //[nt]
+   Float_t         txyzatcl[9][3];   //[nt]
+   Float_t         txyzatlxe[9][3];   //[nt]
+   Int_t           tenconv[9];   //[nt]
    Int_t           nks_total;
    Int_t           nks;
    Int_t           ksvind[5][2];   //[nks]
@@ -126,21 +126,21 @@ public :
    Float_t         tlxesen_layers[10][14];   //[ntlxe]
    Int_t           nph_total;
    Int_t           nph;
-   Float_t         phen[13];   //[nph]
-   Float_t         phth[13];   //[nph]
-   Float_t         phphi[13];   //[nph]
-   Float_t         phrho[13];   //[nph]
-   Float_t         phen0[13];   //[nph]
-   Float_t         phth0[13];   //[nph]
-   Float_t         phphi0[13];   //[nph]
-   Float_t         phlxe[13];   //[nph]
-   Float_t         phslxe_layers[13][14];   //[nph]
-   Float_t         pherr[13][3];   //[nph]
-   Float_t         phcsi[13];   //[nph]
-   Float_t         phbgo[13];   //[nph]
-   Int_t           phflag[13];   //[nph]
-   Int_t           phconv[13];   //[nph]
-   Int_t           phfc[13];   //[nph]
+   Float_t         phen[11];   //[nph]
+   Float_t         phth[11];   //[nph]
+   Float_t         phphi[11];   //[nph]
+   Float_t         phrho[11];   //[nph]
+   Float_t         phen0[11];   //[nph]
+   Float_t         phth0[11];   //[nph]
+   Float_t         phphi0[11];   //[nph]
+   Float_t         phlxe[11];   //[nph]
+   Float_t         phslxe_layers[11][14];   //[nph]
+   Float_t         pherr[11][3];   //[nph]
+   Float_t         phcsi[11];   //[nph]
+   Float_t         phbgo[11];   //[nph]
+   Int_t           phflag[11];   //[nph]
+   Int_t           phconv[11];   //[nph]
+   Int_t           phfc[11];   //[nph]
    Int_t           nzcs_total;
    Int_t           nzcs;
    Int_t           zcsch[19];   //[nzcs]
@@ -157,33 +157,33 @@ public :
    Float_t         zccz[20];   //[nzcc]
    Int_t           zccvalid[20];   //[nzcc]
    Int_t           nant;
-   Int_t           antch[16];   //[nant]
-   Float_t         antt0[16];   //[nant]
-   Float_t         antt1[16];   //[nant]
-   Float_t         anta0[16];   //[nant]
-   Float_t         anta1[16];   //[nant]
-   Float_t         antphi[16];   //[nant]
-   Int_t           antst[16];   //[nant]
+   Int_t           antch[14];   //[nant]
+   Float_t         antt0[14];   //[nant]
+   Float_t         antt1[14];   //[nant]
+   Float_t         anta0[14];   //[nant]
+   Float_t         anta1[14];   //[nant]
+   Float_t         antphi[14];   //[nant]
+   Int_t           antst[14];   //[nant]
    Int_t           nmu;
-   Int_t           much[10];   //[nmu]
-   Float_t         mut0[10];   //[nmu]
-   Float_t         mut1[10];   //[nmu]
-   Float_t         mut2[10];   //[nmu]
-   Float_t         mut3[10];   //[nmu]
-   Float_t         mua0[10];   //[nmu]
-   Float_t         mua1[10];   //[nmu]
-   Float_t         mua2[10];   //[nmu]
-   Float_t         mua3[10];   //[nmu]
-   Int_t           must[10];   //[nmu]
+   Int_t           much[8];   //[nmu]
+   Float_t         mut0[8];   //[nmu]
+   Float_t         mut1[8];   //[nmu]
+   Float_t         mut2[8];   //[nmu]
+   Float_t         mut3[8];   //[nmu]
+   Float_t         mua0[8];   //[nmu]
+   Float_t         mua1[8];   //[nmu]
+   Float_t         mua2[8];   //[nmu]
+   Float_t         mua3[8];   //[nmu]
+   Int_t           must[8];   //[nmu]
    Int_t           nsim;
-   Int_t           simtype[21];   //[nsim]
-   Int_t           simorig[21];   //[nsim]
-   Float_t         simmom[21];   //[nsim]
-   Float_t         simphi[21];   //[nsim]
-   Float_t         simtheta[21];   //[nsim]
-   Float_t         simvtx[21];   //[nsim]
-   Float_t         simvty[21];   //[nsim]
-   Float_t         simvtz[21];   //[nsim]
+   Int_t           simtype[16];   //[nsim]
+   Int_t           simorig[16];   //[nsim]
+   Float_t         simmom[16];   //[nsim]
+   Float_t         simphi[16];   //[nsim]
+   Float_t         simtheta[16];   //[nsim]
+   Float_t         simvtx[16];   //[nsim]
+   Float_t         simvty[16];   //[nsim]
+   Float_t         simvtz[16];   //[nsim]
    Int_t           ncorr;
    Int_t           idcorr[1];   //[ncorr]
    Int_t           bitcorr[1];   //[ncorr]
@@ -367,29 +367,28 @@ public :
    TBranch        *b_ncorruptedbanks;   //!
    TBranch        *b_has_frontend;   //!
 
-   ksklTrEff(TTree *tree=0);
-   virtual ~ksklTrEff();
+   PionTracksCutter(TTree *tree=0);
+   virtual ~PionTracksCutter();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree);
-   virtual void     Loop(std::string outFileName);
+   virtual void     Loop();
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
 };
 
 #endif
 
-#ifdef ksklTrEff_cxx
-ksklTrEff::ksklTrEff(TTree *tree) : fChain(0) 
+#ifdef PionTracksCutter_cxx
+PionTracksCutter::PionTracksCutter(TTree *tree) : fChain(0) 
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      std::string fname = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/mcgpj/tr_ph v9/EnergySmearing/MCGPJ_kskl505_Merged.root";
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(fname.c_str());
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("C:/work/Science/BINP/Kaon Mass Measure/tr_ph/mcgpj/tr_ph v9/pipi/MCGPJ_pipi509_Merged.root");
       if (!f || !f->IsOpen()) {
-         f = new TFile(fname.c_str());
+         f = new TFile("C:/work/Science/BINP/Kaon Mass Measure/tr_ph/mcgpj/tr_ph v9/pipi/MCGPJ_pipi509_Merged.root");
       }
       f->GetObject("tr_ph",tree);
 
@@ -397,19 +396,19 @@ ksklTrEff::ksklTrEff(TTree *tree) : fChain(0)
    Init(tree);
 }
 
-ksklTrEff::~ksklTrEff()
+PionTracksCutter::~PionTracksCutter()
 {
    if (!fChain) return;
    delete fChain->GetCurrentFile();
 }
 
-Int_t ksklTrEff::GetEntry(Long64_t entry)
+Int_t PionTracksCutter::GetEntry(Long64_t entry)
 {
 // Read contents of entry.
    if (!fChain) return 0;
    return fChain->GetEntry(entry);
 }
-Long64_t ksklTrEff::LoadTree(Long64_t entry)
+Long64_t PionTracksCutter::LoadTree(Long64_t entry)
 {
 // Set the environment to read one entry
    if (!fChain) return -5;
@@ -422,7 +421,7 @@ Long64_t ksklTrEff::LoadTree(Long64_t entry)
    return centry;
 }
 
-void ksklTrEff::Init(TTree *tree)
+void PionTracksCutter::Init(TTree *tree)
 {
    // The Init() function is called when the selector needs to initialize
    // a new tree or chain. Typically here the branch addresses and branch
@@ -612,7 +611,7 @@ void ksklTrEff::Init(TTree *tree)
    Notify();
 }
 
-Bool_t ksklTrEff::Notify()
+Bool_t PionTracksCutter::Notify()
 {
    // The Notify() function is called when a new file is opened. This
    // can be either for a new TTree in a TChain or when when a new TTree
@@ -623,18 +622,18 @@ Bool_t ksklTrEff::Notify()
    return kTRUE;
 }
 
-void ksklTrEff::Show(Long64_t entry)
+void PionTracksCutter::Show(Long64_t entry)
 {
 // Print contents of entry.
 // If entry is not specified, print current entry
    if (!fChain) return;
    fChain->Show(entry);
 }
-Int_t ksklTrEff::Cut(Long64_t entry)
+Int_t PionTracksCutter::Cut(Long64_t entry)
 {
 // This function may be called from Loop.
 // returns  1 if entry is accepted.
 // returns -1 otherwise.
    return 1;
 }
-#endif // #ifdef ksklTrEff_cxx
+#endif // #ifdef PionTracksCutter_cxx

@@ -1,5 +1,5 @@
 #define kskl2bGen_cxx
-#include "kskl2bGen.h"
+#include "kskl2bGen.hpp"
 #include <TH2.h>
 #include <TH1D.h>
 #include <TF1.h>

@@ -20,7 +20,6 @@ Double_t QPGamma(Int_t Mode, Double_t s);
 Double_t FAS_ASPO(Double_t TwoE);
 
 std::complex<double> KnFF_total(double ss, const std::vector<double> par);
-double KnFormFactor(double ss, const std::vector<double> par);
 std::complex<double> KFF_total(double ss, const std::vector<double>par, double charge);
 
 std::complex<double> KFF_total(double ss, const std::vector<double> par, double charge)
@@ -400,7 +399,7 @@ int PhiToK0_XSecBornFunc_New()
     TCanvas c("canv", "canv");
     TGraphErrors a(energies.size(), energies.data(), cross_sections.data(), zeroes.data(), xsec_err.data());
     auto bb = new TF1("born", KnFormFactor, 1000., 1060., 7);
-
+    bb->SetNpx(1e4);
     bb->SetParameters(1019.4586, 4.189, 0.0004296, 0., 0., 0.97212, 0.);
     bb->FixParameter(3, 0.);
     bb->FixParameter(4, 0.);
@@ -414,15 +413,14 @@ int PhiToK0_XSecBornFunc_New()
         std::cout << fabs(bb->Derivative(ens[i]) * enErrs[i]) << ", ";
     }
 
-    // a.Fit(bb, "ME");
-    // a.DrawClone("AP");
+    a.Fit(bb, "ME");
+    a.DrawClone("AP");
 
     // TFile *file = TFile::Open("C:/work/Science/BINP/Kaon Mass Measure/PhiMesonFit/bcs_BigChi2=935.root");
     // auto gr = (TGraphErrors *)file->Get("bcs");
     // gr->SetMarkerColor(kRed);
     // gr->DrawClone("AP");
-    // a.DrawClone("P same");
-    bb->DrawClone("same");
+    // bb->DrawClone("same");
 
     c.DrawClone();
     return 0;

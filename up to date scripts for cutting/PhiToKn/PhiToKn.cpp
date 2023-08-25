@@ -1,5 +1,5 @@
 #define PhiToKn_cxx
-#include "PhiToKn.h"
+#include "PhiToKn.hpp"
 #include <TH2.h>
 #include <TH1D.h>
 #include <TH2D.h>

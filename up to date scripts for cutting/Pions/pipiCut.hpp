@@ -5,8 +5,8 @@
 // found on file: root://cmd//scan2018/scan2018_tr_ph_fc_e295_v8.root
 //////////////////////////////////////////////////////////
 
-#ifndef pipiCut_h
-#define pipiCut_h
+#ifndef pipiCut_hpp
+#define pipiCut_hpp
 
 #include <TROOT.h>
 #include <TChain.h>
