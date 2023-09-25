@@ -11,10 +11,12 @@
 
 int CalcThetaSigmas()
 {
-    auto filename = [](std::string energyPoint) { return "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/pipi/pipiExp" + energyPoint + ".root"; };
+    auto filename = [](std::string energyPoint, bool isMC = false) 
+    { return "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/pipi/pipi" + std::string(isMC? "MC" : "Exp") + energyPoint + "_new.root"; };
+
     std::vector<std::string> points = {"210", "230", "250", "270", "274", "280", "290", "295"};
 
-    auto tree = TFile::Open(filename("274").c_str())->Get<TTree>("pion");
+    auto tree = TFile::Open(filename("274", false).c_str())->Get<TTree>("pion");
     double phiPos;
     double thetaPos;
     double momPos;
@@ -58,8 +60,10 @@ int CalcThetaSigmas()
         hAngleVsThetaPos->Fill(thetaPos, pos.Angle(neg) - TMath::Pi());
     }
 
-    hDeltaThetaVsThetaPos->DrawClone("col");
-    hAngleVsThetaPos->DrawClone("col");
+    // hDeltaThetaVsThetaPos->DrawClone("col");
+    // hAngleVsThetaPos->DrawClone("col");
 
+    hDeltaThetaVsThetaPos->ProfileX("DeltaTheta_pfx")->DrawClone();
+    hDeltaThetaVsThetaPos->ProjectionY("DeltaTheta_py")->DrawClone();
     return 0;
 }

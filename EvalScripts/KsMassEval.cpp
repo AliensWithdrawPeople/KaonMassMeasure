@@ -2,7 +2,7 @@
 #include <ctime> 
 #include <iostream> 
 
-// #include "HandlerMC.hpp"
+#include "HandlerMC.hpp"
 #include "HandlerExp.hpp"
 
 
@@ -32,26 +32,23 @@ int KsMassEval()
         radiativeCorrections[energyPoints[i]] = deltaM_RC_Smeared[i]; 
     }
 
-    std::string energyPoint = "509";
-    std::string fileNameMC = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/MC/KsKl_Smeared/MC" + energyPoint + ".root";
-    // fileName = "tr_ph/MC/KsKl_Smeared/Field/MC" + energyPoint + "_Field.root";
-
-    // auto handlerMC = new HandlerMC(fileName, energyPoint, 0.27, std::nullopt, true);
-    // auto [mass, massErr] = handlerMC->Eval();
-    // std::cout << mass << " + " << massErr << std::endl;
-    // handlerMC->Draw("hMlnYpfx", {-0.4, 0.4});
-    // // handlerMC->SaveHists("/hist/MC" + energyPoint + ".root");
-    // handlerMC->SaveSplines("C:/work/Science/BINP/Kaon Mass Measure/splines/spline_" + energyPoint + ".root");
-    // delete handlerMC;
-
-    std::string fileNameExp = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/expKsKl/exp" + energyPoint + ".root";
-    auto handlerExp = new HandlerExp(fileNameExp, energyPoint, 0.27, true);
-    auto [mass, massErr] = handlerExp->Eval();
+    std::string energyPoint = "509.5";
+    std::string fileNameMC = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/MC/KsKl_Smeared/New formfactor/MC" + energyPoint + ".root";
+    auto handlerMC = new HandlerMC(fileNameMC, energyPoint, 0.27, meanEnergies[energyPoint].first, false);
+    auto [mass, massErr] = handlerMC->Eval();
     std::cout << mass << " + " << massErr << std::endl;
-    handlerExp->Draw("hMlnYpfx", {-0.4, 0.4});
-    // handler->SaveHists("/hist/MC" + energyPoint + ".root");
-    delete handlerExp;
+    handlerMC->Draw("hMlnYpfx", {-0.4, 0.4});
+    // handlerMC->SaveHists("/hist/MC" + energyPoint + ".root");
+    // handlerMC->SaveSplines("C:/work/Science/BINP/Kaon Mass Measure/splines/spline_" + energyPoint + ".root");
+    delete handlerMC;
 
+    // std::string fileNameExp = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/expKsKl/exp" + energyPoint + ".root";
+    // auto handlerExp = new HandlerExp(fileNameExp, energyPoint, 0.27, true);
+    // auto [mass, massErr] = handlerExp->Eval();
+    // std::cout << mass << " + " << massErr << std::endl;
+    // handlerExp->Draw("hMlnYpfx", {-0.4, 0.4});
+    // handler->SaveHists("/hist/MC" + energyPoint + ".root");
+    // delete handlerExp;
 
     auto end = std::chrono::system_clock::now();
     std::chrono::duration<double> diff = end - start; 

@@ -1,4 +1,4 @@
-#include "C:\work\Science\BINP\Kaon Mass Measure\Energy.h"
+#include "Energy.hpp"
 
 int energyStability()
 {

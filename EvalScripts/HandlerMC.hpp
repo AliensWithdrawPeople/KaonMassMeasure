@@ -51,13 +51,6 @@ public:
     HandlerMC(std::string fKsKl, std::string energyPoint, double fitRange, std::optional<double> meanEnergy, 
                 bool useTrueEnergy, bool saveSplines = false, bool isVerbose = true);
 
-    HandlerMC(std::string fKsKl, std::string energyPoint, bool useTrueEnergy, bool saveSplines = false, bool isVerbose = true): 
-            HandlerMC(fKsKl, energyPoint, 0.27, std::nullopt, useTrueEnergy, saveSplines, isVerbose) {}
-
-    HandlerMC(std::string fKsKl, std::string energyPoint, double fitRange, 
-                bool useTrueEnergy, bool saveSplines = false, bool isVerbose = true): 
-            HandlerMC(fKsKl, energyPoint, fitRange, std::nullopt, useTrueEnergy, saveSplines, isVerbose) {}
-
     std::pair<double, double> GetMass(double fitRange = 0.27);
     
     std::pair<double, double> Eval() override { return GetMass(); }
@@ -114,7 +107,7 @@ HandlerMC::HandlerMC(std::string fKsKl, std::string energyPoint, double fitRange
 
     if(saveSplines)
     { SaveSplines(spline_filename); }
-    
+
     FillHists(useTrueEnergy);
 }
 
