@@ -1,3 +1,9 @@
+/**
+ * @author Parametrization and all values of parameters are taken from E.A.Kozyrev's article (https://arxiv.org/abs/1604.02981).
+ * Code was written by E.A.Kozyrev (e.a.kozyrev@inp.nsk.su) and was updated in terms of constants (pdg live, July 2023) 
+ * and readability by Daniil Ivanov (daniilivanov1606@gmail.com).
+*/
+
 #include <cmath>
 #include <complex>
 #include <TMath.h>
@@ -12,6 +18,18 @@
 #define alphafss 0.0072973525628
 #define pi 3.1415926535
 
+
+/**
+ * // Cross section: KnCrossSection(double *Ecms, double *par);
+ * // Form factor: KnFormFactor(double *Ecms, double *par);
+ * double M_phi = 1019.457; \\ par[0], MeV -- phi meson mass.
+ * double W_phi = 4.240; \\ par[1], MeV -- phi meson width.
+ * double W_phi_ee_B_phi_KsKl = 0.428e-03 // par[2], MeV -- \Gamma_{\phi->e^+e^-} * B_{\phi->KsKl} = 0.428 keV = 0.428e-03 MeV. 
+ * double g_rho_omega = 0.8; \\ par[3] -- g_{\rho, \omega} multiplicative factor for coupling constants  g_{\rho KsKl}, g_{\omega KsKl} (read more in the article).
+ * std::vector<double> params = {1019.457, 4.240, 0.428e-03, 0.8};
+ * // pass params as params.data().
+*/
+
 Double_t PointLikeKnCrossSection(Double_t s);
 Double_t RhoWidth(Double_t s);
 Double_t OmgWidth(Double_t s);
@@ -23,13 +41,13 @@ Double_t FAS_ASPO(Double_t TwoE);
 
 /** @param charge For Neutral kaons == -1. 
 */ 
-std::complex<double> KFF_total(double ss, const std::vector<double> par, double charge)
+std::complex<double> KFF_total(double Ecms, const std::vector<double> par, double charge)
 {
-    Double_t s = ss*ss;
+    Double_t s = Ecms*Ecms;
 
     Double_t MPhi = par[0];
     Double_t WPhi = par[1];
-    Double_t gb = par[2];
+    Double_t gb = par[2]; // Gamma * Branching
         
     Double_t Momega = 782.66;
     Double_t Mrho = 775.26;
@@ -96,15 +114,21 @@ std::complex<double> KFF_total(double ss, const std::vector<double> par, double 
 }
 
 /** @brief Set mode of KFF_total: -1 -- K0
- * @param ss s = 4 * E_beam^2.
+ * @param Ecms = 2 * E_beam MeV
  * @param par Vector of parameters that are used in phi -> KsKl cross section parametrization.
 */
-std::complex<double> KnFF_total(double ss, const std::vector<double> par)
-{ return KFF_total(ss,par,-1.); }
+std::complex<double> KnFF_total(double Ecms, const std::vector<double> par)
+{ return KFF_total(Ecms,par,-1.); }
 
-double KnCrossSection(double *ss, double *par)
+/**
+ * @note pass params as params.data().
+ * @param Ecms = 2 * E_beam MeV
+ * @param par Vector of parameters that are used in phi -> KsKl cross section parametrization.
+ * @returns Cross section in nb.
+*/
+double KnCrossSection(double *Ecms, double *par)
 {
-    double s = ss[0]*ss[0];
+    double s = Ecms[0]*Ecms[0];
     std::vector<double> par1;
     par1.push_back(par[0]);
     par1.push_back(par[1]);
@@ -121,7 +145,7 @@ double KnCrossSection(double *ss, double *par)
     par1.push_back(0.0);
     par1.push_back(0.0);
     
-    std::complex<double> ATot = KnFF_total(ss[0] ,par1);
+    std::complex<double> ATot = KnFF_total(Ecms[0], par1);
     double MPhi = par[0];
     double Fval = (std::norm(ATot))/pow(s,2.5)*C*pow(s/4.-mKn*mKn,1.5)/pow(MPhi*MPhi/4.-mKn*mKn,1.5); 
 
@@ -131,14 +155,15 @@ double KnCrossSection(double *ss, double *par)
 }
 
 /** @brief Evaluate form-factor of neutral kaon F(s), which is defined as 
- * sigma_{e+e- -> KsKl}(s) = sigma^{point-like}_{e+e- -> KsKl}(s) * |F(s)|^2.  
- * @param ss s = 4 * E_beam^2.
+ * sigma_{e+e- -> KsKl}(s) = sigma^{point-like}_{e+e- -> KsKl}(s) * |F(s)|^2.
+ * @note pass params as params.data().  
+ * @param Ecms = 2 * E_beam MeV
  * @param par Vector of parameters that are used in phi -> KsKl cross section parametrization.
  * @returns Form factor of neutral kaon.
 */
-std::complex<double> KnFormFactor(double *ss, double *par)
+std::complex<double> KnFormFactor(double *Ecms, double *par)
 {
-    double s = ss[0]*ss[0];
+    double s = Ecms[0]*Ecms[0];
     std::vector<double> par1;
     par1.push_back(par[0]);
     par1.push_back(par[1]);
@@ -155,7 +180,7 @@ std::complex<double> KnFormFactor(double *ss, double *par)
     par1.push_back(0.0);
     par1.push_back(0.0);
     
-    std::complex<double> ATot = KnFF_total(ss[0] ,par1);
+    std::complex<double> ATot = KnFF_total(Ecms[0] ,par1);
     double MPhi = par[0];
     auto ff =  ATot * sqrt(3 / (8. * alphafss * alphafss * pi * pow(MPhi*MPhi/4.-mKn*mKn, 1.5)));
 
@@ -421,21 +446,6 @@ Double_t FAS_ASPO(Double_t TwoE)
 
     return Fval;
 }
-
-
-/**
- * // Parametrization and all values of parameters are taken from E.A.Kozyrev's article (https://arxiv.org/abs/1604.02981).
- * // Code was written by E.A.Kozyrev (e.a.kozyrev@inp.nsk.su) and was updated in terms of constants (pdg live, July 2023) 
- * // and readability by Daniil Ivanov (daniilivanov1606@gmail.com).
- * Cross section: KnCrossSection(double *ss, double *par);
- * Form factor: KnFormFactor(double *ss, double *par);
- * double M_phi = 1019.457; \\ par[0], MeV -- phi meson mass.
- * double W_phi = 4.240; \\ par[1], MeV -- phi meson width.
- * double W_phi_ee_B_phi_KsKl = 0.428e-03 // par[2], MeV -- \Gamma_{\phi->e^+e^-} * B_{\phi->KsKl} = 0.428 keV = 0.428e-03 MeV. 
- * double g_rho_omega = 0.8; \\ par[3] -- g_{\rho, \omega} multiplicative factor for coupling constants  g_{\rho KsKl}, g_{\omega KsKl} (read more in the article).
- * std::vector<double> params = {1019.457, 4.240, 0.428e-03, 0.8};
- * // pas params as params.data().
-*/
 
 int KnXSec()
 {

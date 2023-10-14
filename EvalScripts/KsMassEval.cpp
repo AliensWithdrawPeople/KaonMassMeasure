@@ -38,7 +38,7 @@ int KsMassEval()
     auto [mass, massErr] = handlerMC->Eval();
     std::cout << mass << " + " << massErr << std::endl;
     handlerMC->Draw("hMlnYpfx", {-0.4, 0.4});
-    // handlerMC->SaveHists("/hist/MC" + energyPoint + ".root");
+    handlerMC->SaveHists("/hist/MC" + energyPoint + ".root");
     // handlerMC->SaveSplines("C:/work/Science/BINP/Kaon Mass Measure/splines/spline_" + energyPoint + ".root");
     delete handlerMC;
 

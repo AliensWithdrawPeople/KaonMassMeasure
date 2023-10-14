@@ -4,6 +4,7 @@
 #include "TGaxis.h"
 #include "TAxis.h"
 #include "TCanvas.h"
+#include "TLatex.h"
 
 int MassVsE()
 {
@@ -14,116 +15,124 @@ int MassVsE()
 * Prev results:
 ******************************
 */ 
-    std::vector<Float_t> vMPDG = {497.742, 497.661, 497.625, 497.634, 497.583, 497.607};
-    std::vector<Float_t> vMPDGerr = {0.085, 0.033, 0.031, 0.024, 0.021, 0.017};
-    std::vector<Float_t> vExpNum = {505, 506, 507, 508, 509, 510};
+    std::vector<Float_t> vMPDG = {497.742, 497.661, 497.625, 497.583, 497.607, 497.577, 0};
+    std::vector<Float_t> vMPDGerr = {0.085, 0.033, 0.031, 0.024, 0.021, 0.017, 0.02, 0};
+    std::vector<Float_t> vExpNum = {505, 506, 507, 508, 509, 510, 520};
     TGraphErrors grMPDG(vMPDG.size(), vExpNum.data(), vMPDG.data(), zeroes.data(), vMPDGerr.data());
-    // grMPDG.DrawClone("same AP");
+    grMPDG.GetYaxis()->SetTitle("M_{K^{0}}, MeV/c^{2}");
+    grMPDG.GetYaxis()->CenterTitle(true);
+    grMPDG.GetXaxis()->SetTickLength(0.);
+    grMPDG.GetXaxis()->SetNdivisions(0);
+    TLatex *latex1 = new TLatex(grMPDG.GetX()[0], grMPDG.GetY()[0],"       CMD '85"); 
+    TLatex *latex2 = new TLatex(grMPDG.GetX()[1], grMPDG.GetY()[1],"       CMD '87"); 
+    TLatex *latex3 = new TLatex(grMPDG.GetX()[2], grMPDG.GetY()[2],"       NA48 '02"); 
+    TLatex *latex4 = new TLatex(grMPDG.GetX()[3], grMPDG.GetY()[3],"       KLOE '07"); 
+    TLatex *latex5 = new TLatex(grMPDG.GetX()[4], grMPDG.GetY()[4],"       CLEO-c data '14"); 
+    TLatex *latex6 = new TLatex(grMPDG.GetX()[5], grMPDG.GetY()[5],"       This work"); 
+    latex1->SetTextAlign(10);
+    latex2->SetTextAlign(10);
+    latex3->SetTextAlign(10);
+    latex4->SetTextAlign(10);
+    latex5->SetTextAlign(10);
+    latex6->SetTextAlign(10);
+
+    latex1->SetTextAngle(90);
+    latex2->SetTextAngle(90);
+    latex3->SetTextAngle(90);
+    latex4->SetTextAngle(90);
+    latex5->SetTextAngle(90);
+    latex6->SetTextAngle(90);
+
+    grMPDG.GetListOfFunctions()->Add(latex1); 
+    grMPDG.GetListOfFunctions()->Add(latex2); 
+    grMPDG.GetListOfFunctions()->Add(latex3); 
+    grMPDG.GetListOfFunctions()->Add(latex4); 
+    grMPDG.GetListOfFunctions()->Add(latex5); 
+    grMPDG.GetListOfFunctions()->Add(latex6); 
+
+    grMPDG.GetXaxis()->SetRangeUser(505, 510);
+    grMPDG.GetYaxis()->SetRangeUser(497.54, 497.73);
+    // grMPDG.DrawClone("AP");
 
 /*
 ******************************
 * Mass vs E_beam in Exp:
 ******************************
 */ 
-
-    // std::vector<Float_t> vM_Exp = {497.545, 497.566, 497.539, 497.547, 497.544, 497.571, 497.579, 497.566, 497.6};
-    // std::vector<Float_t> vM_Exp = {497.632, 497.608, 497.585, 497.596, 497.604, 497.619, 497.62, 497.597, 497.635};
-    std::vector<Float_t> vM_Exp = {497.571, 497.549, 497.527, 497.539, 497.538, 497.55, 497.545, 497.517, 497.542};
-
-    std::vector<Float_t> vM_Exp2 = {497.577, 497.568, 497.533, 497.554, 497.544, 497.57, 497.589, 497.568, 497.604};
-    std::vector<Float_t> vM_Exp_vis = {497.677, 497.667, 497.622, 497.634, 497.615, 497.686, 497.78, 497.902, 499.057};
-
-    std::vector<Float_t> vMerrExp = {0.036, 0.014, 0.011, 0.008, 0.007, 0.01, 0.013, 0.014, 0.029};
-
-    std::vector<Float_t> vRC = {497.652, 497.647, 497.638, 497.627, 497.627, 497.679, 497.761, 497.912, 499.053};
-    // std::vector<Float_t> vE = {505, 508, 508.5, 509, 509.5, 510, 510.5, 511, 514};
     std::vector<Float_t> vE = {504.8, 507.862, 508.404, 508.957, 509.528, 509.956, 510.458, 511.035, 513.864};
-    
-
+    std::vector<Float_t> vM_Exp = {497.556, 497.573, 497.563, 497.562, 497.562, 497.597, 497.596, 497.595, 497.592};
+    std::vector<Float_t> vMerrExp = {0.039, 0.015, 0.011, 0.011, 0.009, 0.01, 0.011, 0.013, 0.045};
     TGraphErrors grRCNC_exp(vM_Exp.size(), vE.data(), vM_Exp.data(), zeroes.data(), vMerrExp.data());
-    TGraphErrors grRCNC_exp2(vM_Exp.size(), vE.data(), vM_Exp2.data(), zeroes.data(), vMerrExp.data());
+
+    std::vector<Float_t> vM_Exp_NoEnergyCorr = {497.612, 497.572, 497.564, 497.569, 497.554, 497.589, 497.608, 497.586, 497.601};
+    std::vector<Float_t> vMerrExp_NoEnergyCorr = {0.039, 0.015, 0.011, 0.011, 0.009, 0.01, 0.011, 0.013, 0.045};
+    TGraphErrors grRCNC_exp_NoEnergyCorr(vM_Exp_NoEnergyCorr.size(), vE.data(), vM_Exp_NoEnergyCorr.data(), 
+                                        zeroes.data(), vMerrExp_NoEnergyCorr.data());
+    
+    std::vector<Float_t> vM_Exp_vis = {497.677, 497.667, 497.622, 497.634, 497.615, 497.686, 497.78, 497.902, 499.057};
     TGraphErrors grNC_exp(vM_Exp.size(), vE.data(), vM_Exp_vis.data(), zeroes.data(), vMerrExp.data());
 
-    TGraphErrors grRC(vM_Exp.size(), vE.data(), vRC.data(), zeroes.data(), zeroes.data());
-
-    grRCNC_exp.SetTitle("Black -- with Energy controll, Blue -- without");
+    grRCNC_exp.SetTitle("Black -- with Energy correction, Blue -- without");
     grRCNC_exp.GetXaxis()->SetTitle("E_{beam}, MeV");
     grRCNC_exp.GetYaxis()->SetTitle("M^{(FullRec)}_{RC NC RecCor}, #frac{MeV}{c^{2}}");
     grRCNC_exp.GetYaxis()->SetTitleOffset(1.2);
     grRCNC_exp.SetName("EnControl");
-    grRCNC_exp.SetMarkerSize(2);
+    grRCNC_exp.SetMarkerSize(1.5);
     grRCNC_exp.Fit("pol0", "ME");
-    
-    grRCNC_exp2.SetName("NoEnControl");
-    grRCNC_exp2.SetMarkerColor(kBlue);
-    grRCNC_exp2.SetLineColor(kBlue);
-    grRCNC_exp2.SetMarkerStyle(22);
-    grRCNC_exp2.SetMarkerSize(2);
-    grRCNC_exp2.Fit("pol0", "ME+");
 
-    grRC.SetName("RC");
-    grRC.SetMarkerColor(kBlue);
-    grRC.SetLineColor(kBlue);
-    grRC.SetMarkerStyle(22);
-    grRC.SetMarkerSize(2);
+    grRCNC_exp_NoEnergyCorr.SetName("NoEnControl");
+    grRCNC_exp_NoEnergyCorr.SetMarkerSize(1.5);
+    grRCNC_exp_NoEnergyCorr.SetMarkerStyle(22);
+    grRCNC_exp_NoEnergyCorr.SetMarkerColor(kBlue);
+    grRCNC_exp_NoEnergyCorr.Fit("pol0", "ME");
+    // grRCNC_exp_NoEnergyCorr.SetLineColor(kBlue);
+    grRCNC_exp_NoEnergyCorr.GetFunction("pol0")->SetLineColor(kBlue);
 
     grRCNC_exp.DrawClone("AP");
-
+    // grRCNC_exp_NoEnergyCorr.DrawClone("same P");
     // grNC_exp.DrawClone("AP");
-    // grRC.DrawClone("P same");
-    // grRCNC_exp2.DrawClone("AP");
 
 /*
 ******************************
 * Mass vs E_beam in MC:
 ******************************
 */ 
-    // std::vector<Float_t> vM_MC_NoSmearing = {497.590, 497.608, 497.614, 497.615, 497.605, 497.618, 497.601, 497.635, 497.600};
-    // std::vector<Float_t> vM_MC_NoSmearingErr = {0.011, 0.013, 0.010, 0.009, 0.009, 0.009, 0.010, 0.010, 0.034};
+    std::vector<Float_t> vM_MC_NoSmearing = {497.625, 497.623, 497.612, 497.619, 497.622, 497.617, 497.624, 497.618, 497.611};
+    std::vector<Float_t> vM_MC_NoSmearingErr = {0.00389227, 0.00550037, 0.00584149, 0.00345417, 0.00345497, 0.00358939, 0.00645167, 0.00640343, 0.00700427};
 
-    // std::vector<Float_t> vM_MC_WithSmearing = {497.627, 497.604, 497.612, 497.603, 497.606, 497.611, 497.607, 497.613,  497.609};
-    // std::vector<Float_t> vM_MC_WithSmearingErr = {0.008, 0.009 , 0.003, 0.006, 0.006, 0.003, 0.006, 0.003, 0.023};
+    std::vector<Float_t> vM_MC_WithSmearing = {497.621, 497.618, 497.616, 497.617, 497.617, 497.617, 497.62, 497.621, 497.612};
+    std::vector<Float_t> vM_MC_WithSmearingErr = {0.00246028, 0.00351182, 0.00370322, 0.00218761, 0.00221447, 0.00227956, 0.00414764, 0.00416976, 0.00444108};
     
-    // std::vector<Float_t> vM_MC_WrongEnergy = {497.575, 497.582, 497.584, 497.586, 497.588, 497.593};
-    // std::vector<Float_t> vM_MC_WrongEnergyErr = {0.002, 0.002, 0.003, 0.003, 0.003, 0.003};
-    // std::vector<Float_t> vE_short = {508.5, 509, 509.5, 510, 510.5, 511};
+    TGraphErrors grMC_NoSmearing(vE.size(), vE.data(), vM_MC_NoSmearing.data(), zeroes.data(), vM_MC_NoSmearingErr.data());
+    TGraphErrors grMC_WithSmearing(vE.size(), vE.data(), vM_MC_WithSmearing.data(), zeroes.data(), vM_MC_WithSmearingErr.data());
 
-    // TGraphErrors grMC_NoSmearing(vE.size(), vE.data(), vM_MC_NoSmearing.data(), zeroes.data(), vM_MC_NoSmearingErr.data());
-    // TGraphErrors grMC_WithSmearing(vE.size(), vE.data(), vM_MC_WithSmearing.data(), zeroes.data(), vM_MC_WithSmearingErr.data());
-    // TGraphErrors grMC_WrongEnergy(vE_short.size(), vE_short.data(), vM_MC_WrongEnergy.data(), zeroes.data(), vM_MC_WrongEnergyErr.data());
+    TLine massKline(504.5, 497.614, 514.5, 497.614);
+    massKline.SetLineStyle(2);
+    massKline.SetLineWidth(4);
+    massKline.SetLineColor(kRed);
 
-    // TLine massKline(504.5, 497.614, 514.5, 497.614);
-    // massKline.SetLineStyle(2);
-    // massKline.SetLineWidth(4);
-    // massKline.SetLineColor(kRed);
-
-    // grMC_NoSmearing.SetTitle("Black -- without Energy Smearing, Blue -- with Energy Smearing, Red line --- mass in generator");
-    // grMC_NoSmearing.GetXaxis()->SetTitle("E_{beam}, MeV");
-    // grMC_NoSmearing.GetYaxis()->SetTitle("M^{(FullRec)}_{RC NC}, #frac{MeV}{c^{2}}");
-    // grMC_NoSmearing.GetYaxis()->SetTitleOffset(1.2);
-    // grMC_NoSmearing.SetName("NoSmear");
-    // grMC_NoSmearing.SetMarkerSize(2);
-    // grMC_NoSmearing.Fit("pol0", "ME");
+    grMC_NoSmearing.SetTitle("Black -- without Energy Smearing, Blue -- with Energy Smearing, Red line --- mass in generator");
+    grMC_NoSmearing.GetXaxis()->SetTitle("E_{beam}, MeV");
+    grMC_NoSmearing.GetYaxis()->SetTitle("M^{(FullRec)}_{RC NC}, #frac{MeV}{c^{2}}");
+    grMC_NoSmearing.GetYaxis()->SetTitleOffset(1.2);
+    grMC_NoSmearing.SetName("NoSmear");
+    grMC_NoSmearing.SetMarkerSize(2);
+    grMC_NoSmearing.Fit("pol0", "ME");
     
-    // grMC_WithSmearing.SetName("Smear");
-    // grMC_WithSmearing.SetMarkerColor(kBlue);
-    // grMC_WithSmearing.SetLineColor(kBlue);
-    // grMC_WithSmearing.SetMarkerStyle(22);
-    // grMC_WithSmearing.SetMarkerSize(2);
-    // grMC_WithSmearing.Fit("pol0", "ME+");
-
-    // grMC_WrongEnergy.SetName("Smear");
-    // grMC_WrongEnergy.SetMarkerColor(kBlue);
-    // grMC_WrongEnergy.SetLineColor(kBlue);
-    // grMC_WrongEnergy.SetMarkerStyle(21);
-    // grMC_WrongEnergy.SetMarkerSize(2);
-    // grMC_WrongEnergy.Fit("pol0", "ME+");
-
-    // grMC_WrongEnergy.DrawClone("AP");
+    grMC_WithSmearing.SetTitle("Black -- without Energy Smearing, Blue -- with Energy Smearing, Red line --- mass in generator");
+    grMC_WithSmearing.GetXaxis()->SetTitle("E_{beam}, MeV");
+    grMC_WithSmearing.GetYaxis()->SetTitle("M^{(FullRec)}_{RC NC}, #frac{MeV}{c^{2}}");
+    grMC_WithSmearing.GetYaxis()->SetTitleOffset(1.2);
+    grMC_WithSmearing.SetName("Smear");
+    grMC_WithSmearing.SetMarkerColor(kBlue);
+    grMC_WithSmearing.SetLineColor(kBlue);
+    grMC_WithSmearing.SetMarkerStyle(22);
+    grMC_WithSmearing.SetMarkerSize(2);
+    grMC_WithSmearing.Fit("pol0", "ME+");
 
 
     // grMC_NoSmearing.DrawClone("AP");
-    // grMC_WithSmearing.DrawClone("AP");
+    // grMC_WithSmearing.DrawClone("same P");
     // massKline.DrawClone("same");
 
 /*
@@ -161,7 +170,7 @@ int MassVsE()
     
 /*
 ******************************
-* Mass_Cowboys - Mass_ Sailorsvs E_beam in EXP:
+* Mass_Cowboys - Mass_Sailors vs E_beam in EXP:
 ******************************
 */
     // std::vector<Float_t> vDiffM_Exp_cowboy_sailor = {-0.03, 0.015, -0.01, -0.025, -0.003, 0.009, 0.001, 0.014};

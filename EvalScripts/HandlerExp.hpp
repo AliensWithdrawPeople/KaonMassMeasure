@@ -119,7 +119,7 @@ void HandlerExp::FillHists(bool useCorrectedEnergy)
     for(const auto &entry : goodEntries)
     {
         tree->GetEntry(entry);
-        if(fabs(data->ks.theta - TMath::Pi() / 2) > 0.5)
+        if(fabs(data->ks.theta - TMath::Pi() / 2) > 0.3)
         { continue; }
         
         auto lnY = log(data->Y);
