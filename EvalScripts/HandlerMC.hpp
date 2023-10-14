@@ -136,6 +136,7 @@ Spline HandlerMC::CreateDeltaPsiSpline()
 void HandlerMC::FillHists(bool useTrueEnergy)
 {
     auto sigmaPhi = Sigmas::GetPhiSigma();
+    auto sigmaY = Sigmas::GetYSigma();
 
     for(const auto &entry : goodEntries)
     {
@@ -148,7 +149,7 @@ void HandlerMC::FillHists(bool useTrueEnergy)
                         sigmaTheta(data->piNeg.theta - TMath::Pi()/2) * sigmaTheta(data->piNeg.theta - TMath::Pi()/2) / 2 * PsiFunc::Derivative(PsiFunc::Var::thetaNeg, data->piPos, data->piNeg, 2) + 
                         sigmaPhi * sigmaPhi / 2 * PsiFunc::Derivative(PsiFunc::Var::phiPos, data->piPos, data->piNeg, 2) +
                         sigmaPhi * sigmaPhi / 2 * PsiFunc::Derivative(PsiFunc::Var::phiNeg, data->piPos, data->piNeg, 2);
-        auto dpsi = tree->reco.ksdpsi +  psiCor;
+        auto dpsi = tree->reco.ksdpsi + psiCor;
 
         auto energy = useTrueEnergy? tree->etrue : meanEnergy.value_or(tree->emeas);
 
@@ -157,7 +158,10 @@ void HandlerMC::FillHists(bool useTrueEnergy)
 
         auto massCorr = -sigmaPsi * sigmaPsi / 2 * 
                         FullRecMassFunc::Derivative(FullRecMassFunc::Var::psi, dpsi, energy, data->Y, 2);
-        auto mass = FullRecMassFunc::Eval(dpsi, energy, data->Y) + massCorr;
+        auto massCorrY = sigmaY * sigmaY / 2 * 
+                        FullRecMassFunc::Derivative(FullRecMassFunc::Var::Y, dpsi, energy, data->Y, 2);
+
+        auto mass = FullRecMassFunc::Eval(dpsi, energy, data->Y) + massCorr + massCorrY;
 
         container["hDeltaM"]->Fill(lnY, massCorr);
         container["hMlnYpfx"]->Fill(lnY, mass); 

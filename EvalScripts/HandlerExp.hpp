@@ -114,6 +114,7 @@ std::pair<Spline, Spline> HandlerExp::LoadSplines(std::string spline_filename)
 void HandlerExp::FillHists(bool useCorrectedEnergy)
 {
     auto sigmaPhi = Sigmas::GetPhiSigma();
+    auto sigmaY = Sigmas::GetYSigma();
 
     for(const auto &entry : goodEntries)
     {
@@ -136,7 +137,9 @@ void HandlerExp::FillHists(bool useCorrectedEnergy)
 
         auto massCorr = -sigmaPsi * sigmaPsi / 2 * 
                         FullRecMassFunc::Derivative(FullRecMassFunc::Var::psi, dpsi, energy, data->Y, 2);
-        auto mass = FullRecMassFunc::Eval(dpsi, energy, data->Y) + massCorr;
+        auto massCorrY = sigmaY * sigmaY / 2 * 
+                        FullRecMassFunc::Derivative(FullRecMassFunc::Var::Y, dpsi, energy, data->Y, 2);
+        auto mass = FullRecMassFunc::Eval(dpsi, energy, data->Y) + massCorr + massCorrY;
 
         container["hDeltaM"]->Fill(lnY, massCorr);
         container["hMlnYpfx"]->Fill(lnY, mass); 

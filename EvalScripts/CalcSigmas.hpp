@@ -137,6 +137,13 @@ namespace Sigmas {
     {
         return 7.12804e-03;
     }
+
+    /// @brief Calc sigma^_{Y}.
+    /// @return sigmaY.
+    double GetYSigma()
+    {
+        return 0.016;
+    }
 }
 
 #endif
