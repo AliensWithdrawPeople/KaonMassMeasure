@@ -23,6 +23,7 @@ class HandlerExp: Evaluator
 private:
     std::string energyPoint;
     std::optional<double> meanEnergy;
+    std::optional<double> energyCorrection;
     bool verbose;
     std::unique_ptr<Tree> tree;
     const Tree::Data* data; 
@@ -51,14 +52,14 @@ private:
     void FillHists(bool useCorrectedEnergy);
 
 public:
-    HandlerExp(std::string fKsKl, std::string energyPoint, double fitRange, std::optional<double> meanEnergy, 
+    HandlerExp(std::string fKsKl, std::string energyPoint, double fitRange, std::optional<double> meanEnergy, std::optional<double> energyCorrection, 
                         bool useCorrectedEnergy, bool isVerbose = true);
 
     HandlerExp(std::string fKsKl, std::string energyPoint, bool useCorrectedEnergy, bool isVerbose = true): 
-            HandlerExp(fKsKl, energyPoint, 0.27, std::nullopt, useCorrectedEnergy, isVerbose) {}
+            HandlerExp(fKsKl, energyPoint, 0.27, std::nullopt, std::nullopt, useCorrectedEnergy, isVerbose) {}
 
     HandlerExp(std::string fKsKl, std::string energyPoint, double fitRange, bool useCorrectedEnergy): 
-            HandlerExp(fKsKl, energyPoint, fitRange, std::nullopt, useCorrectedEnergy, true) {}
+            HandlerExp(fKsKl, energyPoint, fitRange, std::nullopt, std::nullopt, useCorrectedEnergy, true) {}
 
     std::pair<double, double> GetMass(double fitRange = 0.27);
     
@@ -68,9 +69,9 @@ public:
     void SaveHists(std::string output_filename);
 };
 
-HandlerExp::HandlerExp(std::string fKsKl, std::string energyPoint, double fitRange, std::optional<double> meanEnergy, 
+HandlerExp::HandlerExp(std::string fKsKl, std::string energyPoint, double fitRange, std::optional<double> meanEnergy, std::optional<double> energyCorrection, 
                         bool useCorrectedEnergy, bool isVerbose = true): 
-    energyPoint{energyPoint}, fitRange{fitRange}, meanEnergy{meanEnergy}, useCorrectedEnergy{useCorrectedEnergy}, verbose{isVerbose} 
+    energyPoint{energyPoint}, fitRange{fitRange}, meanEnergy{meanEnergy}, energyCorrection{energyCorrection}, useCorrectedEnergy{useCorrectedEnergy}, verbose{isVerbose} 
 {
     tree = std::unique_ptr<Tree>(new Tree(fKsKl, true));
     painter = std::unique_ptr<Painter>(new Painter(&container));
@@ -129,7 +130,7 @@ void HandlerExp::FillHists(bool useCorrectedEnergy)
                         sigmaPhi * sigmaPhi / 2 * PsiFunc::Derivative(PsiFunc::Var::phiNeg, data->piPos, data->piNeg, 2);
         auto dpsi = tree->reco.ksdpsi +  psiCor;
 
-        auto energy = meanEnergy.value_or(tree->emeas);
+        auto energy = meanEnergy.value_or(tree->emeas) - energyCorrection.value_or(0.0);
         energy = useCorrectedEnergy? misc::GetCorrectedEnergy(tree->runnum, energy) : energy;
 
         auto [binY, binKsTheta] = Sigmas::GetSigmaMatrix_bin(lnY, data->ks.theta);

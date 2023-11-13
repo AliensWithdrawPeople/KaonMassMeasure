@@ -15,43 +15,43 @@ int MassVsE()
 * Prev results:
 ******************************
 */ 
-    std::vector<Float_t> vMPDG = {497.742, 497.661, 497.625, 497.583, 497.607, 497.577, 0};
-    std::vector<Float_t> vMPDGerr = {0.085, 0.033, 0.031, 0.024, 0.021, 0.017, 0.02, 0};
-    std::vector<Float_t> vExpNum = {505, 506, 507, 508, 509, 510, 520};
-    TGraphErrors grMPDG(vMPDG.size(), vExpNum.data(), vMPDG.data(), zeroes.data(), vMPDGerr.data());
-    grMPDG.GetYaxis()->SetTitle("M_{K^{0}}, MeV/c^{2}");
-    grMPDG.GetYaxis()->CenterTitle(true);
-    grMPDG.GetXaxis()->SetTickLength(0.);
-    grMPDG.GetXaxis()->SetNdivisions(0);
-    TLatex *latex1 = new TLatex(grMPDG.GetX()[0], grMPDG.GetY()[0],"       CMD '85"); 
-    TLatex *latex2 = new TLatex(grMPDG.GetX()[1], grMPDG.GetY()[1],"       CMD '87"); 
-    TLatex *latex3 = new TLatex(grMPDG.GetX()[2], grMPDG.GetY()[2],"       NA48 '02"); 
-    TLatex *latex4 = new TLatex(grMPDG.GetX()[3], grMPDG.GetY()[3],"       KLOE '07"); 
-    TLatex *latex5 = new TLatex(grMPDG.GetX()[4], grMPDG.GetY()[4],"       CLEO-c data '14"); 
-    TLatex *latex6 = new TLatex(grMPDG.GetX()[5], grMPDG.GetY()[5],"       This work"); 
-    latex1->SetTextAlign(10);
-    latex2->SetTextAlign(10);
-    latex3->SetTextAlign(10);
-    latex4->SetTextAlign(10);
-    latex5->SetTextAlign(10);
-    latex6->SetTextAlign(10);
+    // std::vector<Float_t> vMPDG = {0, 497.742, 497.661, 497.625, 497.583, 497.607, 497.570, 0};
+    // std::vector<Float_t> vMPDGerr = {0, 0.085, 0.033, 0.031, 0.024, 0.021, 0.017, 0.021, 0};
+    // std::vector<Float_t> vExpNum = {500, 505, 506, 507, 508, 509, 510, 520};
+    // TGraphErrors grMPDG(vMPDG.size(), vExpNum.data(), vMPDG.data(), zeroes.data(), vMPDGerr.data());
+    // grMPDG.GetYaxis()->SetTitle("M_{K^{0}}, MeV/c^{2}");
+    // grMPDG.GetYaxis()->CenterTitle(true);
+    // grMPDG.GetXaxis()->SetTickLength(0.);
+    // grMPDG.GetXaxis()->SetNdivisions(0);
+    // TLatex *latex1 = new TLatex(grMPDG.GetX()[1], grMPDG.GetY()[1],"       CMD '85"); 
+    // TLatex *latex2 = new TLatex(grMPDG.GetX()[2], grMPDG.GetY()[2],"       CMD '87"); 
+    // TLatex *latex3 = new TLatex(grMPDG.GetX()[3], grMPDG.GetY()[3],"       NA48 '02"); 
+    // TLatex *latex4 = new TLatex(grMPDG.GetX()[4], grMPDG.GetY()[4],"       KLOE '07"); 
+    // TLatex *latex5 = new TLatex(grMPDG.GetX()[5], grMPDG.GetY()[5],"       CLEO-c data '14"); 
+    // TLatex *latex6 = new TLatex(grMPDG.GetX()[6], grMPDG.GetY()[6],"       This work"); 
+    // latex1->SetTextAlign(10);
+    // latex2->SetTextAlign(10);
+    // latex3->SetTextAlign(10);
+    // latex4->SetTextAlign(10);
+    // latex5->SetTextAlign(10);
+    // latex6->SetTextAlign(10);
 
-    latex1->SetTextAngle(90);
-    latex2->SetTextAngle(90);
-    latex3->SetTextAngle(90);
-    latex4->SetTextAngle(90);
-    latex5->SetTextAngle(90);
-    latex6->SetTextAngle(90);
+    // latex1->SetTextAngle(90);
+    // latex2->SetTextAngle(90);
+    // latex3->SetTextAngle(90);
+    // latex4->SetTextAngle(90);
+    // latex5->SetTextAngle(90);
+    // latex6->SetTextAngle(90);
 
-    grMPDG.GetListOfFunctions()->Add(latex1); 
-    grMPDG.GetListOfFunctions()->Add(latex2); 
-    grMPDG.GetListOfFunctions()->Add(latex3); 
-    grMPDG.GetListOfFunctions()->Add(latex4); 
-    grMPDG.GetListOfFunctions()->Add(latex5); 
-    grMPDG.GetListOfFunctions()->Add(latex6); 
+    // grMPDG.GetListOfFunctions()->Add(latex1); 
+    // grMPDG.GetListOfFunctions()->Add(latex2); 
+    // grMPDG.GetListOfFunctions()->Add(latex3); 
+    // grMPDG.GetListOfFunctions()->Add(latex4); 
+    // grMPDG.GetListOfFunctions()->Add(latex5); 
+    // grMPDG.GetListOfFunctions()->Add(latex6); 
 
-    grMPDG.GetXaxis()->SetRangeUser(505, 510);
-    grMPDG.GetYaxis()->SetRangeUser(497.54, 497.73);
+    // grMPDG.GetXaxis()->SetRangeUser(505, 510);
+    // grMPDG.GetYaxis()->SetRangeUser(497.54, 497.8);
     // grMPDG.DrawClone("AP");
 
 /*
@@ -60,13 +60,15 @@ int MassVsE()
 ******************************
 */ 
     std::vector<Float_t> vE = {504.8, 507.862, 508.404, 508.957, 509.528, 509.956, 510.458, 511.035, 513.864};
-    std::vector<Float_t> vM_Exp = {497.556, 497.573, 497.563, 497.562, 497.562, 497.597, 497.596, 497.595, 497.592};
-    std::vector<Float_t> vMerrExp = {0.039, 0.015, 0.011, 0.011, 0.009, 0.01, 0.011, 0.013, 0.045};
-    TGraphErrors grRCNC_exp(vM_Exp.size(), vE.data(), vM_Exp.data(), zeroes.data(), vMerrExp.data());
+    std::vector<Float_t> vE0 = {504.8, 507.862, 508.404, 508.957, 509.528, 509.956, 510.458, 511.035, 511.444, 513.864};
+    
+    std::vector<Float_t> vM_Exp = {497.529, 497.591, 497.576, 497.572, 497.562, 497.586, 497.599, 497.583, 497.588, 497.603};
+    std::vector<Float_t> vMerrExp = {0.046, 0.018, 0.012, 0.011, 0.01, 0.01, 0.011, 0.015, 0.019, 0.053};
+    TGraphErrors grRCNC_exp(vM_Exp.size(), vE0.data(), vM_Exp.data(), zeroes.data(), vMerrExp.data());
 
-    std::vector<Float_t> vM_Exp_NoEnergyCorr = {497.612, 497.572, 497.564, 497.569, 497.554, 497.589, 497.608, 497.586, 497.601};
-    std::vector<Float_t> vMerrExp_NoEnergyCorr = {0.039, 0.015, 0.011, 0.011, 0.009, 0.01, 0.011, 0.013, 0.045};
-    TGraphErrors grRCNC_exp_NoEnergyCorr(vM_Exp_NoEnergyCorr.size(), vE.data(), vM_Exp_NoEnergyCorr.data(), 
+    std::vector<Float_t> vM_Exp_NoEnergyCorr = {497.542, 497.56, 497.547, 497.559, 497.55, 497.587, 497.587, 497.58, 497.583, 497.59};
+    std::vector<Float_t> vMerrExp_NoEnergyCorr = {0.046, 0.018, 0.012, 0.011, 0.01, 0.01, 0.011, 0.015, 0.019, 0.054};
+    TGraphErrors grRCNC_exp_NoEnergyCorr(vM_Exp_NoEnergyCorr.size(), vE0.data(), vM_Exp_NoEnergyCorr.data(), 
                                         zeroes.data(), vMerrExp_NoEnergyCorr.data());
     
     std::vector<Float_t> vM_Exp_vis = {497.677, 497.667, 497.622, 497.634, 497.615, 497.686, 497.78, 497.902, 499.057};
@@ -97,38 +99,39 @@ int MassVsE()
 * Mass vs E_beam in MC:
 ******************************
 */ 
-    std::vector<Float_t> vM_MC_NoSmearing = {497.625, 497.623, 497.612, 497.619, 497.622, 497.617, 497.624, 497.618, 497.611};
-    std::vector<Float_t> vM_MC_NoSmearingErr = {0.00389227, 0.00550037, 0.00584149, 0.00345417, 0.00345497, 0.00358939, 0.00645167, 0.00640343, 0.00700427};
+    // std::vector<Float_t> vM_MC_NoSmearing = {497.625, 497.623, 497.612, 497.619, 497.622, 497.617, 497.624, 497.618, 497.611};
+    // std::vector<Float_t> vM_MC_NoSmearingErr = {0.00389227, 0.00550037, 0.00584149, 0.00345417, 0.00345497, 0.00358939, 0.00645167, 0.00640343, 0.00700427};
 
-    std::vector<Float_t> vM_MC_WithSmearing = {497.621, 497.618, 497.616, 497.617, 497.617, 497.617, 497.62, 497.621, 497.612};
-    std::vector<Float_t> vM_MC_WithSmearingErr = {0.00246028, 0.00351182, 0.00370322, 0.00218761, 0.00221447, 0.00227956, 0.00414764, 0.00416976, 0.00444108};
+    // std::vector<Float_t> vM_MC_WithSmearing = {497.621, 497.618, 497.616, 497.617, 497.617, 497.617, 497.62, 497.621, 497.612};
+    // std::vector<Float_t> vM_MC_WithSmearingErr = {0.00246028, 0.00351182, 0.00370322, 0.00218761, 0.00221447, 0.00227956, 0.00414764, 0.00416976, 0.00444108};
     
-    TGraphErrors grMC_NoSmearing(vE.size(), vE.data(), vM_MC_NoSmearing.data(), zeroes.data(), vM_MC_NoSmearingErr.data());
-    TGraphErrors grMC_WithSmearing(vE.size(), vE.data(), vM_MC_WithSmearing.data(), zeroes.data(), vM_MC_WithSmearingErr.data());
+    // TGraphErrors grMC_NoSmearing(vE.size(), vE.data(), vM_MC_NoSmearing.data(), zeroes.data(), vM_MC_NoSmearingErr.data());
+    // TGraphErrors grMC_WithSmearing(vE.size(), vE.data(), vM_MC_WithSmearing.data(), zeroes.data(), vM_MC_WithSmearingErr.data());
 
-    TLine massKline(504.5, 497.614, 514.5, 497.614);
-    massKline.SetLineStyle(2);
-    massKline.SetLineWidth(4);
-    massKline.SetLineColor(kRed);
+    // TLine massKline(504.5, 497.614, 514.5, 497.614);
+    // massKline.SetLineStyle(2);
+    // massKline.SetLineWidth(4);
+    // massKline.SetLineColor(kRed);
 
-    grMC_NoSmearing.SetTitle("Black -- without Energy Smearing, Blue -- with Energy Smearing, Red line --- mass in generator");
-    grMC_NoSmearing.GetXaxis()->SetTitle("E_{beam}, MeV");
-    grMC_NoSmearing.GetYaxis()->SetTitle("M^{(FullRec)}_{RC NC}, #frac{MeV}{c^{2}}");
-    grMC_NoSmearing.GetYaxis()->SetTitleOffset(1.2);
-    grMC_NoSmearing.SetName("NoSmear");
-    grMC_NoSmearing.SetMarkerSize(2);
-    grMC_NoSmearing.Fit("pol0", "ME");
+    // grMC_NoSmearing.SetTitle("Black -- without Energy Smearing, Blue -- with Energy Smearing, Red line --- mass in generator");
+    // grMC_NoSmearing.GetXaxis()->SetTitle("E_{beam}, MeV");
+    // grMC_NoSmearing.GetYaxis()->SetTitle("M^{(FullRec)}_{RC NC}, #frac{MeV}{c^{2}}");
+    // grMC_NoSmearing.GetYaxis()->SetTitleOffset(1.2);
+    // grMC_NoSmearing.SetName("NoSmear");
+    // grMC_NoSmearing.SetMarkerSize(2);
+    // grMC_NoSmearing.Fit("pol0", "ME");
     
-    grMC_WithSmearing.SetTitle("Black -- without Energy Smearing, Blue -- with Energy Smearing, Red line --- mass in generator");
-    grMC_WithSmearing.GetXaxis()->SetTitle("E_{beam}, MeV");
-    grMC_WithSmearing.GetYaxis()->SetTitle("M^{(FullRec)}_{RC NC}, #frac{MeV}{c^{2}}");
-    grMC_WithSmearing.GetYaxis()->SetTitleOffset(1.2);
-    grMC_WithSmearing.SetName("Smear");
-    grMC_WithSmearing.SetMarkerColor(kBlue);
-    grMC_WithSmearing.SetLineColor(kBlue);
-    grMC_WithSmearing.SetMarkerStyle(22);
-    grMC_WithSmearing.SetMarkerSize(2);
-    grMC_WithSmearing.Fit("pol0", "ME+");
+    // grMC_WithSmearing.SetTitle("Black -- without Energy Smearing, Blue -- with Energy Smearing, Red line --- mass in generator");
+    // grMC_WithSmearing.GetXaxis()->SetTitle("E_{beam}, MeV");
+    // grMC_WithSmearing.GetYaxis()->SetTitle("M^{(FullRec)}_{RC NC}, #frac{MeV}{c^{2}}");
+    // grMC_WithSmearing.GetYaxis()->SetTitleOffset(1.2);
+    // grMC_WithSmearing.SetName("Smear");
+    // grMC_WithSmearing.SetMarkerColor(kBlue);
+    // grMC_WithSmearing.SetLineColor(kBlue);
+    // grMC_WithSmearing.SetMarkerStyle(22);
+    // grMC_WithSmearing.SetMarkerSize(2);
+    // grMC_WithSmearing.Fit("pol0", "ME+");
+    // grMC_WithSmearing.GetFunction("pol0")->SetLineColor(kBlue);
 
 
     // grMC_NoSmearing.DrawClone("AP");

@@ -2,12 +2,6 @@ import subprocess as sub
 import re
 
 energy_points = ["501", "503", "505", "508", "508.5", "509", "509.5", "510", "510.5", "511", "511.5", "514", "517", "520", "525", "530"]
-# energy_points = ["509.5", "510", "510.5", "511", "511.5", "514"]
-# energy_points = ["509.5", "510", "510.5"]
-energy_points = ["501", "503", "505", "508", "508.5", "509"]
-# energy_points = ["508", "508.5", "509", "509.5", "510", "510.5", "511", "511.5", "514"]
-# energy_points = ["509", "509.5", "510"]
-energy_points = ["509"]
 
 aux1, aux2 = "\"", "\\"
 
@@ -17,13 +11,20 @@ mean_energies_err = []
 
 output_pattern = r'Mean Energy = ([\d.]+) \+/- ([\d.]+); e_mc = ([\d.]+)'
 
-
-for en in energy_points:
-    command = f"root -l -q \"C:/work/Science/BINP/Kaon Mass Measure/up to date scripts for cutting/cutters/massCutter.cpp(\\{aux1 + en + aux2}\")\""
+def run_root(command: str):
     res = sub.run(command, capture_output=True)
     output = res.stderr if res.stderr else res.stdout    
     print(res.stdout.decode()[118:])
     print("ERROR!", res.stderr.decode())
+    
+
+for en in energy_points:
+    command = f"root -l -q \"C:/work/Science/BINP/Kaon Mass Measure/up to date scripts for cutting/cutters/Xsec_EnergySpectrum_Cutter.cpp(\\{aux1 + en + aux2}\")\""
+    run_root(command)
+    
+    command = f"root -l -q \"C:/work/Science/BINP/Kaon Mass Measure/up to date scripts for cutting/cutters/massCutter.cpp(\\{aux1 + en + aux2}\")\""
+    run_root(command)
+
     
 #     match = re.search(output_pattern, res.stdout.decode())
 #     if match:

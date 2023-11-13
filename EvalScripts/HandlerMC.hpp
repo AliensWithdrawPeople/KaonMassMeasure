@@ -52,6 +52,7 @@ public:
                 bool useTrueEnergy, bool saveSplines = false, bool isVerbose = true);
 
     std::pair<double, double> GetMass(double fitRange = 0.27);
+    std::pair<double, double> GetEnergySpectrumMean();
     
     std::pair<double, double> Eval() override { return GetMass(); }
     void Draw(std::string name) override;
@@ -181,7 +182,9 @@ void HandlerMC::FillHists(bool useTrueEnergy)
             container["hMlnYpfx_sailor"]->Fill(lnY, mass); 
         }
         container["hPsilnY"]->Fill(lnY, dpsi); 
-        container["hEnergySpectrum"]->Fill(tree->etrue);
+
+        if(fabs(lnY) < 0.3)
+        { container["hEnergySpectrum"]->Fill(tree->etrue); }
     }
 }
 
@@ -200,6 +203,13 @@ std::pair<double, double> HandlerMC::GetMass(double fitRange)
     double massErr = res->ParError(0);
 
     return std::pair(mass, massErr);
+}
+
+std::pair<double, double> HandlerMC::GetEnergySpectrumMean()
+{
+    auto mean = container["hEnergySpectrum"]->GetMean();
+    auto meanErr = container["hEnergySpectrum"]->GetMeanError();
+    return std::make_pair(mean, meanErr);
 }
 
 void HandlerMC::Draw(std::string name)

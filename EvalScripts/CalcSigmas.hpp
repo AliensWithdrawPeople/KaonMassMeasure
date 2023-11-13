@@ -142,7 +142,7 @@ namespace Sigmas {
     /// @return sigmaY.
     double GetYSigma()
     {
-        return 0.016;
+        return 0.018;
     }
 }
 
