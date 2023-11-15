@@ -4,6 +4,7 @@
  * and readability by Daniil Ivanov (daniilivanov1606@gmail.com).
 */
 
+#include <memory>
 #include <cmath>
 #include <complex>
 #include <TMath.h>
@@ -447,7 +448,7 @@ Double_t FAS_ASPO(Double_t TwoE)
     return Fval;
 }
 
-int KnXSec()
+int KnXSec_func()
 {
     // data from E.A.Kozyrev's article (https://arxiv.org/abs/1604.02981).
     std::vector<double> energies = {1004.066, 1010.466, 1012.955, 1015.068, 1016.105, 1017.155, 1017.156, 1018.046, 1019.118,  1019.214, 1019.421, 1019.902, 
@@ -462,14 +463,60 @@ int KnXSec()
     TGraphErrors xsec(energies.size(), energies.data(), cross_sections.data(), zeroes.data(), xsec_err.data());
 
     auto born_xsec = new TF1("born", KnCrossSection, 1000., 1060., 4);
-    born_xsec->SetParameters(1019.4586, 4.189, 0.0004296, 0.97212);
+    
+    born_xsec->SetParameters(1019.457, 4.240, 0.428e-03, 0.8);
     born_xsec->SetNpx(1e4);
-    born_xsec->DrawClone();
+    // born_xsec->DrawClone();
+
+    std::vector<double> delta_cross_sections = {};
+    for(const auto& en : energies)
+    {
+        // delta_cross_sections.push_back(born_xsec->EvalPar([en], [1019.457, 4.270, 0.428e-03, 0.8) - ))
+    }
 
     // xsec.Fit(born_xsec, "ME");
     // xsec.DrawClone("AP");
-    // bb->DrawClone("same");
+    // born_xsec->DrawClone("same");
+
+    // born_xsec->DrawDerivative();
+    born_xsec->SetParameters(1019.457, 4.270, 0.428e-03, 0.8);
+    born_xsec->SetLineColor(kRed);
+    // born_xsec->DrawDerivative("same");
+
+    double_t pars1[4] = {1019.457, 4.240, 0.428e-03, 0.8};
+    double_t pars2[4] = {1019.457, 4.270, 0.428e-03, 0.8};
+    double_t pars_mine[4] = {1019.446, 4.225, 0.428e-03, 0.8};
+
+    auto born_xsec_deriv_diff = new TF1("born", [&](double *x, double *pars) {
+        return born_xsec->EvalPar(x, pars1) - born_xsec->EvalPar(x, pars2); 
+        // return born_xsec->Derivative(x[0], pars1) - born_xsec->Derivative(x[0], pars2);
+    }, 1000., 1060., 1);
+    born_xsec_deriv_diff->SetNpx(1e4);
+    born_xsec_deriv_diff->Draw();
     canv.DrawClone();
 
     return 0;
 }
+
+class KnXSec
+{
+private:
+    std::unique_ptr<TF1> born_xsec;
+
+public:
+    KnXSec();
+    ~KnXSec() = default;
+
+    double eval(double energy)
+    {
+        return born_xsec->Eval(2 * energy);
+    }
+};
+
+KnXSec::KnXSec()
+{
+    born_xsec = std::unique_ptr<TF1>(new TF1("born", KnCrossSection, 990., 1060., 4));
+    born_xsec->SetParameters(1019.457, 4.240, 0.428e-03, 0.8);
+    born_xsec->SetNpx(1e4);
+}
+

@@ -30,6 +30,7 @@ private:
 
     double fitRange;
     bool useTrueEnergy = false;
+    bool useEnergySmearing = true;
 
     /// @brief Numbers of entries that satisfy all selection cuts.
     std::vector<int> goodEntries = {};
@@ -49,7 +50,7 @@ private:
 
 public:
     HandlerMC(std::string fKsKl, std::string energyPoint, double fitRange, std::optional<double> meanEnergy, 
-                bool useTrueEnergy, bool saveSplines = false, bool isVerbose = true);
+                bool useTrueEnergy, bool saveSplines = false, bool useEnergySmearing = true, bool isVerbose = true);
 
     std::pair<double, double> GetMass(double fitRange = 0.27);
     std::pair<double, double> GetEnergySpectrumMean();
@@ -62,8 +63,8 @@ public:
 };
 
 HandlerMC::HandlerMC(std::string fKsKl, std::string energyPoint, double fitRange, std::optional<double> meanEnergy, 
-                        bool useTrueEnergy, bool saveSplines, bool isVerbose = true): 
-    energyPoint{energyPoint}, fitRange{fitRange}, meanEnergy{meanEnergy}, useTrueEnergy{useTrueEnergy}, verbose{isVerbose} 
+                        bool useTrueEnergy, bool saveSplines, bool useEnergySmearing, bool isVerbose): 
+    energyPoint{energyPoint}, fitRange{fitRange}, meanEnergy{meanEnergy}, useTrueEnergy{useTrueEnergy}, useEnergySmearing{useEnergySmearing}, verbose{isVerbose} 
 {
     tree = std::unique_ptr<Tree>(new Tree(fKsKl));
     painter = std::unique_ptr<Painter>(new Painter(&container));
@@ -142,7 +143,8 @@ void HandlerMC::FillHists(bool useTrueEnergy)
     for(const auto &entry : goodEntries)
     {
         tree->GetEntry(entry);
-        if(fabs(data->ks.theta - TMath::Pi() / 2) > 0.3)
+        // Ks in a good region + optional cut to eliminate energy smearing.
+        if(fabs(data->ks.theta - TMath::Pi() / 2) > 0.3 && (useEnergySmearing? true : fabs(tree->emeas - meanEnergy.value_or(0)) < 20e-3))
         { continue; }
         
         auto lnY = log(data->Y);
