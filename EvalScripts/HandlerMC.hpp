@@ -70,10 +70,8 @@ HandlerMC::HandlerMC(std::string fKsKl, std::string energyPoint, double fitRange
     painter = std::unique_ptr<Painter>(new Painter(&container));
     data = tree->data; 
 
-    container.Add("hMlnY", new TH2D("hMlnY", "M(lnY)", 300, -0.3, 0.3, 600, 480, 520));
+    container.Add("hMlnY", new TH2D("hMlnY", "M(lnY)", 800, -0.8, 0.8, 600, 485, 515));
     container.Add("hDeltaM", new TProfile("hDeltaM", "DeltaM(lnY)", 40, -1, 1, -1, 1));
-    container.Add("MPsi", new TH2D("MPsi", "M(Psi)", 200, 2, TMath::Pi(), 200, 480, 520));
-    container.Add("hM_CrAnglelnY", new TH2D("hM_CrAnglelnY", "M_CrAngle(lnY)", 30, -0.4, 0.4, 40000, 490, 515));
     container.Add("hPsilnY", new TH2D("hPsilnY", "Psi(lnY)", 200, -0.4, 0.4, 10000, 2.4, 3.3));
     container.Add("hEnergySpectrum", new TH1D("hEnergySpectrum", "hEnergySpectrum", 6000, 480, 540));
     container.Add("hMassVsKsTheta", new TH2D("hMassVsKsTheta", "M vs KsTheta", 600, -1.57, 1.57, 40000, 480, 520));
@@ -143,11 +141,14 @@ void HandlerMC::FillHists(bool useTrueEnergy)
     for(const auto &entry : goodEntries)
     {
         tree->GetEntry(entry);
+        auto lnY = log(data->Y);
+        container["hMlnY"]->Fill(lnY, FullRecMassFunc::Eval(tree->reco.ksdpsi, tree->emeas, data->Y));
+
         // Ks in a good region + optional cut to eliminate energy smearing.
-        if(fabs(data->ks.theta - TMath::Pi() / 2) > 0.3 && (useEnergySmearing? true : fabs(tree->emeas - meanEnergy.value_or(0)) < 20e-3))
+        if(fabs(data->ks.theta - TMath::Pi() / 2) > 0.3 || (useEnergySmearing? false : fabs(tree->emeas - meanEnergy.value_or(0)) > 20e-3))
         { continue; }
         
-        auto lnY = log(data->Y);
+
         auto psiCor =   sigmaTheta(data->piPos.theta - TMath::Pi()/2) * sigmaTheta(data->piPos.theta - TMath::Pi()/2) / 2 * PsiFunc::Derivative(PsiFunc::Var::thetaPos, data->piPos, data->piNeg, 2) + 
                         sigmaTheta(data->piNeg.theta - TMath::Pi()/2) * sigmaTheta(data->piNeg.theta - TMath::Pi()/2) / 2 * PsiFunc::Derivative(PsiFunc::Var::thetaNeg, data->piPos, data->piNeg, 2) + 
                         sigmaPhi * sigmaPhi / 2 * PsiFunc::Derivative(PsiFunc::Var::phiPos, data->piPos, data->piNeg, 2) +
