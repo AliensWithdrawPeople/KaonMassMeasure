@@ -10,7 +10,7 @@
 
 int DrawBcs()
 {
-    std::string filename = "bcs_NewEff_ver3.root";
+    std::string filename = "bcs_RunLumi_v9.root";
     std::string fullFilename = "C:/work/Science/BINP/Kaon Mass Measure/PhiMesonFit/" + filename; 
     auto file = TFile::Open(fullFilename.c_str());
     auto bcs = file->Get<TGraphErrors>("bcs");
@@ -37,7 +37,7 @@ int DrawBcs()
         f_y = f_bcs->Eval(x);
 
         xs.push_back(x);
-        ratios.push_back(y / f_y);
+        ratios.push_back((y - f_y) / f_y);
         residuals.push_back(y - f_y);
 
         ratioErrs.push_back(yErr / f_y);

@@ -130,8 +130,9 @@ void HandlerExp::FillHists(bool useCorrectedEnergy)
                         sigmaPhi * sigmaPhi / 2 * PsiFunc::Derivative(PsiFunc::Var::phiNeg, data->piPos, data->piNeg, 2);
         auto dpsi = tree->reco.ksdpsi +  psiCor;
 
-        auto energy = meanEnergy.value_or(tree->emeas) - energyCorrection.value_or(0.0);
+        auto energy = meanEnergy.value_or(tree->emeas);
         energy = useCorrectedEnergy? misc::GetCorrectedEnergy(tree->runnum, energy) : energy;
+        energy = energy - energyCorrection.value_or(0.0);
 
         auto [binY, binKsTheta] = Sigmas::GetSigmaMatrix_bin(lnY, data->ks.theta);
         auto sigmaPsi = (binY != -1 && binKsTheta != -1)? vSigmaMatrixFit[binY][binKsTheta] : 0.;
