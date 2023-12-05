@@ -54,6 +54,7 @@ void PhiToKn_MC::Loop(std::string output_fname, double energy0)
     int negTrackNumber = 0;
 
     double mass = 0;
+    double z = 0;
 
     Double_t halfPi = TMath::Pi() / 2;
     double cutChi2r = 15.;
@@ -95,6 +96,7 @@ void PhiToKn_MC::Loop(std::string output_fname, double energy0)
     tNew->Branch("runnum", &runnum, "runnum/I");
     tNew->Branch("ksminv", ksminv, "ksminv[15]/F");
     tNew->Branch("mass", &mass, "mass/D");
+    tNew->Branch("z", &z, "z/D");
     // tNew->Branch("kstlen", kstlen, "kstlen[6]/F");
     tNew->Branch("kstlen", &ksCandtlen, "kstlen/D");
 
@@ -123,7 +125,7 @@ void PhiToKn_MC::Loop(std::string output_fname, double energy0)
     auto res = hKsMom->Fit("gaus", "SQME", "goff", sqrt(energy0 * energy0 - 497.614 * 497.614) - 15, sqrt(energy0 * energy0 - 497.614 * 497.614) + 15);
     res = hKsMom->Fit("gaus", "SQME", "goff", res->Parameter(1) - 2 * res->Parameter(2), res->Parameter(1) + 2 * res->Parameter(2));
     const double ksMomUpperBound = res->Parameter(1) + 5 * res->Parameter(2);
-    const double ksMomLowerBound = energy0 < 511.8 ? res->Parameter(1) - 5 * res->Parameter(2) : 85.;
+    const double ksMomLowerBound = energy0 < 513 ? res->Parameter(1) - 5 * res->Parameter(2) : 85.;
     std::cout << "Ks Momentum bounds = " <<  ksMomLowerBound << "--" << ksMomUpperBound << std::endl;
 
     nbytes = 0, nb = 0;
@@ -153,8 +155,9 @@ void PhiToKn_MC::Loop(std::string output_fname, double energy0)
                 // ksalign[k] > 0.85 && 
                 kstlen[k] < 6. &&
                 ksptot[k] > ksMomLowerBound && ksptot[k] < ksMomUpperBound
-                ) 
+            ) 
             {
+                flag = true;
                 posTrackNumber = tcharge[ksvind[k][0]] > 0 ? 0 : 1;
                 negTrackNumber = posTrackNumber == 1 ? 0 : 1;
 
@@ -174,15 +177,16 @@ void PhiToKn_MC::Loop(std::string output_fname, double energy0)
                 KsCandMasses.push_back(sqrt(2 * 139.57 * 139.57 + 2 * (piPosEn * piNegEn - piPos.Dot(piNeg)) ) );
                 KsCand.push_back(k);
                 hPsi->Fill(piPos.Dot(piNeg) / piPos.Mag() / piNeg.Mag());
-                // if(piPos.Dot(piNeg) < -2 * ( TMath::ACos((1 - 497.614 * 497.614 / energy / energy) / (1 - 4 * 139.57 * 139.57 / energy / energy) )) + 1 + 0.)
-                { flag = true; }
-                if(KsCand.size() > 1)
-                {
-                    flag = false;
-                    break;
-                }
-                hKstlen->Fill(kstlen[k]);
 
+                if(piPos.Angle(piNeg) < 0.8 * 2 * TMath::ACos((energy * energy - 497.614 * 497.614) / (energy * energy - 4 * 139.57 * 139.57)))
+                { flag = false; }
+
+                // if(KsCand.size() > 1)
+                // {
+                //     flag = false;
+                //     break;
+                // }
+                hKstlen->Fill(kstlen[k]);
 
                 p1 = tptot[ ksvind[k][posTrackNumber] ];
                 piPos.SetMagThetaPhi(p1, tth[ ksvind[k][posTrackNumber] ], tphi[ ksvind[k][posTrackNumber] ]);
@@ -205,16 +209,13 @@ void PhiToKn_MC::Loop(std::string output_fname, double energy0)
 
         if(flag)
         { 
-            double tmp = fabs(KsCandMasses[0] - 497.614);
             int candNum = 0;
-            // for(int i = 1; i < KsCandMasses.size(); i++) 
-            // { 
-            //     if(fabs(KsCandMasses[i] - 497.614) < tmp)
-            //     { 
-            //         tmp = fabs(KsCandMasses[i] - 497.614); 
-            //         candNum = i;
-            //     }
-            // }
+            {
+                auto it = std::min_element(KsCandMasses.begin(), KsCandMasses.end(), [](const double &c1, const double &c2){
+                    return fabs(c1 - 497.614) < fabs(c2 - 497.614);
+                });
+                candNum = std::distance(KsCandMasses.begin(), it);
+            }
 
             if(KlCandMasses[candNum] > 350)
             {
@@ -224,6 +225,7 @@ void PhiToKn_MC::Loop(std::string output_fname, double energy0)
                 piThetaPos = kspith[KsCand[candNum]][posTrackNumber];
                 piThetaNeg = kspith[KsCand[candNum]][negTrackNumber];
                 ksCandtlen = kstlen[KsCand[candNum]];
+                z = ksz0[KsCand[candNum]];
 
                 for(int i = 0; i < nsim; i++)
                 { 
