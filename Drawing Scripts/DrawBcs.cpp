@@ -10,7 +10,7 @@
 
 int DrawBcs()
 {
-    std::string filename = "bcs_RunLumi_v9.root";
+    std::string filename = "bcs_bkg_pol0.root";
     std::string fullFilename = "C:/work/Science/BINP/Kaon Mass Measure/PhiMesonFit/" + filename; 
     auto file = TFile::Open(fullFilename.c_str());
     auto bcs = file->Get<TGraphErrors>("bcs");
@@ -56,7 +56,7 @@ int DrawBcs()
     grResidual.GetYaxis()->SetTitle("#sigma^{(data)}_{born} - #sigma^{(fit)}_{born}, nb");
     grResidual.GetXaxis()->SetTitle("E_{cms}, GeV");
 
-    grRatio.GetYaxis()->SetTitle("#sigma^{(data)}_{born} / #sigma^{(fit)}_{born}");
+    grRatio.GetYaxis()->SetTitle("(data - fit) / fit");
     grRatio.GetXaxis()->SetTitle("E_{cms}, GeV");
 
     grRatio.DrawClone("ap");

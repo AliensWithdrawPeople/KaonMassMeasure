@@ -32,7 +32,7 @@ int CountEvents()
         [2] / sqrt(2 * 3.14 * ([7]*[7] + [14]*[14])) * exp(-(x[0] - [8] - [13]) * (x[0] - [8] - [13])/2/([7]*[7] + [14]*[14])) + \
         [3] / sqrt(2 * 3.14 * ([9]*[9] + [14]*[14])) * exp(-(x[0] - [10] - [13]) * (x[0] - [10] - [13])/2/([9]*[9] + [14]*[14])) + \
         [4] / sqrt(2 * 3.14 * ([11]*[11] + [14]*[14])) * exp(-(x[0] - [12] - [13]) * (x[0] - [12] - [13])/2/([11]*[11] + [14]*[14]))\
-    ) + [15] + [16] * x[0] + [17] * x[0] * x[0]", 460, 540);
+    ) + [15] + [16] * (x[0] - 496.) + [17] * (x[0] - 496.) * (x[0] - 496.)", 460, 540);
 
     // auto sig_bkg_func = new TF1("sig_bkg_func", "[0] / sqrt(2 * 3.14 * ([1]*[1] + [3]*[3])) * exp(-(x[0] - [2] - [4]) * (x[0] - [2] - [4])/2/([1]*[1] + [3]*[3])) + [5]", 460, 540);
 
@@ -50,10 +50,10 @@ int CountEvents()
 
     auto res_MC = mass_MC->Fit(sig_bkg_func, "SQLME0");
     res_MC = mass_MC->Fit(sig_bkg_func, "SQLME0");
-    res_MC = mass_MC->Fit(sig_bkg_func, "SQLME0");
+    res_MC = mass_MC->Fit(sig_bkg_func, "SQLME");
     std::cout << "MC chi2/ndf = " << res_MC->Chi2() << "/" << res_MC->Ndf() << std::endl;
     std::cout << "mass_MC signal integral = " << sig_bkg_func->Integral(460, 540) << std::endl;
-    // mass_MC->DrawClone("P E");
+    mass_MC->DrawClone("P E");
     // mass_exp->DrawNormalized("same", 187133);
 
 
@@ -67,25 +67,25 @@ int CountEvents()
     // sig_bkg_func->ReleaseParameter(16);
     // sig_bkg_func->ReleaseParameter(17);
 
-    auto res_exp = mass_exp->Fit(sig_bkg_func, "SQLME");
-    mass_exp->DrawClone("PE");
-    mass_exp->GetXaxis()->SetTitle("x");
-    // auto ratio_plot = new TRatioPlot(mass_exp);
-    // ratio_plot->Draw();
-    // ratio_plot->GetLowerRefYaxis()->SetTitle("ratio");
-    // ratio_plot->GetUpperRefYaxis()->SetTitle("entries");
-    // ratio_plot->GetUpperPad()->SetLogy();
+    // auto res_exp = mass_exp->Fit(sig_bkg_func, "SQLME");
+    // mass_exp->DrawClone("PE");
+    // mass_exp->GetXaxis()->SetTitle("x");
+    // // auto ratio_plot = new TRatioPlot(mass_exp);
+    // // ratio_plot->Draw();
+    // // ratio_plot->GetLowerRefYaxis()->SetTitle("ratio");
+    // // ratio_plot->GetUpperRefYaxis()->SetTitle("entries");
+    // // ratio_plot->GetUpperPad()->SetLogy();
 
-    sig_bkg_func->FixParameter(15, 0.0);
-    sig_bkg_func->FixParameter(16, 0.0);
-    sig_bkg_func->FixParameter(17, 0.0);
+    // sig_bkg_func->FixParameter(15, 0.0);
+    // sig_bkg_func->FixParameter(16, 0.0);
+    // sig_bkg_func->FixParameter(17, 0.0);
 
-    sig_bkg_func->SetLineColor(kBlue);
-    sig_bkg_func->SetLineStyle(kDashed);
-    sig_bkg_func->DrawClone("same");
+    // sig_bkg_func->SetLineColor(kBlue);
+    // sig_bkg_func->SetLineStyle(kDashed);
+    // sig_bkg_func->DrawClone("same");
 
-    std::cout << "mass_exp signal integral = " << sig_bkg_func->Integral(460, 540) << std::endl;
-    std::cout << "mass_exp signal integral = " << sig_bkg_func->IntegralError(460, 540) << std::endl;
+    // std::cout << "mass_exp signal integral = " << sig_bkg_func->Integral(460, 540) << std::endl;
+    // std::cout << "mass_exp signal integral = " << sig_bkg_func->IntegralError(460, 540) << std::endl;
 
 
 // **************************** Pars_alt2 ***************************

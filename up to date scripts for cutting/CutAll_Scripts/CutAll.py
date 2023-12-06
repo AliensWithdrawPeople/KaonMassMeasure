@@ -5,7 +5,7 @@ import numpy as np
 
 energy_points = ["501", "503", "505", "508", "508.5", "509", "509.5", "510", "510.5", "511", "511.5", "514", "517", "520", "525", "530"]
 # energy_points = ["508", "508.5", "509", "509.5", "510", "510.5", "511", "511.5", "514"]
-energy_points = ["501"]
+# energy_points = ["501"]
 aux1, aux2 = "\"", "\\"
 pattern = r'luminosity = ([\d.]+)\r\nluminosity_err = ([\d.]+)\r\nentries = (\d+)\r\nrunCounter = (\d+)'
 pattern_bckg = r'N_bckg = ([\d.]+)\r\nN_bckg_err = ([\d.]+)'

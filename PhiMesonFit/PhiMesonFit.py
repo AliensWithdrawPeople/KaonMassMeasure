@@ -37,6 +37,8 @@ e_MC_err = np.sqrt(e_MC * (1 - e_MC) / np.array(n_MC))
 n_events = [305, 2624, 1736, 26421, 120322, 146898, 573681, 442909, 185693, 82720, 46215, 16475, 8931, 5228, 4045, 2550]
 # New: Const bkg
 n_events = [309, 2630, 1738, 26458, 120514, 147107, 574569, 443659, 186014, 82867, 46320, 16524, 8963, 5252, 4062, 2571]
+# New: Const bkg (only right sideband)
+n_events = [260, 2579, 1781, 27053, 123149, 150554, 587751, 453786, 190345, 84830, 47554, 16892, 9138, 5349, 4059, 2555]
 # for point in energy_points:
 #     with up.open(f"C:/work/Science/BINP/Kaon Mass Measure/tr_ph/PhiXSection/Kn{point}.root:Kn") as KnTree: # type: ignore
 #         n_events.append(len(KnTree['emeas'].array())) # type: ignore
@@ -49,7 +51,7 @@ ev_bkg_err = np.array([18.2023, 25.2735, 14.0677, 27.7477, 29.0511, 94.7366, 3.3
 xsec_bkg: np.ndarray = np.round((ev_bkg / lumi), 5)
 xsec_bkg_err = np.round(np.sqrt( (1 / lumi)**2 * ev_bkg_err**2 + (ev_bkg / (lumi**2))**2 * lumi_err**2), 5)
 
-# n_events = ev_sig
+n_events = ev_sig
 efficiency = e_MC
 
 xsec_vis = n_events / lumi
@@ -59,7 +61,7 @@ xsec_vis_err = np.sqrt( (np.sqrt(n_events) / lumi / efficiency)**2 + (n_events /
 xsec = n_events / lumi / efficiency / (1-0.0025) / (1-0.0015)
 
 print("E_beam =", energy_points)
-print("N_events =", n_events)
+print("N_events =", list(n_events))
 print("eff =", list(np.round(efficiency, 6)))
 print("eff_err =", list(np.round(e_MC_err, 6)))
 print("n_MC =", list(n_MC))

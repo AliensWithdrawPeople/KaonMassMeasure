@@ -400,7 +400,7 @@ int PhiToK0_XSecBornFunc_New()
     TGraphErrors a(energies.size(), energies.data(), cross_sections.data(), zeroes.data(), xsec_err.data());
     auto bb = new TF1("born", KnFormFactor, 1000., 1060., 7);
     bb->SetNpx(1e4);
-    bb->SetParameters(1019.4586, 4.189, 0.0004296, 0., 0., 0.97212, 0.);
+    bb->SetParameters(1019.463, 4.245, 0.000428, 0., 0., 0.8, 0.);
     bb->FixParameter(3, 0.);
     bb->FixParameter(4, 0.);
     bb->FixParameter(6, 0.);
@@ -412,9 +412,9 @@ int PhiToK0_XSecBornFunc_New()
     {
         std::cout << fabs(bb->Derivative(ens[i]) * enErrs[i]) << ", ";
     }
-
-    a.Fit(bb, "ME");
-    a.DrawClone("AP");
+    bb->Draw();
+    // a.Fit(bb, "ME");
+    // a.DrawClone("AP");
 
     // TFile *file = TFile::Open("C:/work/Science/BINP/Kaon Mass Measure/PhiMesonFit/bcs_BigChi2=935.root");
     // auto gr = (TGraphErrors *)file->Get("bcs");

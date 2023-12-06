@@ -236,7 +236,7 @@ void PhiToKn::Loop(std::string output_fname, double energy0)
                 piThetaNeg = kspith[KsCand[candNum]][negTrackNumber];
                 ksCandtlen = kstlen[KsCand[candNum]];
                 z = ksz0[KsCand[candNum]];
-                
+
                 if(runnum != prevRunnum)
                 {
                     lumi += lumoff;
@@ -281,7 +281,7 @@ void PhiToKn::Loop(std::string output_fname, double energy0)
         std::cout << "N_bckg = " << bckgLevel * hMass->GetNbinsX() << std::endl;
         std::cout << "N_bckg_err = " <<  bckgLevelErr * hMass->GetNbinsX() << std::endl;
         std::cout << "res1 chi2 /ndf = " << res1->Chi2() / res1->Ndf() << std::endl;
-        std::cout << "res1 chi2 /ndf = " << res2->Chi2() / res2->Ndf() << std::endl;
+        std::cout << "res2 chi2 /ndf = " << res2->Chi2() / res2->Ndf() << std::endl;
     }
 
     std::cout << "luminosity = " << lumi << std::endl;

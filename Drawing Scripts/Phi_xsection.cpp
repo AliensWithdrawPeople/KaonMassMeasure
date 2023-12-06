@@ -26,10 +26,10 @@ int Phi_xsection()
     auto grVisXsec2 = new TGraphErrors(energy.size(), energy.data(), xsec_vis2.data(), energySpread.data(), xsec_vis_err2.data());
 
     // New FF: MC + pol2 fit
-    std::vector<double> xsec_vis = {2.51468, 8.67344, 23.48487, 224.97181, 389.29359, 674.34957, 1016.52104, 999.00898, 795.56775, 532.48244, 409.77972, 149.8607, 78.52898, 51.27216, 33.31665, 23.73516};
-    std::vector<double> xsec_vis_err = {0.143783, 0.168631, 0.559077, 1.506623, 1.44527, 2.131825, 1.926259, 2.088932, 2.681391, 2.307578, 2.203054, 1.217629, 0.854318, 0.715368, 0.525421, 0.467961};
+    std::vector<double> xsec_vis = {2.50786, 8.68968, 23.62778, 226.54159, 389.94455, 675.32426, 1010.04235, 1001.09009, 800.55697, 533.56961, 411.19664, 150.52218, 78.77594, 51.6739, 33.70135, 23.99367};
+    std::vector<double> xsec_vis_err = {0.143587, 0.168791, 0.560805, 1.512828, 1.446984, 2.133892, 1.916838, 2.092197, 2.694341, 2.310825, 2.20793, 1.220632, 0.855789, 0.718334, 0.528582, 0.470581};
     
-    TFile *top = new TFile("C:/work/Science/BINP/Kaon Mass Measure/PhiMesonFit/vcs_sig_mc_bkg_pol2.root", "recreate");
+    // TFile *top = new TFile("C:/work/Science/BINP/Kaon Mass Measure/PhiMesonFit/vcs_sig_mc_bkg_pol2.root", "recreate");
 
     auto grVisXsec = new TGraphErrors(energy.size(), energy.data(), xsec_vis.data(), energySpread.data(), xsec_vis_err.data());
     grVisXsec->GetYaxis()->SetTitle("#sigma_{vis}, nb");
@@ -41,9 +41,9 @@ int Phi_xsection()
     grVisXsec->DrawClone("AP");
     grVisXsec2->DrawClone("P same");
     
-    grVisXsec->Write();
-    top->Write();
-    top->Save();
+    // grVisXsec->Write();
+    // top->Write();
+    // top->Save();
 
 /************ Efficiency vs energy ************/
     // Outdated (old Kaon FF in MCGPJ) efficiency.
@@ -68,9 +68,9 @@ int Phi_xsection()
     grEff->SetMarkerColor(kBlue);
     grEff->SetTitle("Selection efficiency of e^{+}e^{-}#rightarrowK_{S}K_{L} events");
 
-    auto legend = new TLegend(0.1,0.7,0.48,0.9);
-    legend->AddEntry(grEff_old,"With old Kaon FF in MCGPJ","ep");
-    legend->AddEntry(grEff,"With new Kaon FF in MCGPJ","ep");
+    // auto legend = new TLegend(0.1,0.7,0.48,0.9);
+    // legend->AddEntry(grEff_old,"With old Kaon FF in MCGPJ","ep");
+    // legend->AddEntry(grEff,"With new Kaon FF in MCGPJ","ep");
 
     // grEff->DrawClone("AP");
     // grEff_old->DrawClone("P same");
@@ -82,21 +82,33 @@ int Phi_xsection()
     // std::vector<double> bckg_err = {0.03429, 0.01627, 0.04449, 0.0373, 0.03013, 0.04185, 0.03296, 0.03633, 0.04488, 0.04353, 0.0528,  0.04186, 0.03907, 0.03983, 0.03503, 0.03965};
     
     // Const bkg, only right sideband (range = (540, 576)); NLL fit
-    // std::vector<double> bckg = {0.69951, 0.47594, 0.42957, 0.55441, 0.86295, 0.77104, 1.04199, 1.10664, 1.00505, 0.88549, 0.81114, 1.00279, 1.04139, 1.02398, 1.2634, 1.2652};
-    // std::vector<double> bckg_err = {0.03887, 0.01981, 0.03722, 0.0329, 0.02517, 0.02833, 0.02039, 0.02377, 0.03114, 0.03567, 0.03994, 0.04461, 0.04424, 0.04616, 0.04659, 0.0486};
+    std::vector<double> bckg2 = {0.69951, 0.47594, 0.42957, 0.55441, 0.86295, 0.77104, 1.04199, 1.10664, 1.00505, 0.88549, 0.81114, 1.00279, 1.04139, 1.02398, 1.2634, 1.2652};
+    std::vector<double> bckg_err2 = {0.03887, 0.01981, 0.03722, 0.0329, 0.02517, 0.02833, 0.02039, 0.02377, 0.03114, 0.03567, 0.03994, 0.04461, 0.04424, 0.04616, 0.04659, 0.0486};
+    auto grBckg_const = new TGraphErrors(energy.size(), energy.data(), bckg2.data(), zeroes.data(), bckg_err2.data());
+    grBckg_const->SetMarkerColor(kRed);
 
     // MC + bkg fit
     std::vector<double> bckg = {0.60188, 0.40148, 0.39382, 0.23414, 0.23994, 0.21656, 0.29378, 0.20309, 0.1284, 0.35398, 0.41952, 0.56358, 0.7418, 0.77178, 0.96882, 1.05519};
     std::vector<double> bckg_err = {0.03891, 0.02062, 0.04516, 0.05381, 0.02114, 0.09759, 0.00026, 0.00369, 0.04822, 0.04436, 0.00083, 0.04753, 0.05373, 0.05456, 0.05113, 0.05295};
 
-    TGraphErrors grBckg(energy.size(), energy.data(), bckg.data(), zeroes.data(), bckg_err.data());
-    grBckg.GetYaxis()->SetTimeOffset(1.2);
-    grBckg.GetYaxis()->SetTitle("#sigma_{bkg}, nb");
-    grBckg.GetXaxis()->SetTitle("E_{cms}, GeV");
-    grBckg.SetName("bckg");
-    grBckg.SetMarkerColor(kBlue);
-    grBckg.DrawClone("AP");
-    
+    auto grBckg = new TGraphErrors(energy.size(), energy.data(), bckg.data(), zeroes.data(), bckg_err.data());
+
+    grBckg->GetYaxis()->SetTimeOffset(1.2);
+    grBckg->GetYaxis()->SetTitle("#sigma_{bkg}, nb");
+    grBckg->GetXaxis()->SetTitle("E_{cms}, GeV");
+    grBckg->SetName("bckg");
+    grBckg->SetMarkerColor(kBlue);
+
+    auto legend = new TLegend(0.1,0.7,0.48,0.9);
+    legend->AddEntry(grBckg_const, "pol0 bkg from right sideband","ep");
+    legend->AddEntry(grBckg,"MC + pol2 bkg fit","ep");
+    legend->SetBorderSize(4);
+
+    // grBckg->DrawClone("AP");
+    // grBckg_const->DrawClone("P same");
+    // legend->DrawClone("same");
+
+
     canv.DrawClone();
     return 0;
 }
