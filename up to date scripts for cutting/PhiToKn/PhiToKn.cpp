@@ -60,16 +60,19 @@ void PhiToKn::Loop(std::string output_fname, double energy0)
     double mass = 0;
     double z = 0;
 
-    Double_t halfPi = TMath::Pi() / 2;
-    double cutChi2r = 15.;
-    double cutChi2z = 10.;
-    int cutNhitMin = 6;
-    int cutNhitMax = 30;
-    // double cutRmin = 0.05;
-    double cutRmax = 6;
-    double cutZtrack = 12.;
-    double cutPtot = 40;
-    double cutTrackTheta = 0.3;
+    const Double_t halfPi = TMath::Pi() / 2;
+    const double cutChi2r = 15.;
+    const double cutChi2z = 10.;
+    const int cutNhitMin = 6;
+    const int cutNhitMax = 30;
+    // const double cutRmin = 0.05;
+    const double cutRmax = 6;
+    const double cutZtrack = 12.;
+    const double cutPtot = 40;
+    const double cutTrackTheta = 0.3;
+    const double max_ks_vertex_z = 8;
+    const double min_kstlen = 0.7;
+    const double max_kstlen = 6;
 
     double p1 = 0;
     double p2 = 0;
@@ -82,7 +85,7 @@ void PhiToKn::Loop(std::string output_fname, double energy0)
     auto tNew = new TTree("Kn", "Cutted tr_ph (phi xsec related data)");
 
     auto hKsMass = new TH1D("hKsMass", "M^{(#pi^{+}#pi^{-})}_{inv}", 640, 420, 580);
-    auto hPsi = new TH1D("hPsi", "Psi", 2000, -1, 1);
+    auto hPsi = new TH1D("hPsi", "Psi", 3142, 0, 3.142);
     auto hKsMom = new TH1D("hKsMom", "P_{K_{S}}", 2000, 0, 1000);
     auto hKstlen = new TH1D("hKstlen", "kstlen_{K_{S}}", 100, 0, 10);
 
@@ -136,6 +139,8 @@ void PhiToKn::Loop(std::string output_fname, double energy0)
     const double ksMomUpperBound = res->Parameter(1) + 5 * res->Parameter(2);
     const double ksMomLowerBound = energy0 < 513 ? res->Parameter(1) - 5 * res->Parameter(2) : 85.;
     std::cout << "Ks Momentum bounds = " <<  ksMomLowerBound << "--" << ksMomUpperBound << std::endl;
+    const double min_psi = 1 * 2 * sqrt(TMath::ACos((energy0 * energy0 - 497.614 * 497.614) / (energy0 * energy0 - 4 * 139.57 * 139.57)));
+    std::cout << "Min psi_{pions} = " <<  min_psi << std::endl;
 
     nbytes = 0, nb = 0;
 
@@ -160,11 +165,17 @@ void PhiToKn::Loop(std::string output_fname, double energy0)
                 energy > 100 && 
                 // is_coll != 1 &&
 
-                (tdedx[ksvind[k][0]] + tdedx[ksvind[k][1]]) / 2 < 5000. &&
+                tdedx[ksvind[k][0]] < 4000. && 
+                tdedx[ksvind[k][1]] < 4000. &&
+                tdedx[ksvind[k][0]] > 1000. && 
+                tdedx[ksvind[k][1]] > 1000. &&
+                
                 1.1 < kspith[k][0] && kspith[k][0] < TMath::Pi() - 1.1 && 
                 1.1 < kspith[k][1] && kspith[k][1] < TMath::Pi() - 1.1 &&
                 // ksalign[k] > 0.85 && 
-                kstlen[k] < 6. &&
+                kstlen[k] < max_kstlen &&
+                // kstlen[k] > min_kstlen &&
+                fabs(ksz0[k]) < max_ks_vertex_z &&
                 ksptot[k] > ksMomLowerBound && ksptot[k] < ksMomUpperBound
             ) 
             {
@@ -185,18 +196,17 @@ void PhiToKn::Loop(std::string output_fname, double energy0)
                 piPosEn = sqrt(139.57 * 139.57 + piPos.Mag2());
                 piNegEn = sqrt(139.57 * 139.57 + piNeg.Mag2());
 
-                KsCandMasses.push_back(sqrt(2 * 139.57 * 139.57 + 2 * (piPosEn * piNegEn - piPos.Dot(piNeg)) ) );
                 KsCand.push_back(k);
-                hPsi->Fill(piPos.Dot(piNeg) / piPos.Mag() / piNeg.Mag());
+                hPsi->Fill(piPos.Angle(piNeg));
 
-                if(piPos.Angle(piNeg) < 0.8 * 2 * TMath::ACos((energy * energy - 497.614 * 497.614) / (energy * energy - 4 * 139.57 * 139.57)))
+                if(piPos.Angle(piNeg) < min_psi)
                 { flag = false; }
 
-                if(KsCand.size() > 1)
-                {
-                    flag = false;
-                    break;
-                }
+                // if(KsCand.size() > 1)
+                // {
+                //     flag = false;
+                //     break;
+                // }
                 hKstlen->Fill(kstlen[k]);
 
                 p1 = tptot[ ksvind[k][posTrackNumber] ];
@@ -213,6 +223,7 @@ void PhiToKn::Loop(std::string output_fname, double energy0)
                 TLorentzVector pseudo(TVector3(0, 0, 0), 2 * energy);
                 missingMass = (pseudo - piPlus - piMinus).M();
                 KlCandMasses.push_back(missingMass);
+                KsCandMasses.push_back((piPlus + piMinus).M());
                 hMissingMass->Fill(missingMass);
             }
         }

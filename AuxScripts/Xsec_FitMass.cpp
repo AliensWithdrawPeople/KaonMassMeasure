@@ -16,6 +16,10 @@
 #include "RooAddPdf.h"
 #include "RooFitResult.h"
 #include "RooChi2Var.h"
+#include "RooTFnBinding.h"
+#include "RooCFunction1Binding.h"
+#include "RooCFunction3Binding.h"
+#include "RooWrapperPdf.h"
 
 #include <vector>
 #include <TCanvas.h>
@@ -33,21 +37,21 @@ int Xsec_FitMass()
     std::vector<double> ev_bkg_err = {};
 
     std::vector<std::string> ens = {"501", "503", "505", "508", "508.5", "509", "509.5", "510", "510.5", "511", "511.5", "514", "517", "520", "525", "530"};
-    // std::string energy = "503";
+    std::string energy = "509.5";
     auto c = new TCanvas("canv","canv",800,400);  
-    c->Divide(4, 2);
-    for(int i = 0; i < 16; i++)
+    // c->Divide(4, 2);
+    // for(int i = 0; i < 16; i++)
     {
-        auto pad = c->cd(i + 1);
+        auto pad = c->cd(-1 + 1);
         pad->SetLogy();
-        std::string energy = ens[i];
+        // std::string energy = ens[i];
         auto exp = TFile::Open(("./tr_ph/PhiXSection/Kn" + energy + ".root").c_str());
         auto mass_exp = new TH1D("mass_exp", "mass_exp", 80, 420, 580);
         auto tr_exp = exp->Get<TTree>("Kn");
         tr_exp->Draw("mass >> mass_exp", "", "goff");
 
         auto MC = TFile::Open(("./tr_ph/PhiXSection/MC/MC_Kn" + energy + ".root").c_str());
-        auto mass_MC = new TH1D("mass_MC", "mass_MC", 160, 420, 580);
+        auto mass_MC = new TH1D("mass_MC", "mass_MC", 80, 420, 580);
         auto mass_MC_conv = new TH1D("mass_MC_conv", "mass_MC_conv", 160, 420, 580);
         auto tr_MC = MC->Get<TTree>("Kn_MC");
         tr_MC->Draw("mass >> mass_MC", "", "goff");
@@ -61,16 +65,16 @@ int Xsec_FitMass()
         RooRealVar mass("mass", "mass", 420, 580, "MeV/c^{2}");
         mass.setRange("left_slope", 430, 505);
         mass.setRange("right_slope", 490, 570);
-        mass.setRange("short", 430, 570);
+        mass.setRange("short", 425, 575);
         mass.setRange("max", 420, 580);
         RooDataHist exp_hist("exp_hist", "exp_hist", mass, mass_exp);
         RooDataHist mc_conv_hist("mc_conv_hist", "mc_conv_hist", mass, mass_MC_conv);
         const auto hist = &exp_hist;
         double hist_events = hist->sumEntries();
     // **************** Polynomial background: Start **************************
-        RooRealVar a0("a0", "a0", 2.7, -1e7, 1e7);
-        RooRealVar a1("a1", "a1", 2.9, -1000, 1000);
-        RooRealVar a2("a2", "a2", 0, -1000, 1000);
+        RooRealVar a0("a0", "a0", -2.98085e+02, -1e5, 1e4);
+        RooRealVar a1("a1", "a1",  -4.98627e+00, -100, 1e2);
+        RooRealVar a2("a2", "a2", 1.04242e-02, -100, 100);
         RooRealVar a3("a3", "a3", 0, -1000, 1000);
         // RooPolynomial bkg("bkg", "Background", mass, RooArgSet());
         RooPolynomial bkg("bkg", "Background", mass, RooArgSet(a0, a1));
@@ -92,14 +96,14 @@ int Xsec_FitMass()
 
         RooRealVar n_sig("n_sig", "n_sig", hist_events, 0, 1.2 * hist_events);
         RooRealVar n_bkg("n_bkg", "n_bkg", 1.e2, 0, 1.2 * hist_events);        
-        RooAddPdf model("model", "MC + bkg(pol2)", RooArgList(sig_conv_pdf, bkg), RooArgList(n_sig, n_bkg));
-        auto res = model.fitTo(*hist, Save(), PrintLevel(0), Range("max"), MaxCalls(1000));
+        RooAddPdf model("model", "MC + bkg(pol2)", RooArgSet(sig_conv_pdf, bkg), RooArgSet(n_sig, n_bkg));
+        auto res = model.fitTo(*hist, Save(), PrintLevel(0), Range("short"), MaxCalls(3000));
         // std::cout << "Nll = " << res->minNll() << std::endl;
 
-
-        model.plotOn(frame, Normalization(n_sig.getVal() + n_bkg.getVal()));
-        model.plotOn(frame, Components(bkg), LineStyle(kDashed), LineColor(kRed), Normalization(n_bkg.getVal()));
-        model.plotOn(frame, Components(sig_conv_pdf), LineStyle(kDashDotted), Normalization(n_sig.getVal()));
+        hist->plotOn(frame);
+        model.plotOn(frame);
+        model.plotOn(frame, Components(bkg), LineStyle(kDashed), LineColor(kRed));
+        model.plotOn(frame, Components(sig_conv_pdf), LineStyle(kDashDotted));
         hist->plotOn(frame);
 
         frame->SetTitle(("Energy = " + energy + " MeV").c_str());
