@@ -61,9 +61,19 @@ int MassVsE()
 */ 
     std::vector<Float_t> vE = {504.8, 507.862, 508.404, 508.957, 509.528, 509.956, 510.458, 511.035, 513.864};
     std::vector<Float_t> vE0 = {504.8, 507.862, 508.404, 508.957, 509.528, 509.956, 510.458, 511.035, 511.444, 513.864};
-    
+
+    // 0.3 > |\theta_{K_S} - \pi/2|; M_{avg} = 497.580 \pm 0.004 MeV; Events = 319198
     std::vector<Float_t> vM_Exp = {497.529, 497.591, 497.576, 497.572, 497.562, 497.586, 497.599, 497.583, 497.588, 497.603};
     std::vector<Float_t> vMerrExp = {0.046, 0.018, 0.012, 0.011, 0.01, 0.01, 0.011, 0.015, 0.019, 0.053};
+
+    // 0.4 > |\theta_{K_S} - \pi/2| > 0.3; M_{avg} = 497.564 \pm 0.006 MeV; Events = 93320
+    // std::vector<Float_t> vM_Exp = {497.624, 497.544, 497.561, 497.550, 497.565, 497.563, 497.582, 497.552, 497.602, 497.611};
+    // std::vector<Float_t> vMerrExp = {0.066, 0.031, 0.018, 0.017, 0.012, 0.013, 0.017, 0.025, 0.036, 0.107};
+    
+    // 0.3 > |\theta_{K_S} - \pi/2| > 0.2; M_{avg} = 497.571 \pm 0.006 MeV; Events = 101771
+    // std::vector<Float_t> vM_Exp = {497.466, 497.574, 497.553, 497.563, 497.563, 497.587, 497.593, 497.583, 497.52, 497.522};
+    // std::vector<Float_t> vMerrExp = {0.07, 0.03, 0.017, 0.016, 0.012, 0.012, 0.016, 0.023, 0.032, 0.096};
+
     TGraphErrors grRCNC_exp(vM_Exp.size(), vE0.data(), vM_Exp.data(), zeroes.data(), vMerrExp.data());
 
     std::vector<Float_t> vM_Exp_NoEnergyCorr = {497.529, 497.591, 497.576, 497.572, 497.562, 497.586, 497.599, 497.583, 497.588, 497.607};
@@ -87,7 +97,7 @@ int MassVsE()
     grRCNC_exp_NoEnergyCorr.SetLineColor(kBlue);
     grRCNC_exp_NoEnergyCorr.GetFunction("pol0")->SetLineColor(kBlue);
 
-    // grRCNC_exp.DrawClone("AP");
+    grRCNC_exp.DrawClone("AP");
     // grRCNC_exp_NoEnergyCorr.DrawClone("same P");
 
 /*
