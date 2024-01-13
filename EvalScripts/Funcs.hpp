@@ -116,6 +116,22 @@ namespace PsiFunc
         return res;
     }
 
+    /// @brief Returns d^2(psi)/(d(thetaPos)d(thetaNeg)).
+    double MixedThetaDerivative(double thetaPos, double phiPos, double thetaNeg, double phiNeg)
+    {
+        return (-cos(thetaPos)*cos(thetaNeg)*cos(phiPos - phiNeg) - sin(thetaPos) * sin(thetaNeg)) / 
+        sqrt(1 - std::pow(sin(thetaPos) * sin(thetaNeg) * cos(phiPos - phiNeg) + cos(thetaPos) * cos(thetaNeg), 2)) + 
+        (
+            (sin(thetaPos) * cos(thetaNeg) * cos(phiPos - phiNeg) - cos(thetaPos) * sin(thetaNeg)) * 
+            (sin(thetaPos) * cos(thetaNeg) - cos(thetaPos) * sin(thetaNeg) * cos(phiPos - phiNeg)) * 
+            (sin(thetaPos) * sin(thetaNeg) * cos(phiPos - phiNeg) + cos(thetaPos) * cos(thetaNeg))
+        ) / std::pow(1 - std::pow(sin(thetaPos) * sin(thetaNeg) * cos(phiPos - phiNeg) + cos(thetaPos) * cos(thetaNeg), 2), 3./2.);
+    }
+
+    /// @brief Returns d^2(psi)/(d(thetaPos)d(thetaNeg)).
+    double MixedThetaDerivative(track piPos, track piNeg)
+    { return MixedThetaDerivative(piPos.theta, piPos.phi, piNeg.theta, piNeg.phi); }
+
     /// @param piPos track data of pi^+
     /// @param piNeg track data of pi^-
     /// @return Angle between pi^+ and pi^-

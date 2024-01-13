@@ -51,6 +51,9 @@ private:
 
     void FillHists(bool useCorrectedEnergy);
 
+    static bool KsThetaCut(double ksTheta)
+    { return fabs(ksTheta - TMath::Pi() / 2) < 0.3; }
+
 public:
     HandlerExp(std::string fKsKl, std::string energyPoint, double fitRange, std::optional<double> meanEnergy, std::optional<double> energyCorrection, 
                         bool useCorrectedEnergy, bool isVerbose = true);
@@ -120,7 +123,7 @@ void HandlerExp::FillHists(bool useCorrectedEnergy)
     for(const auto &entry : goodEntries)
     {
         tree->GetEntry(entry);
-        if(fabs(data->ks.theta - TMath::Pi() / 2) > 0.3)
+        if(!KsThetaCut(data->ks.theta))
         { continue; }
         
         auto lnY = log(data->Y);
@@ -128,7 +131,7 @@ void HandlerExp::FillHists(bool useCorrectedEnergy)
                         sigmaTheta(data->piNeg.theta - TMath::Pi()/2) * sigmaTheta(data->piNeg.theta - TMath::Pi()/2) / 2 * PsiFunc::Derivative(PsiFunc::Var::thetaNeg, data->piPos, data->piNeg, 2) + 
                         sigmaPhi * sigmaPhi / 2 * PsiFunc::Derivative(PsiFunc::Var::phiPos, data->piPos, data->piNeg, 2) +
                         sigmaPhi * sigmaPhi / 2 * PsiFunc::Derivative(PsiFunc::Var::phiNeg, data->piPos, data->piNeg, 2);
-        auto dpsi = tree->reco.ksdpsi +  psiCor;
+        auto dpsi = PsiFunc::Eval(data->piPos.theta, data->piPos.phi, data->piNeg.theta,  data->piNeg.phi) + psiCor;
 
         auto energy = meanEnergy.value_or(tree->emeas);
         energy = useCorrectedEnergy? misc::GetCorrectedEnergy(tree->runnum, energy) : energy;
@@ -146,7 +149,8 @@ void HandlerExp::FillHists(bool useCorrectedEnergy)
         container["hDeltaM"]->Fill(lnY, massCorr);
         container["hMlnYpfx"]->Fill(lnY, mass); 
 
-        container["hMassVsKsTheta"]->Fill(data->ks.theta - TMath::Pi() / 2, mass); 
+        if(fabs(lnY) < fitRange)
+        { container["hMassVsKsTheta"]->Fill(data->ks.theta - TMath::Pi() / 2, mass); }
         auto eventType = misc::GetEventType(data->piPos, data->piNeg);
         if(eventType == misc::EventType::cowboy)
         { 

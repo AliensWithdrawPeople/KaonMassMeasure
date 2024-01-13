@@ -13,7 +13,7 @@
 
 int Mass_vs_lnY()
 {
-    auto filename = [](std::string point) { return "C:/work/Science/BINP/Kaon Mass Measure/hists/MC/Hists_MC" + point + ".root"; };
+    auto filename = [](std::string point) { return "C:/work/Science/BINP/Kaon Mass Measure/hists/Exp/Hists_Exp" + point + ".root"; };
     std::vector<std::string> points = {"505", "508", "508.5", "509", "509.5", "510", "511", "511.5", "514"};
 
     TLine lower_bound(-0.8, 490, 0.8, 490);
@@ -31,8 +31,9 @@ int Mass_vs_lnY()
         auto file = TFile::Open(filename(points[i]).c_str());
         auto hist = file->Get<TH2D>("hMassVsKsTheta")->ProfileX(("pfx" + points[i]).c_str());
         // auto hist = file->Get<TH2D>("hMlnY");
-        hist->SetTitle(("E_{beam} = " + points[i] + " MeV, MC").c_str());
+        hist->SetTitle(("E_{beam} = " + points[i] + " MeV, EXP").c_str());
         hist->Rebin(4);
+        hist->Fit("pol0", "SQMEL", "", -0.3, 0.3);
         // hist->SetMarkerStyle(1);
         hist->GetYaxis()->SetRangeUser(497.4, 497.6);
         hist->GetXaxis()->SetRangeUser(-0.6, 0.6);

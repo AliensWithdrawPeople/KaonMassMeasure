@@ -67,14 +67,16 @@ int MassVsE()
     std::vector<Float_t> vMerrExp = {0.046, 0.018, 0.012, 0.011, 0.01, 0.01, 0.011, 0.015, 0.019, 0.053};
 
     // 0.4 > |\theta_{K_S} - \pi/2| > 0.3; M_{avg} = 497.564 \pm 0.006 MeV; Events = 93320
-    // std::vector<Float_t> vM_Exp = {497.624, 497.544, 497.561, 497.550, 497.565, 497.563, 497.582, 497.552, 497.602, 497.611};
-    // std::vector<Float_t> vMerrExp = {0.066, 0.031, 0.018, 0.017, 0.012, 0.013, 0.017, 0.025, 0.036, 0.107};
+    std::vector<Float_t> vM_Exp_relaxed = {497.624, 497.544, 497.561, 497.550, 497.565, 497.563, 497.582, 497.552, 497.602, 497.611};
+    std::vector<Float_t> vMerrExp_relaxed = {0.066, 0.031, 0.018, 0.017, 0.012, 0.013, 0.017, 0.025, 0.036, 0.107};
     
     // 0.3 > |\theta_{K_S} - \pi/2| > 0.2; M_{avg} = 497.571 \pm 0.006 MeV; Events = 101771
-    // std::vector<Float_t> vM_Exp = {497.466, 497.574, 497.553, 497.563, 497.563, 497.587, 497.593, 497.583, 497.52, 497.522};
-    // std::vector<Float_t> vMerrExp = {0.07, 0.03, 0.017, 0.016, 0.012, 0.012, 0.016, 0.023, 0.032, 0.096};
+    std::vector<Float_t> vM_Exp_tightened = {497.466, 497.574, 497.553, 497.563, 497.563, 497.587, 497.593, 497.583, 497.52, 497.522};
+    std::vector<Float_t> vMerrExp_tightened = {0.07, 0.03, 0.017, 0.016, 0.012, 0.012, 0.016, 0.023, 0.032, 0.096};
 
     TGraphErrors grRCNC_exp(vM_Exp.size(), vE0.data(), vM_Exp.data(), zeroes.data(), vMerrExp.data());
+    TGraphErrors grRCNC_exp_relaxed(vM_Exp_relaxed.size(), vE0.data(), vM_Exp_relaxed.data(), zeroes.data(), vMerrExp_relaxed.data());
+    TGraphErrors grRCNC_exp_tightened(vM_Exp_tightened.size(), vE0.data(), vM_Exp_tightened.data(), zeroes.data(), vMerrExp_tightened.data());
 
     std::vector<Float_t> vM_Exp_NoEnergyCorr = {497.529, 497.591, 497.576, 497.572, 497.562, 497.586, 497.599, 497.583, 497.588, 497.607};
     std::vector<Float_t> vMerrExp_NoEnergyCorr = {0.046, 0.018, 0.012, 0.011, 0.01, 0.01, 0.011, 0.015, 0.019, 0.054};
@@ -86,8 +88,18 @@ int MassVsE()
     grRCNC_exp.GetYaxis()->SetTitle("M^{(FullRec)}_{RC NC RecCor}, #frac{MeV}{c^{2}}");
     grRCNC_exp.GetYaxis()->SetTitleOffset(1.2);
     grRCNC_exp.SetName("EnControl");
-    grRCNC_exp.SetMarkerSize(1.5);
+    grRCNC_exp.SetMarkerSize(1.2);
     grRCNC_exp.Fit("pol0", "ME");
+
+    grRCNC_exp_relaxed.SetName("KsTheta_relaxed");
+    grRCNC_exp_relaxed.SetMarkerSize(1.2);
+    grRCNC_exp_relaxed.SetMarkerStyle(22);
+    grRCNC_exp_relaxed.SetMarkerColor(kBlue);
+
+    grRCNC_exp_tightened.SetName("KsTheta_tightened");
+    grRCNC_exp_tightened.SetMarkerSize(1.2);
+    grRCNC_exp_tightened.SetMarkerStyle(23);
+    grRCNC_exp_tightened.SetMarkerColor(kMagenta);
 
     grRCNC_exp_NoEnergyCorr.SetName("NoEnControl");
     grRCNC_exp_NoEnergyCorr.SetMarkerSize(1.5);
@@ -98,6 +110,8 @@ int MassVsE()
     grRCNC_exp_NoEnergyCorr.GetFunction("pol0")->SetLineColor(kBlue);
 
     grRCNC_exp.DrawClone("AP");
+    grRCNC_exp_relaxed.DrawClone("same P");
+    grRCNC_exp_tightened.DrawClone("same P");
     // grRCNC_exp_NoEnergyCorr.DrawClone("same P");
 
 /*
@@ -108,8 +122,8 @@ int MassVsE()
     std::vector<Float_t> vM_MC_NoSmearing = {497.64, 497.657, 497.647, 497.642, 497.642, 497.642, 497.65, 497.642, 497.647, 497.633,};
     std::vector<Float_t> vM_MC_NoSmearingErr = {0.00331564, 0.00494999, 0.00522022, 0.00300056, 0.00274137, 0.0028886, 0.00562059, 0.00583294, 0.00588136, 0.00558898};
 
-    std::vector<Float_t> vM_MC_WithSmearing = {497.622, 497.633, 497.62, 497.618, 497.62, 497.618, 497.626, 497.62, 497.626, 497.61};
-    std::vector<Float_t> vM_MC_WithSmearingErr = {0.0034322, 0.00515306, 0.00547349, 0.00315173, 0.00283653, 0.00300368, 0.00584828, 0.00605364, 0.00610134, 0.0057569};
+    std::vector<Float_t> vM_MC_WithSmearing = {497.611, 497.619, 497.605, 497.604, 497.606, 497.604, 497.611, 497.608, 497.612, 497.604};
+    std::vector<Float_t> vM_MC_WithSmearingErr = {0.00343265, 0.00515374, 0.00547423, 0.00315212, 0.00283681, 0.00300401, 0.00584891, 0.00605414, 0.00610191, 0.00575733};
     
     TGraphErrors grMC_NoSmearing(vE0.size(), vE0.data(), vM_MC_NoSmearing.data(), zeroes.data(), vM_MC_NoSmearingErr.data());
     TGraphErrors grMC_WithSmearing(vE0.size(), vE0.data(), vM_MC_WithSmearing.data(), zeroes.data(), vM_MC_WithSmearingErr.data());
@@ -141,7 +155,7 @@ int MassVsE()
 
 
     // grMC_NoSmearing.DrawClone("AP");
-    // grMC_WithSmearing.DrawClone("same P");
+    // grMC_WithSmearing.DrawClone("AP");
     // massKline.DrawClone("same");
 
 /*
