@@ -13,7 +13,8 @@
 
 int Mass_vs_lnY()
 {
-    auto filename = [](std::string point) { return "C:/work/Science/BINP/Kaon Mass Measure/hists/Exp/Hists_Exp" + point + ".root"; };
+    auto filename = [](std::string point) { return "C:/work/Science/BINP/Kaon Mass Measure/hists/MC/Hists_MC" + point + ".root"; };
+    auto filename_exp = [](std::string point) { return "C:/work/Science/BINP/Kaon Mass Measure/hists/Exp/Hists_Exp" + point + ".root"; };
     std::vector<std::string> points = {"505", "508", "508.5", "509", "509.5", "510", "511", "511.5", "514"};
 
     TLine lower_bound(-0.8, 490, 0.8, 490);
@@ -31,11 +32,11 @@ int Mass_vs_lnY()
         auto file = TFile::Open(filename(points[i]).c_str());
         auto hist = file->Get<TH2D>("hMassVsKsTheta")->ProfileX(("pfx" + points[i]).c_str());
         // auto hist = file->Get<TH2D>("hMlnY");
-        hist->SetTitle(("E_{beam} = " + points[i] + " MeV, EXP").c_str());
-        hist->Rebin(4);
-        hist->Fit("pol0", "SQMEL", "", -0.3, 0.3);
+        hist->SetTitle(("E_{beam} = " + points[i] + " MeV, Black -- MC, Blue -- Exp").c_str());
+        hist->Rebin(15);
+        // hist->Fit("pol0", "SQMEL", "", -0.3, 0.3);
         // hist->SetMarkerStyle(1);
-        hist->GetYaxis()->SetRangeUser(497.4, 497.6);
+        hist->GetYaxis()->SetRangeUser(497.3, 497.8);
         hist->GetXaxis()->SetRangeUser(-0.6, 0.6);
 
         hist->GetYaxis()->SetTitle("M_{K_{S}}, MeV/c^{2}   ");
@@ -45,6 +46,18 @@ int Mass_vs_lnY()
         hist->DrawClone();
         // lower_bound.Draw("same");
         // higher_bound.Draw("same");
+
+
+        auto file_exp = TFile::Open(filename_exp(points[i]).c_str());
+        auto hist_exp = file_exp->Get<TH2D>("hMassVsKsTheta")->ProfileX(("pfx_exp" + points[i]).c_str());
+        hist_exp->SetTitle(("E_{beam} = " + points[i] + " MeV, EXP").c_str());
+        hist_exp->Rebin(15);
+        hist_exp->SetMarkerStyle(23);
+        hist_exp->SetMarkerColor(kBlue);
+        hist_exp->GetYaxis()->SetRangeUser(497.3, 497.8);
+        hist_exp->GetXaxis()->SetRangeUser(-0.6, 0.6);
+        hist_exp->DrawClone("same");
+
     }
     canv->DrawClone();
     return 0;

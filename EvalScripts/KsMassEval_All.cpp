@@ -49,7 +49,7 @@ int KsMassEval_All(bool isExp = false)
         for(const auto& energyPoint : energyPoints)
         {
             std::string fileNameMC = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/MC/KsKl_Smeared/New formfactor/XsecConv/MC" + energyPoint + "_XsecConv.root";
-            auto handlerMC = new HandlerMC(fileNameMC, energyPoint, 0.27, meanEnergies[energyPoint].first, false, false);
+            auto handlerMC = new HandlerMC(fileNameMC, energyPoint, 0.27, meanEnergies[energyPoint].first, true, false);
             auto [mass, massErr] = handlerMC->Eval();
             res.push_back(std::make_tuple(energyPoint, mass, massErr));
             std::cout << "MC" << energyPoint << ": " << mass << " + " << massErr << std::endl;

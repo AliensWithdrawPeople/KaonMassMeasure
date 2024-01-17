@@ -252,7 +252,8 @@ void HandlerMC::FillHists(bool useTrueEnergy)
         container["hMlnYpfx"]->Fill(lnY, mass); 
 
         container["hDiffRecGen"]->Fill(data->ks.theta - TMath::Pi() / 2, dpsi - tree->gen.ksdpsi);
-        container["hMassVsKsTheta"]->Fill(data->ks.theta - TMath::Pi() / 2, mass); 
+        if(fabs(lnY) < fitRange)
+        { container["hMassVsKsTheta"]->Fill(data->ks.theta - TMath::Pi() / 2, mass); }
 
         container["hThetaPionDiffRecGen"]->Fill(data->piPos.theta - tree->gen.piPos.theta, data->piNeg.theta - tree->gen.piNeg.theta);
         container["hPhiPionDiffRecGen"]->Fill(data->piPos.phi - tree->gen.piPos.phi, data->piNeg.phi - tree->gen.piNeg.phi); 
