@@ -59,8 +59,7 @@ int MassVsE()
 * Mass vs E_beam in Exp:
 ******************************
 */ 
-    std::vector<Float_t> vE = {504.8, 507.862, 508.404, 508.957, 509.528, 509.956, 510.458, 511.035, 513.864};
-    std::vector<Float_t> vE0 = {504.8, 507.862, 508.404, 508.957, 509.528, 509.956, 510.458, 511.035, 511.444, 513.864};
+    std::vector<Float_t> vE = {504.8, 507.862, 508.404, 508.957, 509.528, 509.956, 510.458, 511.035, 511.444, 513.864};
 
     // 0.3 > |\theta_{K_S} - \pi/2|; M_{avg} = 497.580 \pm 0.004 MeV; Events = 319198
     std::vector<Float_t> vM_Exp = {497.529, 497.591, 497.576, 497.572, 497.562, 497.586, 497.599, 497.583, 497.588, 497.603};
@@ -74,13 +73,13 @@ int MassVsE()
     std::vector<Float_t> vM_Exp_tightened = {497.466, 497.574, 497.553, 497.563, 497.563, 497.587, 497.593, 497.583, 497.52, 497.522};
     std::vector<Float_t> vMerrExp_tightened = {0.07, 0.03, 0.017, 0.016, 0.012, 0.012, 0.016, 0.023, 0.032, 0.096};
 
-    TGraphErrors grRCNC_exp(vM_Exp.size(), vE0.data(), vM_Exp.data(), zeroes.data(), vMerrExp.data());
-    TGraphErrors grRCNC_exp_relaxed(vM_Exp_relaxed.size(), vE0.data(), vM_Exp_relaxed.data(), zeroes.data(), vMerrExp_relaxed.data());
-    TGraphErrors grRCNC_exp_tightened(vM_Exp_tightened.size(), vE0.data(), vM_Exp_tightened.data(), zeroes.data(), vMerrExp_tightened.data());
+    TGraphErrors grRCNC_exp(vM_Exp.size(), vE.data(), vM_Exp.data(), zeroes.data(), vMerrExp.data());
+    TGraphErrors grRCNC_exp_relaxed(vM_Exp_relaxed.size(), vE.data(), vM_Exp_relaxed.data(), zeroes.data(), vMerrExp_relaxed.data());
+    TGraphErrors grRCNC_exp_tightened(vM_Exp_tightened.size(), vE.data(), vM_Exp_tightened.data(), zeroes.data(), vMerrExp_tightened.data());
 
     std::vector<Float_t> vM_Exp_NoEnergyCorr = {497.529, 497.591, 497.576, 497.572, 497.562, 497.586, 497.599, 497.583, 497.588, 497.607};
     std::vector<Float_t> vMerrExp_NoEnergyCorr = {0.046, 0.018, 0.012, 0.011, 0.01, 0.01, 0.011, 0.015, 0.019, 0.054};
-    TGraphErrors grRCNC_exp_NoEnergyCorr(vM_Exp_NoEnergyCorr.size(), vE0.data(), vM_Exp_NoEnergyCorr.data(), 
+    TGraphErrors grRCNC_exp_NoEnergyCorr(vM_Exp_NoEnergyCorr.size(), vE.data(), vM_Exp_NoEnergyCorr.data(), 
                                         zeroes.data(), vMerrExp_NoEnergyCorr.data());
 
     grRCNC_exp.SetTitle("Black -- with Energy correction, Blue -- without");
@@ -125,8 +124,8 @@ int MassVsE()
     std::vector<Float_t> vM_MC_WithSmearing = {497.611, 497.619, 497.605, 497.604, 497.606, 497.604, 497.611, 497.608, 497.612, 497.604};
     std::vector<Float_t> vM_MC_WithSmearingErr = {0.00343265, 0.00515374, 0.00547423, 0.00315212, 0.00283681, 0.00300401, 0.00584891, 0.00605414, 0.00610191, 0.00575733};
     
-    TGraphErrors grMC_NoSmearing(vE0.size(), vE0.data(), vM_MC_NoSmearing.data(), zeroes.data(), vM_MC_NoSmearingErr.data());
-    TGraphErrors grMC_WithSmearing(vE0.size(), vE0.data(), vM_MC_WithSmearing.data(), zeroes.data(), vM_MC_WithSmearingErr.data());
+    TGraphErrors grMC_NoSmearing(vE.size(), vE.data(), vM_MC_NoSmearing.data(), zeroes.data(), vM_MC_NoSmearingErr.data());
+    TGraphErrors grMC_WithSmearing(vE.size(), vE.data(), vM_MC_WithSmearing.data(), zeroes.data(), vM_MC_WithSmearingErr.data());
 
     TLine massKline(504.5, 497.614, 514.5, 497.614);
     massKline.SetLineStyle(2);
@@ -164,31 +163,31 @@ int MassVsE()
 ******************************
 */
 
-    // std::vector<Float_t> vM_Exp_cowboy = {497.747, 497.659, 497.615, 497.605, 497.621, 497.691, 497.765, 497.899, 499.158};
-    // std::vector<Float_t> vMerr_Exp_cowboy = {0.0549, 0.0214, 0.0117, 0.0117, 0.0096, 0.0099, 0.0112, 0.0145, 0.0464};
-    // TGraphErrors grNC_exp_cowboy(vM_Exp_cowboy.size(), vE.data(), vM_Exp_cowboy.data(), zeroes.data(), vMerr_Exp_cowboy.data());
+    std::vector<Float_t> vM_Exp_cowboy = {497.466, 497.601, 497.564, 497.567, 497.575, 497.606, 497.593, 497.602, 497.577, 497.538};
+    std::vector<Float_t> vMerr_Exp_cowboy = {0.0537, 0.0239, 0.0144, 0.0136, 0.0111, 0.0116, 0.0139, 0.0199, 0.0258, 0.0724};
+    TGraphErrors grNC_exp_cowboy(vM_Exp_cowboy.size(), vE.data(), vM_Exp_cowboy.data(), zeroes.data(), vMerr_Exp_cowboy.data());
 
-    // grNC_exp_cowboy.SetTitle("Black -- Cowboy, Blue -- Sailor");
-    // grNC_exp_cowboy.GetXaxis()->SetTitle("E_{beam}, MeV");
-    // grNC_exp_cowboy.GetYaxis()->SetTitle("M^{(FullRec)}_{NC RecCor}, #frac{MeV}{c^{2}}");
-    // grNC_exp_cowboy.GetYaxis()->SetTitleOffset(1.2);
-    // grNC_exp_cowboy.SetName("Cowboy");
-    // grNC_exp_cowboy.SetMarkerSize(1);
+    grNC_exp_cowboy.SetTitle("Black -- Cowboy, Blue -- Sailor");
+    grNC_exp_cowboy.GetXaxis()->SetTitle("E_{beam}, MeV");
+    grNC_exp_cowboy.GetYaxis()->SetTitle("M_{K_{S}}, #frac{MeV}{c^{2}}");
+    grNC_exp_cowboy.GetYaxis()->SetTitleOffset(1.2);
+    grNC_exp_cowboy.SetName("Cowboy");
+    grNC_exp_cowboy.SetMarkerSize(1);
 
-    // std::vector<Float_t> vM_Exp_sailor = {497.777, 497.644, 497.625, 497.63, 497.624, 497.682, 497.764, 497.885};
-    // std::vector<Float_t> vMerr_Exp_sailor = {0.0547, 0.0211, 0.0118, 0.0118, 0.0097, 0.0098, 0.0112, 0.0144};
-    // TGraphErrors grNC_exp_sailor(vM_Exp_sailor.size(), vE.data(), vM_Exp_sailor.data(), zeroes.data(), vMerr_Exp_sailor.data());
+    std::vector<Float_t> vM_Exp_sailor = {497.552, 497.575, 497.568, 497.562, 497.559, 497.581, 497.58, 497.56, 497.596, 497.673};
+    std::vector<Float_t> vMerr_Exp_sailor = {0.0616, 0.0235, 0.0144, 0.0137, 0.0111, 0.0116, 0.0141, 0.0187, 0.0262, 0.0761};
+    TGraphErrors grNC_exp_sailor(vM_Exp_sailor.size(), vE.data(), vM_Exp_sailor.data(), zeroes.data(), vMerr_Exp_sailor.data());
 
-    // grNC_exp_sailor.SetTitle("Black -- Cowboy, Blue -- Sailor");
-    // grNC_exp_sailor.GetXaxis()->SetTitle("E_{beam}, MeV");
-    // grNC_exp_sailor.GetYaxis()->SetTitle("M^{(FullRec)}_{NC RecCor}, #frac{MeV}{c^{2}}");
-    // grNC_exp_sailor.GetYaxis()->SetTitleOffset(1.2);
-    // grNC_exp_sailor.SetName("Sailor");
-    // grNC_exp_sailor.SetMarkerColor(kBlue);
-    // grNC_exp_sailor.SetMarkerSize(1);
+    grNC_exp_sailor.SetTitle("Black -- Cowboy, Blue -- Sailor");
+    grNC_exp_sailor.GetXaxis()->SetTitle("E_{beam}, MeV");
+    grNC_exp_sailor.GetYaxis()->SetTitle("MM_{K_{S}}, #frac{MeV}{c^{2}}");
+    grNC_exp_sailor.GetYaxis()->SetTitleOffset(1.2);
+    grNC_exp_sailor.SetName("Sailor");
+    grNC_exp_sailor.SetMarkerColor(kBlue);
+    grNC_exp_sailor.SetMarkerSize(1);
 
-    // grNC_exp_cowboy.DrawClone("AP");
-    // grNC_exp_sailor.DrawClone("P Same");
+    grNC_exp_cowboy.DrawClone("AP");
+    grNC_exp_sailor.DrawClone("P Same");
 
     
 /*
@@ -196,17 +195,17 @@ int MassVsE()
 * Mass_Cowboys - Mass_Sailors vs E_beam in EXP:
 ******************************
 */
-    // std::vector<Float_t> vDiffM_Exp_cowboy_sailor = {-0.03, 0.015, -0.01, -0.025, -0.003, 0.009, 0.001, 0.014};
-    // std::vector<Float_t> vDiffMerr_Exp_cowboy_sailor = {0.077499, 0.030053, 0.016617, 0.016617, 0.013647, 0.01393, 0.015839, 0.020436};
-    // TGraphErrors grNC_Exp_cowboy_sailor_diff(vDiffM_Exp_cowboy_sailor.size(), vE.data(), vDiffM_Exp_cowboy_sailor.data(), zeroes.data(), vDiffMerr_Exp_cowboy_sailor.data());
-    // grNC_Exp_cowboy_sailor_diff.SetTitle("Cowboy Sailor Difference");
-    // grNC_Exp_cowboy_sailor_diff.GetXaxis()->SetTitle("E_{beam}, MeV");
-    // grNC_Exp_cowboy_sailor_diff.GetYaxis()->SetTitle("#Delta M, #frac{MeV}{c^{2}}");
-    // grNC_Exp_cowboy_sailor_diff.GetYaxis()->SetTitleOffset(1.2);
-    // grNC_Exp_cowboy_sailor_diff.SetName("CowboySailorDiff");
-    // grNC_Exp_cowboy_sailor_diff.SetMarkerSize(1);
+    std::vector<Float_t> vDiffM_Exp_cowboy_sailor = {-0.086, 0.026, -0.004, 0.005, 0.016, 0.025, 0.013, 0.042, -0.019, -0.135};
+    std::vector<Float_t> vDiffMerr_Exp_cowboy_sailor = {0.0811, 0.032, 0.0177, 0.0165, 0.0121, 0.013, 0.0171, 0.0254, 0.0354, 0.1046};
+    TGraphErrors grNC_Exp_cowboy_sailor_diff(vDiffM_Exp_cowboy_sailor.size(), vE.data(), vDiffM_Exp_cowboy_sailor.data(), zeroes.data(), vDiffMerr_Exp_cowboy_sailor.data());
+    grNC_Exp_cowboy_sailor_diff.SetTitle("Cowboy Sailor Difference");
+    grNC_Exp_cowboy_sailor_diff.GetXaxis()->SetTitle("E_{beam}, MeV");
+    grNC_Exp_cowboy_sailor_diff.GetYaxis()->SetTitle("#Delta M, #frac{MeV}{c^{2}}");
+    grNC_Exp_cowboy_sailor_diff.GetYaxis()->SetTitleOffset(1.2);
+    grNC_Exp_cowboy_sailor_diff.SetName("CowboySailorDiff");
+    grNC_Exp_cowboy_sailor_diff.SetMarkerSize(1);
 
-    // grNC_Exp_cowboy_sailor_diff.DrawClone("AP");
+    grNC_Exp_cowboy_sailor_diff.DrawClone("AP");
     
     c.DrawClone();
     return 0;
