@@ -6,7 +6,7 @@
 #include "HandlerExp.hpp"
 
 
-int KsMassEval_All(bool isExp = false)
+int KsMassEval_All(bool isExp = true)
 {
     auto start = std::chrono::system_clock::now();
 
@@ -16,7 +16,9 @@ int KsMassEval_All(bool isExp = false)
     const std::vector<double> meanEnergiesErr = {0.007, 0.007, 0.008, 0.009, 0.004, 0.005, 0.007, 0.009, 0.009, 0.009};
 
 
-    const std::vector<double> deltaE_RC_Smeared = {0.105504, 0.0760349, 0.069423, 0.0598971, 0.0769491, 0.118673, 0.197142, 0.336072, 0.467132, 1.54063};
+    // const std::vector<double> deltaE_RC_Smeared = {0.105504, 0.0760349, 0.069423, 0.0598971, 0.0769491, 0.118673, 0.197142, 0.336072, 0.467132, 1.54063};
+    // With Gamma_phi = 4.5 MeV
+    const std::vector<double> deltaE_RC_Smeared = {0.108198, 0.0799646, 0.0718193, 0.0611741, 0.0804569, 0.1252, 0.19649, 0.33062, 0.446016, 1.55081};
     const std::vector<std::string> energyPoints = {"505", "508", "508.5", "509", "509.5", "510", "510.5", "511", "511.5", "514"};
 
     std::map<std::string, std::pair<double, double>> meanEnergies;
@@ -48,7 +50,8 @@ int KsMassEval_All(bool isExp = false)
     {
         for(const auto& energyPoint : energyPoints)
         {
-            std::string fileNameMC = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/MC/KsKl_Smeared/New formfactor/XsecConv/MC" + energyPoint + "_XsecConv.root";
+            // std::string fileNameMC = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/MC/KsKl_Smeared/New formfactor/XsecConv/MC" + energyPoint + "_XsecConv.root";
+            std::string fileNameMC = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/MC/KsKl_Smeared/phi_width 4.5 MeV/MC" + energyPoint + "_XsecConv.root";
             auto handlerMC = new HandlerMC(fileNameMC, energyPoint, 0.27, meanEnergies[energyPoint].first, true, false);
             auto [mass, massErr] = handlerMC->Eval();
             res.push_back(std::make_tuple(energyPoint, mass, massErr));

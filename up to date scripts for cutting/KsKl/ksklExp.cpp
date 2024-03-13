@@ -65,6 +65,7 @@ void ksklExp::Loop(std::string histFileName)
     Float_t dpsi;
     Float_t ksTheta;
     Float_t ksPhi;
+    Float_t ks_len;
     Float_t Y;
 
     Float_t piThetaPos;
@@ -85,6 +86,7 @@ void ksklExp::Loop(std::string histFileName)
     tNew->Branch("ksdpsi", &dpsi, "dpsi/F");
     tNew->Branch("kstheta", &ksTheta, "kstheta/F");
     tNew->Branch("ksphi", &ksPhi, "ksphi/F");
+    tNew->Branch("ks_len", &ks_len, "ksphi/F");
     tNew->Branch("Y", &Y, "Y/F");
 
     tNew->Branch("piThetaPos", &piThetaPos, "piThetaPos/F");
@@ -339,6 +341,7 @@ void ksklExp::Loop(std::string histFileName)
                 dpsi = piPos.Angle(piNeg);
                 ksTheta = ksth[ksCand[0]];
                 ksPhi = ksphi[ksCand[0]];
+                ks_len = kstlen[ksCand[0]];
 
                 missingMom = -(piPos + piNeg);
                 piPosEn = sqrt(139.57 * 139.57 + piPos.Mag2());

@@ -45,6 +45,7 @@ void kskl2bGen::Loop(std::string histFileName)
     Float_t dpsi;
     Float_t ksTheta;
     Float_t ksPhi;
+    Float_t ks_len;
     Float_t Y;
     Float_t eff;
     Float_t posMom, negMom;
@@ -80,6 +81,7 @@ void kskl2bGen::Loop(std::string histFileName)
     tNew->Branch("ksdpsi", &dpsi, "dpsi/F");
     tNew->Branch("kstheta", &ksTheta, "kstheta/F");
     tNew->Branch("ksphi", &ksPhi, "ksphi/F");
+    tNew->Branch("ks_len", &ks_len, "ksphi/F");
     tNew->Branch("Y", &Y, "Y/F");
     tNew->Branch("nhitPos", &nhitPos, "nhitPos/I");
     tNew->Branch("nhitNeg", &nhitNeg, "nhitNeg/I");
@@ -243,6 +245,7 @@ void kskl2bGen::Loop(std::string histFileName)
                 //(20 - ksz0[0]) * fabs(TMath::Tan(kspith[0][0])) > 15 && (20 - ksz0[0]) * fabs(TMath::Tan(kspith[0][1])) > 15 &&
                 // kspipt[k][0] > 120 && kspipt[k][1] > 120 && 
                 // kspipt[k][0] < 350 && kspipt[k][1] < 350 &&
+                kstlen[k] < 1.7 &&
                 tcharge[ksvind[k][0]] * tcharge[ksvind[k][1]] < 0 && kstype[k] == 0) // Added kstype[k] == 0.
                 {
                     ks.SetMagThetaPhi(1, ksth[k], ksphi[k]);
@@ -353,6 +356,7 @@ void kskl2bGen::Loop(std::string histFileName)
                 hSumMomTr->Fill(kspipt[ksCand[0]][negTrackNumber] + kspipt[ksCand[0]][posTrackNumber]);
                 dpsi = ksdpsi[ksCand[0]];
                 ksTheta = ksth[ksCand[0]];
+                ks_len = kstlen[ksCand[0]];
                 ksPhi = ksphi[ksCand[0]];
                 etrue = sqrt(139.57 * 139.57 + piNeg.Mag2()) + sqrt(139.57 * 139.57 + piPos.Mag2());            
                 

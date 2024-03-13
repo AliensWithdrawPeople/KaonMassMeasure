@@ -87,6 +87,7 @@ HandlerMC::HandlerMC(std::string fKsKl, std::string energyPoint, double fitRange
     container.Add("hDiffRecGen_cowboy", new TH2D("hDiffRecGen_cowboy", "hDiffRecGen_cowboy", 1200, -6., 6., 20000, -1, 1));
     container.Add("hDiffRecGen_sailor", new TH2D("hDiffRecGen_sailor", "hDiffRecGen_sailor", 1200, -6., 6., 20000, -1, 1));
 
+    container.Add("hMassVsKstlen", new TProfile("hMassVsKstlen", "M vs tlen", 100, 0, 2, 490, 505));
     container.Add("hMlnYpfx", new TProfile("hMlnYpfx","Profile of M versus lnY", 30, -1, 1, 490, 505));
     container.Add("hMlnYpfx_cowboy", new TProfile("hMlnYpfx_cowboy", "Profile of M versus lnY, cowboy", 30, -1, 1, 490, 505));
     container.Add("hMlnYpfx_sailor", new TProfile("hMlnYpfx_sailor", "Profile of M versus lnY, sailor", 30, -1, 1, 490, 505));
@@ -253,7 +254,10 @@ void HandlerMC::FillHists(bool useTrueEnergy)
 
         container["hDiffRecGen"]->Fill(data->ks.theta - TMath::Pi() / 2, dpsi - tree->gen.ksdpsi);
         if(fabs(lnY) < fitRange)
-        { container["hMassVsKsTheta"]->Fill(data->ks.theta - TMath::Pi() / 2, mass); }
+        { 
+            container["hMassVsKsTheta"]->Fill(data->ks.theta - TMath::Pi() / 2, mass); 
+            container["hMassVsKstlen"]->Fill(fabs(data->ks_len), mass); 
+        }
 
         container["hThetaPionDiffRecGen"]->Fill(data->piPos.theta - tree->gen.piPos.theta, data->piNeg.theta - tree->gen.piNeg.theta);
         container["hPhiPionDiffRecGen"]->Fill(data->piPos.phi - tree->gen.piPos.phi, data->piNeg.phi - tree->gen.piNeg.phi); 

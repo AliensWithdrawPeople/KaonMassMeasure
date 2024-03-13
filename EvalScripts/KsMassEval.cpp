@@ -29,14 +29,25 @@ int KsMassEval()
         radiativeCorrections[energyPoints[i]] = deltaE_RC_Smeared[i]; 
     }
 
-    std::string energyPoint = "509.5";
+    std::string energyPoint = "509";
     
-    std::string fileNameMC = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/MC/KsKl_Smeared/New formfactor/MC" + energyPoint + ".root";
-    auto handlerMC = new HandlerMC(fileNameMC, energyPoint, 0.27, meanEnergies[energyPoint].first, true, true);
+    std::string fileNameMC = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/MC/KsKl_Smeared/New formfactor/XsecConv/MC" + energyPoint + "_XsecConv.root";
+    // std::string fileNameMC = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/MC/KsKl_Smeared/phi_width 4.5 MeV/MC" + energyPoint + "_XsecConv.root";
+    // 508.331 + 0.00388704
+    // 510.699 + 0.0054766
+    // 514.38 + 0.0330618
+
+    // 508.335 + 0.00271313
+    // 510.7 + 0.00766055
+    // 514.362 + 0.0333405
+    auto handlerMC = new HandlerMC(fileNameMC, energyPoint, 0.27, meanEnergies[energyPoint].first, true, false);
     auto [mass, massErr] = handlerMC->Eval();
     std::cout << mass << " + " << massErr << std::endl;
+
+    auto [meanEnergy_Spectrum, meanEnergyErr_Spectrum] = handlerMC->GetEnergySpectrumMean();
+    std::cout << meanEnergy_Spectrum << " + " << meanEnergyErr_Spectrum << std::endl;
     handlerMC->Draw("hMlnYpfx", {-0.4, 0.4});
-    handlerMC->SaveHists("C:/work/Science/BINP/Kaon Mass Measure/hists/MC/Hists_MC" + energyPoint + ".root");
+    // handlerMC->SaveHists("C:/work/Science/BINP/Kaon Mass Measure/hists/MC/Hists_MC" + energyPoint + ".root");
     // handlerMC->SaveSplines("C:/work/Science/BINP/Kaon Mass Measure/splines/spline_" + energyPoint + ".root");
     delete handlerMC;
 

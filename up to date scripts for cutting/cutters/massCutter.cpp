@@ -5,11 +5,11 @@
 
 int massCutter(std::string point) {
     // MC
-    gROOT->LoadMacro("C:/work/Science/BINP/Kaon Mass Measure/up to date scripts for cutting/KsKl/kskl2bgen.cpp");
-    auto fname = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/mcgpj/tr_ph v9 new form factor/Merged/xsec_cutted/MCGPJ_kskl" + point + "_Merged_XsecConv.root";
-    auto file = TFile::Open((fname).c_str());
-    gROOT->ProcessLine("kskl2bGen a(tr_ph_merged)");
-    gROOT->ProcessLine(("a.Loop(\"KsKl_Smeared/New formfactor/XsecConv/MC" + point + "_XsecConv.root\")").c_str());
+    // gROOT->LoadMacro("C:/work/Science/BINP/Kaon Mass Measure/up to date scripts for cutting/KsKl/kskl2bgen.cpp");
+    // auto fname = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/mcgpj/tr_ph v9 new form factor/Merged/xsec_cutted/MCGPJ_kskl" + point + "_Merged_XsecConv.root";
+    // auto file = TFile::Open((fname).c_str());
+    // gROOT->ProcessLine("kskl2bGen a(tr_ph_merged)");
+    // gROOT->ProcessLine(("a.Loop(\"KsKl_Smeared/New formfactor/XsecConv/MC" + point + "_XsecConv.root\")").c_str());
 
     // MC without xsection-energy spectrum convolution
     // gROOT->LoadMacro("C:/work/Science/BINP/Kaon Mass Measure/up to date scripts for cutting/KsKl/kskl2bgen.cpp");
@@ -17,6 +17,13 @@ int massCutter(std::string point) {
     // auto file = TFile::Open((fname).c_str());
     // gROOT->ProcessLine("kskl2bGen a(tr_ph_merged)");
     // gROOT->ProcessLine(("a.Loop(\"KsKl_Smeared/New formfactor/MC" + point + ".root\")").c_str());
+
+    // MC with phi width = 4.5 MeV
+    gROOT->LoadMacro("C:/work/Science/BINP/Kaon Mass Measure/up to date scripts for cutting/KsKl/kskl2bgen.cpp");
+    auto fname = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/mcgpj/tr_ph v9 phi_width 4.5 MeV/xsec_cutted/MCGPJ_kskl" + point + "_Merged_XsecConv.root";
+    auto file = TFile::Open((fname).c_str());
+    gROOT->ProcessLine("kskl2bGen a(tr_ph_merged)");
+    gROOT->ProcessLine(("a.Loop(\"KsKl_Smeared/phi_width 4.5 MeV/MC" + point + "_XsecConv.root\")").c_str());
 
     // MC with heterogeneous field
     // gROOT->LoadMacro("C:/work/Science/BINP/Kaon Mass Measure/up to date scripts for cutting/KsKl/kskl2bgen.cpp");

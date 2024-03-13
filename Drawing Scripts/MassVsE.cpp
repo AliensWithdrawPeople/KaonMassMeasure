@@ -15,8 +15,8 @@ int MassVsE()
 * Prev results:
 ******************************
 */ 
-    std::vector<Float_t> vMPDG = {0, 497.742, 497.661, 497.625, 497.583, 497.607, 497.580, 0};
-    std::vector<Float_t> vMPDGerr = {0, 0.085, 0.033, 0.031, 0.024, 0.021, 0.017, 0.021, 0};
+    std::vector<Float_t> vMPDG = {0,    497.742, 497.661, 497.625, 497.583, 497.607, 497.580, 0};
+    std::vector<Float_t> vMPDGerr = {0, 0.085,   0.033,   0.031,   0.021,   0.017,   0.034, 0};
     std::vector<Float_t> vExpNum = {500, 505, 506, 507, 508, 509, 510, 520};
     TGraphErrors grMPDG(vMPDG.size(), vExpNum.data(), vMPDG.data(), zeroes.data(), vMPDGerr.data());
     grMPDG.GetYaxis()->SetTitle("M_{K^{0}}, MeV/c^{2}");
@@ -36,12 +36,12 @@ int MassVsE()
     latex5->SetTextAlign(10);
     latex6->SetTextAlign(10);
 
-    latex1->SetTextAngle(90);
-    latex2->SetTextAngle(90);
-    latex3->SetTextAngle(90);
-    latex4->SetTextAngle(90);
-    latex5->SetTextAngle(90);
-    latex6->SetTextAngle(90);
+    // latex1->SetTextAngle(90);
+    // latex2->SetTextAngle(90);
+    // latex3->SetTextAngle(90);
+    // latex4->SetTextAngle(90);
+    // latex5->SetTextAngle(90);
+    // latex6->SetTextAngle(90);
 
     grMPDG.GetListOfFunctions()->Add(latex1); 
     grMPDG.GetListOfFunctions()->Add(latex2); 
@@ -63,6 +63,8 @@ int MassVsE()
 
     // 0.3 > |\theta_{K_S} - \pi/2|; M_{avg} = 497.580 \pm 0.004 MeV; Events = 319198
     std::vector<Float_t> vM_Exp = {497.529, 497.591, 497.576, 497.572, 497.562, 497.586, 497.599, 497.583, 497.588, 497.603};
+    // With phi width = 4.5 MeV
+    // std::vector<Float_t> vM_Exp = {497.529, 497.585, 497.565, 497.563, 497.565, 497.587, 497.587, 497.592, 497.605, 497.5987};
     std::vector<Float_t> vMerrExp = {0.046, 0.018, 0.012, 0.011, 0.01, 0.01, 0.011, 0.015, 0.019, 0.053};
 
     // 0.4 > |\theta_{K_S} - \pi/2| > 0.3; M_{avg} = 497.564 \pm 0.006 MeV; Events = 93320
@@ -110,7 +112,7 @@ int MassVsE()
 
     grRCNC_exp.DrawClone("AP");
     grRCNC_exp_relaxed.DrawClone("same P");
-    grRCNC_exp_tightened.DrawClone("same P");
+    // grRCNC_exp_tightened.DrawClone("same P");
     // grRCNC_exp_NoEnergyCorr.DrawClone("same P");
 
 /*
@@ -121,7 +123,8 @@ int MassVsE()
     std::vector<Float_t> vM_MC_NoSmearing = {497.64, 497.657, 497.647, 497.642, 497.642, 497.642, 497.65, 497.642, 497.647, 497.633,};
     std::vector<Float_t> vM_MC_NoSmearingErr = {0.00331564, 0.00494999, 0.00522022, 0.00300056, 0.00274137, 0.0028886, 0.00562059, 0.00583294, 0.00588136, 0.00558898};
 
-    std::vector<Float_t> vM_MC_WithSmearing = {497.611, 497.619, 497.605, 497.604, 497.606, 497.604, 497.611, 497.608, 497.612, 497.604};
+    // std::vector<Float_t> vM_MC_WithSmearing = {497.611, 497.619, 497.605, 497.604, 497.606, 497.604, 497.611, 497.608, 497.612, 497.604};
+    std::vector<Float_t> vM_MC_WithSmearing = {497.623, 497.631, 497.618, 497.616, 497.619, 497.616, 497.623, 497.619, 497.625, 497.619};
     std::vector<Float_t> vM_MC_WithSmearingErr = {0.00343265, 0.00515374, 0.00547423, 0.00315212, 0.00283681, 0.00300401, 0.00584891, 0.00605414, 0.00610191, 0.00575733};
     
     TGraphErrors grMC_NoSmearing(vE.size(), vE.data(), vM_MC_NoSmearing.data(), zeroes.data(), vM_MC_NoSmearingErr.data());
@@ -186,8 +189,8 @@ int MassVsE()
     grNC_exp_sailor.SetMarkerColor(kBlue);
     grNC_exp_sailor.SetMarkerSize(1);
 
-    grNC_exp_cowboy.DrawClone("AP");
-    grNC_exp_sailor.DrawClone("P Same");
+    // grNC_exp_cowboy.DrawClone("AP");
+    // grNC_exp_sailor.DrawClone("P Same");
 
     
 /*
@@ -205,7 +208,7 @@ int MassVsE()
     grNC_Exp_cowboy_sailor_diff.SetName("CowboySailorDiff");
     grNC_Exp_cowboy_sailor_diff.SetMarkerSize(1);
 
-    grNC_Exp_cowboy_sailor_diff.DrawClone("AP");
+    // grNC_Exp_cowboy_sailor_diff.DrawClone("AP");
     
     c.DrawClone();
     return 0;

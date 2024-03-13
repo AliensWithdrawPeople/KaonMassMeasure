@@ -56,6 +56,7 @@ public:
     struct Data {
         // Momentum ratio = P1/P2, where P1 is the momentum of pi+, P2 is the momentum of pi-.
         float Y;
+        float ks_len;
         float ksdpsi;
         track piPos;
         track piNeg;
@@ -84,6 +85,7 @@ Tree::Tree(std::string filename, bool isExp): tree(std::unique_ptr<TTree>(TFile:
     
     // reco
     tree->SetBranchAddress("Y", &reco.Y);
+    tree->SetBranchAddress("ks_len", &reco.ks_len);
     tree->SetBranchAddress("ksdpsi", &reco.ksdpsi);
     tree->SetBranchAddress("kstheta", &reco.ks.theta);
     tree->SetBranchAddress("ksphi", &reco.ks.phi);

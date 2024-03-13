@@ -89,6 +89,7 @@ HandlerExp::HandlerExp(std::string fKsKl, std::string energyPoint, double fitRan
     container.Add("hPsilnY", new TH2D("hPsilnY", "Psi(lnY)", 200, -0.4, 0.4, 10000, 2.4, 3.3));
     container.Add("hMassVsKsTheta", new TH2D("hMassVsKsTheta", "M vs KsTheta", 600, -1.57, 1.57, 40000, 480, 520));
 
+    container.Add("hMassVsKstlen", new TProfile("hMassVsKstlen", "M vs tlen", 100, 0, 2, 490, 505));
     container.Add("hMlnYpfx", new TProfile("hMlnYpfx","Profile of M versus lnY", 30, -1, 1, 490, 505));
     container.Add("hMlnYpfx_cowboy", new TProfile("hMlnYpfx_cowboy", "Profile of M versus lnY, cowboy", 30, -1, 1, 490, 505));
     container.Add("hMlnYpfx_sailor", new TProfile("hMlnYpfx_sailor", "Profile of M versus lnY, sailor", 30, -1, 1, 490, 505));
@@ -148,9 +149,13 @@ void HandlerExp::FillHists(bool useCorrectedEnergy)
 
         container["hDeltaM"]->Fill(lnY, massCorr);
         container["hMlnYpfx"]->Fill(lnY, mass); 
+        container["hMassVsKstlen"]->Fill(fabs(data->ks_len), mass); 
 
         if(fabs(lnY) < fitRange)
-        { container["hMassVsKsTheta"]->Fill(data->ks.theta - TMath::Pi() / 2, mass); }
+        { 
+            container["hMassVsKsTheta"]->Fill(data->ks.theta - TMath::Pi() / 2, mass); 
+            container["hMassVsKstlen"]->Fill(fabs(data->ks_len), mass); 
+        }
         auto eventType = misc::GetEventType(data->piPos, data->piNeg);
         if(eventType == misc::EventType::cowboy)
         { 

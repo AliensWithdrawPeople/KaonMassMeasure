@@ -47,6 +47,7 @@ void xsec_cut::Loop(std::string histFileName)
 
     auto xsec = new KnXSec();
     TFile *new_file = new TFile(("C:/work/Science/BINP/Kaon Mass Measure/tr_ph/mcgpj/tr_ph v9 new form factor/Merged/xsec_cutted/" + histFileName).c_str(), "recreate");
+    // TFile *new_file = new TFile(("C:/work/Science/BINP/Kaon Mass Measure/tr_ph/mcgpj/tr_ph v9 phi_width 4.5 MeV/xsec_cutted/" + histFileName).c_str(), "recreate");
     auto tnew = fChain->CloneTree(0);
 
     auto energy_spectrum = new TH1D("energy_spectrum", "energy_spectrum", 3500, 500, 535);
