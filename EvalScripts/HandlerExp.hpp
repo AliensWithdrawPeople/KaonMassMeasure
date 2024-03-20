@@ -24,12 +24,16 @@ private:
     std::string energyPoint;
     std::optional<double> meanEnergy;
     std::optional<double> energyCorrection;
+    std::optional<double> pion_theta_covariance;
+    std::optional<std::pair<double, double>> piPos_correction; 
+    std::optional<std::pair<double, double>> piNeg_correction; 
+
     bool verbose;
     std::unique_ptr<Tree> tree;
-    const Tree::Data* data; 
+    Tree::Data* data; 
     HistContainer container = HistContainer();
     std::unique_ptr<Painter> painter;
-
+    
     double fitRange;
     bool useCorrectedEnergy = true;
 
@@ -48,6 +52,7 @@ private:
     /// @param spline_filename name of .root file where splines are saved. 
     /// @return std::pair<ksdpsiRecGenDiff_spline, sigmaTheta_spline>.
     std::pair<Spline, Spline> LoadSplines(std::string spline_filename);
+    double GetPionThetaCorrection_(double KsTheta, bool isPos);
 
     void FillHists(bool useCorrectedEnergy);
 
@@ -55,14 +60,22 @@ private:
     { return fabs(ksTheta - TMath::Pi() / 2) < 0.3; }
 
 public:
-    HandlerExp(std::string fKsKl, std::string energyPoint, double fitRange, std::optional<double> meanEnergy, std::optional<double> energyCorrection, 
-                        bool useCorrectedEnergy, bool isVerbose = true);
+    HandlerExp(std::string fKsKl, 
+            std::string energyPoint, 
+            double fitRange, 
+            std::optional<double> meanEnergy, 
+            std::optional<double> energyCorrection, 
+            std::optional<double> pion_theta_covariance, 
+            std::optional<std::pair<double, double>> piPos_correction, 
+            std::optional<std::pair<double, double>> piNeg_correction, 
+            bool useCorrectedEnergy, 
+            bool isVerbose = true);
 
-    HandlerExp(std::string fKsKl, std::string energyPoint, bool useCorrectedEnergy, bool isVerbose = true): 
-            HandlerExp(fKsKl, energyPoint, 0.27, std::nullopt, std::nullopt, useCorrectedEnergy, isVerbose) {}
+    // HandlerExp(std::string fKsKl, std::string energyPoint, bool useCorrectedEnergy, bool isVerbose = true): 
+    //         HandlerExp(fKsKl, energyPoint, 0.27, std::nullopt, std::nullopt, std::nullopt, std::nullopt, useCorrectedEnergy, isVerbose) {}
 
-    HandlerExp(std::string fKsKl, std::string energyPoint, double fitRange, bool useCorrectedEnergy): 
-            HandlerExp(fKsKl, energyPoint, fitRange, std::nullopt, std::nullopt, useCorrectedEnergy, true) {}
+    // HandlerExp(std::string fKsKl, std::string energyPoint, double fitRange, bool useCorrectedEnergy): 
+    //         HandlerExp(fKsKl, energyPoint, fitRange, std::nullopt, std::nullopt, std::nullopt, std::nullopt, useCorrectedEnergy, true) {}
 
     std::pair<double, double> GetMass(double fitRange = 0.27);
     
@@ -72,9 +85,18 @@ public:
     void SaveHists(std::string output_filename);
 };
 
-HandlerExp::HandlerExp(std::string fKsKl, std::string energyPoint, double fitRange, std::optional<double> meanEnergy, std::optional<double> energyCorrection, 
-                        bool useCorrectedEnergy, bool isVerbose = true): 
-    energyPoint{energyPoint}, fitRange{fitRange}, meanEnergy{meanEnergy}, energyCorrection{energyCorrection}, useCorrectedEnergy{useCorrectedEnergy}, verbose{isVerbose} 
+HandlerExp::HandlerExp(std::string fKsKl, 
+                    std::string energyPoint, 
+                    double fitRange, 
+                    std::optional<double> meanEnergy, 
+                    std::optional<double> energyCorrection, 
+                    std::optional<double> pion_theta_covariance, 
+                    std::optional<std::pair<double, double>> piPos_correction, 
+                    std::optional<std::pair<double, double>> piNeg_correction, 
+                    bool useCorrectedEnergy, bool isVerbose = true): 
+    energyPoint{energyPoint}, fitRange{fitRange}, meanEnergy{meanEnergy}, energyCorrection{energyCorrection}, 
+    useCorrectedEnergy{useCorrectedEnergy}, verbose{isVerbose}, pion_theta_covariance{pion_theta_covariance},
+    piPos_correction{piPos_correction}, piNeg_correction{piNeg_correction}  
 {
     tree = std::unique_ptr<Tree>(new Tree(fKsKl, true));
     painter = std::unique_ptr<Painter>(new Painter(&container));
@@ -113,6 +135,17 @@ HandlerExp::HandlerExp(std::string fKsKl, std::string energyPoint, double fitRan
     FillHists(useCorrectedEnergy);
 }
 
+double HandlerExp::GetPionThetaCorrection_(double ksTheta, bool isPos)
+{
+    if(!(piPos_correction.has_value() && piNeg_correction.has_value()))
+    { return 0.; }
+    if(isPos)
+    {
+        return -(piPos_correction.value().first + piPos_correction.value().second * ksTheta);
+    }
+    return -(piNeg_correction.value().first + piNeg_correction.value().second * ksTheta);
+}
+
 std::pair<Spline, Spline> HandlerExp::LoadSplines(std::string spline_filename)
 { return {Spline(spline_filename, "ksdpsiRecGenDiff_spline"), Spline(spline_filename, "sigmaTheta_spline")}; }
 
@@ -128,8 +161,11 @@ void HandlerExp::FillHists(bool useCorrectedEnergy)
         { continue; }
         
         auto lnY = log(data->Y);
+        data->piPos.theta += GetPionThetaCorrection_(data->ks.theta, true);
+        data->piNeg.theta += GetPionThetaCorrection_(data->ks.theta, false);
         auto psiCor =   sigmaTheta(data->piPos.theta - TMath::Pi()/2) * sigmaTheta(data->piPos.theta - TMath::Pi()/2) / 2 * PsiFunc::Derivative(PsiFunc::Var::thetaPos, data->piPos, data->piNeg, 2) + 
                         sigmaTheta(data->piNeg.theta - TMath::Pi()/2) * sigmaTheta(data->piNeg.theta - TMath::Pi()/2) / 2 * PsiFunc::Derivative(PsiFunc::Var::thetaNeg, data->piPos, data->piNeg, 2) + 
+                        pion_theta_covariance.value_or(0.) *  PsiFunc::MixedThetaDerivative(data->piPos, data->piNeg) +
                         sigmaPhi * sigmaPhi / 2 * PsiFunc::Derivative(PsiFunc::Var::phiPos, data->piPos, data->piNeg, 2) +
                         sigmaPhi * sigmaPhi / 2 * PsiFunc::Derivative(PsiFunc::Var::phiNeg, data->piPos, data->piNeg, 2);
         auto dpsi = PsiFunc::Eval(data->piPos.theta, data->piPos.phi, data->piNeg.theta,  data->piNeg.phi) + psiCor;

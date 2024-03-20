@@ -15,8 +15,8 @@ int MassVsE()
 * Prev results:
 ******************************
 */ 
-    std::vector<Float_t> vMPDG = {0,    497.742, 497.661, 497.625, 497.583, 497.607, 497.580, 0};
-    std::vector<Float_t> vMPDGerr = {0, 0.085,   0.033,   0.031,   0.021,   0.017,   0.034, 0};
+    std::vector<Float_t> vMPDG = {0,    497.742, 497.661, 497.625, 497.583, 497.607, 497.574, 0};
+    std::vector<Float_t> vMPDGerr = {0, 0.085,   0.033,   0.031,   0.021,   0.017,   0.016, 0};
     std::vector<Float_t> vExpNum = {500, 505, 506, 507, 508, 509, 510, 520};
     TGraphErrors grMPDG(vMPDG.size(), vExpNum.data(), vMPDG.data(), zeroes.data(), vMPDGerr.data());
     grMPDG.GetYaxis()->SetTitle("M_{K^{0}}, MeV/c^{2}");
@@ -62,24 +62,25 @@ int MassVsE()
     std::vector<Float_t> vE = {504.8, 507.862, 508.404, 508.957, 509.528, 509.956, 510.458, 511.035, 511.444, 513.864};
 
     // 0.3 > |\theta_{K_S} - \pi/2|; M_{avg} = 497.580 \pm 0.004 MeV; Events = 319198
-    std::vector<Float_t> vM_Exp = {497.529, 497.591, 497.576, 497.572, 497.562, 497.586, 497.599, 497.583, 497.588, 497.603};
+    // std::vector<Float_t> vM_Exp = {497.529, 497.591, 497.576, 497.572, 497.562, 497.586, 497.599, 497.583, 497.588, 497.603};
+    std::vector<Float_t> vM_Exp = {497.525, 497.588, 497.564, 497.559, 497.564, 497.591, 497.581, 497.58, 497.583, 497.602};
     // With phi width = 4.5 MeV
     // std::vector<Float_t> vM_Exp = {497.529, 497.585, 497.565, 497.563, 497.565, 497.587, 497.587, 497.592, 497.605, 497.5987};
     std::vector<Float_t> vMerrExp = {0.046, 0.018, 0.012, 0.011, 0.01, 0.01, 0.011, 0.015, 0.019, 0.053};
 
     // 0.4 > |\theta_{K_S} - \pi/2| > 0.3; M_{avg} = 497.564 \pm 0.006 MeV; Events = 93320
-    std::vector<Float_t> vM_Exp_relaxed = {497.624, 497.544, 497.561, 497.550, 497.565, 497.563, 497.582, 497.552, 497.602, 497.611};
+    std::vector<Float_t> vM_Exp_relaxed = {497.648, 497.566, 497.582, 497.582, 497.55, 497.579, 497.606, 497.554, 497.614, 497.695};
     std::vector<Float_t> vMerrExp_relaxed = {0.066, 0.031, 0.018, 0.017, 0.012, 0.013, 0.017, 0.025, 0.036, 0.107};
     
     // 0.3 > |\theta_{K_S} - \pi/2| > 0.2; M_{avg} = 497.571 \pm 0.006 MeV; Events = 101771
-    std::vector<Float_t> vM_Exp_tightened = {497.466, 497.574, 497.553, 497.563, 497.563, 497.587, 497.593, 497.583, 497.52, 497.522};
+    std::vector<Float_t> vM_Exp_tightened = {497.547, 497.577, 497.561, 497.554, 497.558, 497.584, 497.574, 497.575, 497.616, 497.624};
     std::vector<Float_t> vMerrExp_tightened = {0.07, 0.03, 0.017, 0.016, 0.012, 0.012, 0.016, 0.023, 0.032, 0.096};
 
     TGraphErrors grRCNC_exp(vM_Exp.size(), vE.data(), vM_Exp.data(), zeroes.data(), vMerrExp.data());
     TGraphErrors grRCNC_exp_relaxed(vM_Exp_relaxed.size(), vE.data(), vM_Exp_relaxed.data(), zeroes.data(), vMerrExp_relaxed.data());
     TGraphErrors grRCNC_exp_tightened(vM_Exp_tightened.size(), vE.data(), vM_Exp_tightened.data(), zeroes.data(), vMerrExp_tightened.data());
 
-    std::vector<Float_t> vM_Exp_NoEnergyCorr = {497.529, 497.591, 497.576, 497.572, 497.562, 497.586, 497.599, 497.583, 497.588, 497.607};
+    std::vector<Float_t> vM_Exp_NoEnergyCorr = {497.525, 497.59, 497.57, 497.564, 497.558, 497.585, 497.594, 497.578, 497.583, 497.602};
     std::vector<Float_t> vMerrExp_NoEnergyCorr = {0.046, 0.018, 0.012, 0.011, 0.01, 0.01, 0.011, 0.015, 0.019, 0.054};
     TGraphErrors grRCNC_exp_NoEnergyCorr(vM_Exp_NoEnergyCorr.size(), vE.data(), vM_Exp_NoEnergyCorr.data(), 
                                         zeroes.data(), vMerrExp_NoEnergyCorr.data());
@@ -95,11 +96,14 @@ int MassVsE()
     grRCNC_exp_relaxed.SetName("KsTheta_relaxed");
     grRCNC_exp_relaxed.SetMarkerSize(1.2);
     grRCNC_exp_relaxed.SetMarkerStyle(22);
+    grRCNC_exp_relaxed.Fit("pol0", "ME");
     grRCNC_exp_relaxed.SetMarkerColor(kBlue);
+    grRCNC_exp_relaxed.Fit("pol0", "ME");
 
     grRCNC_exp_tightened.SetName("KsTheta_tightened");
     grRCNC_exp_tightened.SetMarkerSize(1.2);
     grRCNC_exp_tightened.SetMarkerStyle(23);
+    grRCNC_exp_tightened.Fit("pol0", "ME");
     grRCNC_exp_tightened.SetMarkerColor(kMagenta);
 
     grRCNC_exp_NoEnergyCorr.SetName("NoEnControl");
@@ -110,8 +114,8 @@ int MassVsE()
     grRCNC_exp_NoEnergyCorr.SetLineColor(kBlue);
     grRCNC_exp_NoEnergyCorr.GetFunction("pol0")->SetLineColor(kBlue);
 
-    grRCNC_exp.DrawClone("AP");
-    grRCNC_exp_relaxed.DrawClone("same P");
+    // grRCNC_exp.DrawClone("AP");
+    // grRCNC_exp_relaxed.DrawClone("same P");
     // grRCNC_exp_tightened.DrawClone("same P");
     // grRCNC_exp_NoEnergyCorr.DrawClone("same P");
 
@@ -120,44 +124,42 @@ int MassVsE()
 * Mass vs E_beam in MC:
 ******************************
 */ 
-    std::vector<Float_t> vM_MC_NoSmearing = {497.64, 497.657, 497.647, 497.642, 497.642, 497.642, 497.65, 497.642, 497.647, 497.633,};
-    std::vector<Float_t> vM_MC_NoSmearingErr = {0.00331564, 0.00494999, 0.00522022, 0.00300056, 0.00274137, 0.0028886, 0.00562059, 0.00583294, 0.00588136, 0.00558898};
+    std::vector<Float_t> vM_MC_NoThetaKs_Corr = {497.64, 497.657, 497.647, 497.642, 497.642, 497.642, 497.65, 497.642, 497.647, 497.633,};
+    std::vector<Float_t> vM_MC_NoThetaKs_CorrErr = {0.00331564, 0.00494999, 0.00522022, 0.00300056, 0.00274137, 0.0028886, 0.00562059, 0.00583294, 0.00588136, 0.00558898};
 
-    // std::vector<Float_t> vM_MC_WithSmearing = {497.611, 497.619, 497.605, 497.604, 497.606, 497.604, 497.611, 497.608, 497.612, 497.604};
-    std::vector<Float_t> vM_MC_WithSmearing = {497.623, 497.631, 497.618, 497.616, 497.619, 497.616, 497.623, 497.619, 497.625, 497.619};
-    std::vector<Float_t> vM_MC_WithSmearingErr = {0.00343265, 0.00515374, 0.00547423, 0.00315212, 0.00283681, 0.00300401, 0.00584891, 0.00605414, 0.00610191, 0.00575733};
-    
-    TGraphErrors grMC_NoSmearing(vE.size(), vE.data(), vM_MC_NoSmearing.data(), zeroes.data(), vM_MC_NoSmearingErr.data());
-    TGraphErrors grMC_WithSmearing(vE.size(), vE.data(), vM_MC_WithSmearing.data(), zeroes.data(), vM_MC_WithSmearingErr.data());
+    std::vector<Float_t> vM_MC_ThetaKs_Corr = {497.613, 497.616, 497.619, 497.612, 497.617, 497.616, 497.619, 497.613, 497.607, 497.613};
+    std::vector<Float_t> vM_MC_ThetaKs_CorrErr = {0.00261007, 0.00290084, 0.00285878, 0.0024269, 0.00246132, 0.00294152, 0.00397698, 0.00569938, 0.00689703, 0.0150645};
+
+    TGraphErrors grMC_NoThetaKs_Corr(vE.size(), vE.data(), vM_MC_NoThetaKs_Corr.data(), zeroes.data(), vM_MC_NoThetaKs_CorrErr.data());
+    TGraphErrors grMC_ThetaKs_Corr(vE.size(), vE.data(), vM_MC_ThetaKs_Corr.data(), zeroes.data(), vM_MC_ThetaKs_CorrErr.data());
 
     TLine massKline(504.5, 497.614, 514.5, 497.614);
     massKline.SetLineStyle(2);
     massKline.SetLineWidth(4);
     massKline.SetLineColor(kRed);
 
-    grMC_NoSmearing.SetTitle("Black -- without Corrections, Blue -- with Corrections, Red line --- mass in generator");
-    grMC_NoSmearing.GetXaxis()->SetTitle("E_{beam}, MeV");
-    grMC_NoSmearing.GetYaxis()->SetTitle("M^{(FullRec)}_{RC NC}, #frac{MeV}{c^{2}}");
-    grMC_NoSmearing.GetYaxis()->SetTitleOffset(1.2);
-    grMC_NoSmearing.SetName("NoSmear");
-    grMC_NoSmearing.SetMarkerSize(2);
-    grMC_NoSmearing.Fit("pol0", "ME");
+    grMC_NoThetaKs_Corr.SetTitle("Black -- without Corrections, Blue -- with Corrections, Red line --- mass in generator");
+    grMC_NoThetaKs_Corr.GetXaxis()->SetTitle("E_{beam}, MeV");
+    grMC_NoThetaKs_Corr.GetYaxis()->SetTitle("M^{(FullRec)}_{RC NC}, #frac{MeV}{c^{2}}");
+    grMC_NoThetaKs_Corr.GetYaxis()->SetTitleOffset(1.2);
+    grMC_NoThetaKs_Corr.SetName("NoThetaKsCorr_MC");
+    grMC_NoThetaKs_Corr.SetMarkerSize(2);
+    grMC_NoThetaKs_Corr.Fit("pol0", "ME");
     
-    grMC_WithSmearing.SetTitle("Black -- without Corrections, Blue -- with Corrections, Red line --- mass in generator");
-    grMC_WithSmearing.GetXaxis()->SetTitle("E_{beam}, MeV");
-    grMC_WithSmearing.GetYaxis()->SetTitle("M^{(FullRec)}_{RC NC}, #frac{MeV}{c^{2}}");
-    grMC_WithSmearing.GetYaxis()->SetTitleOffset(1.2);
-    grMC_WithSmearing.SetName("Smear");
-    grMC_WithSmearing.SetMarkerColor(kBlue);
-    grMC_WithSmearing.SetLineColor(kBlue);
-    grMC_WithSmearing.SetMarkerStyle(22);
-    grMC_WithSmearing.SetMarkerSize(2);
-    grMC_WithSmearing.Fit("pol0", "ME+");
-    grMC_WithSmearing.GetFunction("pol0")->SetLineColor(kBlue);
+    grMC_ThetaKs_Corr.SetTitle("Black -- without Corrections, Blue -- with Corrections, Red line --- mass in generator");
+    grMC_ThetaKs_Corr.GetXaxis()->SetTitle("E_{beam}, MeV");
+    grMC_ThetaKs_Corr.GetYaxis()->SetTitle("M^{(FullRec)}_{RC NC}, #frac{MeV}{c^{2}}");
+    grMC_ThetaKs_Corr.GetYaxis()->SetTitleOffset(1.2);
+    grMC_ThetaKs_Corr.SetName("ThetaKsCorr_MC");
+    grMC_ThetaKs_Corr.SetMarkerColor(kBlue);
+    grMC_ThetaKs_Corr.SetLineColor(kBlue);
+    grMC_ThetaKs_Corr.SetMarkerStyle(22);
+    grMC_ThetaKs_Corr.SetMarkerSize(2);
+    grMC_ThetaKs_Corr.Fit("pol0", "ME+");
+    grMC_ThetaKs_Corr.GetFunction("pol0")->SetLineColor(kBlue);
 
-
-    // grMC_NoSmearing.DrawClone("AP");
-    // grMC_WithSmearing.DrawClone("AP");
+    // grMC_NoThetaKs_Corr.DrawClone("AP");
+    // grMC_ThetaKs_Corr.DrawClone("AP");
     // massKline.DrawClone("same");
 
 /*

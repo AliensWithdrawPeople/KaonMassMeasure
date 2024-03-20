@@ -24,7 +24,8 @@ private:
     std::optional<double> meanEnergy;
     bool verbose;
     std::unique_ptr<Tree> tree;
-    const Tree::Data* data; 
+    Tree::Data* data; 
+    // const Tree::Data* data; 
     HistContainer container = HistContainer();
     std::unique_ptr<Painter> painter;
 
@@ -174,8 +175,8 @@ double HandlerMC::GetPionThetaCorrection_(double ksTheta, bool isPos, bool isWri
             tmp_hThetaDiffRecGenVsTheta_PionNeg->Fill(data->ks.theta, data->piPos.theta - tree->gen.piPos.theta); 
             tmp_hThetaDiffRecGenVsTheta_PionPos->Fill(data->ks.theta, data->piNeg.theta - tree->gen.piNeg.theta); 
         }
-        auto res_pos = tmp_hThetaDiffRecGenVsTheta_PionPos->Fit("pol1", "SQME", "goff", TMath::Pi()/2 - 0.5, TMath::Pi()/2 + 0.5);
-        auto res_neg = tmp_hThetaDiffRecGenVsTheta_PionNeg->Fit("pol1", "SQME", "goff", TMath::Pi()/2 - 0.5, TMath::Pi()/2 + 0.5);
+        auto res_pos = tmp_hThetaDiffRecGenVsTheta_PionPos->Fit("pol1", "SQME", "goff", TMath::Pi()/2 - 0.8, TMath::Pi()/2 + 0.8);
+        auto res_neg = tmp_hThetaDiffRecGenVsTheta_PionNeg->Fit("pol1", "SQME", "goff", TMath::Pi()/2 - 0.8, TMath::Pi()/2 + 0.8);
         piPos_corr = std::make_pair(res_pos->Parameter(0), res_pos->Parameter(1));
         piNeg_corr = std::make_pair(res_neg->Parameter(0), res_neg->Parameter(1));
         std::cout << piPos_corr.first << " : " << piPos_corr.second << std::endl;
@@ -188,8 +189,6 @@ double HandlerMC::GetPionThetaCorrection_(double ksTheta, bool isPos, bool isWri
     }
     return -(piNeg_corr.first + piNeg_corr.second * ksTheta);
 }
-
-
 
 Spline HandlerMC::CreateDeltaPsiSpline()
 {
@@ -227,10 +226,11 @@ void HandlerMC::FillHists(bool useTrueEnergy)
         // Ks in a good region + optional cut to eliminate energy smearing.
         if(!KsThetaCut(data->ks.theta) || (useEnergySmearing? false : fabs(tree->emeas - meanEnergy.value_or(0)) > 20e-3))
         { continue; }
-        
+        data->piPos.theta += GetPionThetaCorrection_(data->ks.theta, true);
+        data->piNeg.theta += GetPionThetaCorrection_(data->ks.theta, false);
         auto psiCor =   sigmaTheta(data->piPos.theta - TMath::Pi()/2) * sigmaTheta(data->piPos.theta - TMath::Pi()/2) / 2 * PsiFunc::Derivative(PsiFunc::Var::thetaPos, data->piPos, data->piNeg, 2) + 
                         sigmaTheta(data->piNeg.theta - TMath::Pi()/2) * sigmaTheta(data->piNeg.theta - TMath::Pi()/2) / 2 * PsiFunc::Derivative(PsiFunc::Var::thetaNeg, data->piPos, data->piNeg, 2) +
-                        // pion_theta_covariance *  PsiFunc::MixedThetaDerivative(data->piPos, data->piNeg) +
+                        pion_theta_covariance *  PsiFunc::MixedThetaDerivative(data->piPos, data->piNeg) +
                         sigmaPhi * sigmaPhi / 2 * PsiFunc::Derivative(PsiFunc::Var::phiPos, data->piPos, data->piNeg, 2) +
                         sigmaPhi * sigmaPhi / 2 * PsiFunc::Derivative(PsiFunc::Var::phiNeg, data->piPos, data->piNeg, 2);
         // data->piPos.theta = data->piPos.theta + GetPionThetaCorrection_(data->ks.theta, true, false);
