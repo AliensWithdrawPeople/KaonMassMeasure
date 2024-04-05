@@ -280,7 +280,7 @@ void PhiToKn::Loop(std::string output_fname, double energy0)
     {
         auto hMass = new TH1D("hMass", "Mass without background", 160, 420, 580);
         tNew->Draw("mass >> hMass", "", "goff");
-        auto res1 = hMass->Fit("pol0", "SQMEL", "goff", 540, 576);
+        auto res1 = hMass->Fit("pol0", "SQMEL", "goff", 540, 580);
         auto res2 = hMass->Fit("pol0", "SQMEL", "goff", 420, 465);
         // double bckgLevel = (res1->Parameter(0) + res2->Parameter(0)) / 2.;
         // double bckgLevelErr = sqrt(res1->ParError(0) * res1->ParError(0) + res2->ParError(0) * res2->ParError(0));

@@ -6,7 +6,7 @@
 #include "HandlerExp.hpp"
 
 
-int KsMassEval_All(bool isExp = true)
+int KsMassEval_All(bool isExp = false)
 {
     auto start = std::chrono::system_clock::now();
 
@@ -65,7 +65,7 @@ int KsMassEval_All(bool isExp = true)
         {
             // std::string fileNameMC = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/MC/KsKl_Smeared/New formfactor/XsecConv/MC" + energyPoint + "_XsecConv.root";
             std::string fileNameMC = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/MC/KsKl_Smeared/phi_width 4.5 MeV/MC" + energyPoint + "_XsecConv.root";
-            auto handlerMC = new HandlerMC(fileNameMC, energyPoint, 0.27, meanEnergies[energyPoint].first, true, false);
+            auto handlerMC = new HandlerMC(fileNameMC, energyPoint, 0.27, meanEnergies[energyPoint].first, true, false, true);
             auto [mass, massErr] = handlerMC->Eval();
             res.push_back(std::make_tuple(energyPoint, mass, massErr));
             std::cout << "MC" << energyPoint << ": " << mass << " + " << massErr << std::endl;

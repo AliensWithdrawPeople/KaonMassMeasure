@@ -217,7 +217,7 @@ void PhiToKn_MC::Loop(std::string output_fname, double energy0)
                 // hMissingMass->Fill(missingMass);
             }
         }
-
+        
         if(flag)
         { 
             int candNum = 0;
@@ -277,9 +277,7 @@ void PhiToKn_MC::Loop(std::string output_fname, double energy0)
         auto hMass = new TH1D("hMass", "Mass without background", 160, 420, 580);
         tNew->Draw("mass >> hMass", "", "goff");
         auto res2 = hMass->Fit("pol0", "SQMEL0", "", 420, 465);
-        auto res1 = hMass->Fit("pol0", "SQMEL", "", 540, 576);
-       // double bckgLevel = (res1->Parameter(0) + res2->Parameter(0)) / 2.;
-        // double bckgLevelErr = sqrt(res1->ParError(0) * res1->ParError(0) + res2->ParError(0) * res2->ParError(0));
+        auto res1 = hMass->Fit("pol0", "SQMEL", "", 540, 580);
         double bckgLevel = res1->Parameter(0);
         double bckgLevelErr = res1->ParError(0);
         n_events = hMass->Integral() - bckgLevel * hMass->GetNbinsX();

@@ -78,7 +78,7 @@ HandlerMC::HandlerMC(std::string fKsKl, std::string energyPoint, double fitRange
     painter = std::unique_ptr<Painter>(new Painter(&container));
     data = tree->data; 
 
-    container.Add("hMlnY", new TH2D("hMlnY", "M(lnY)", 800, -0.8, 0.8, 600, 485, 515));
+    container.Add("hMlnY", new TH2D("hMlnY", "M(lnY)", 800, -0.8, 0.8, 1000, 485, 515));
     container.Add("hDeltaM", new TProfile("hDeltaM", "DeltaM(lnY)", 40, -1, 1, -1, 1));
     container.Add("hPsilnY", new TH2D("hPsilnY", "Psi(lnY)", 200, -0.4, 0.4, 10000, 2.4, 3.3));
     container.Add("hEnergySpectrum", new TH1D("hEnergySpectrum", "hEnergySpectrum", 6000, 480, 540));
@@ -221,8 +221,6 @@ void HandlerMC::FillHists(bool useTrueEnergy)
     {
         tree->GetEntry(entry);
         auto lnY = log(data->Y);
-        container["hMlnY"]->Fill(lnY, FullRecMassFunc::Eval(tree->reco.ksdpsi, tree->emeas, data->Y));
-
         // Ks in a good region + optional cut to eliminate energy smearing.
         if(!KsThetaCut(data->ks.theta) || (useEnergySmearing? false : fabs(tree->emeas - meanEnergy.value_or(0)) > 20e-3))
         { continue; }
@@ -251,6 +249,7 @@ void HandlerMC::FillHists(bool useTrueEnergy)
 
         container["hDeltaM"]->Fill(lnY, massCorr);
         container["hMlnYpfx"]->Fill(lnY, mass); 
+        container["hMlnY"]->Fill(lnY, mass);
 
         container["hDiffRecGen"]->Fill(data->ks.theta - TMath::Pi() / 2, dpsi - tree->gen.ksdpsi);
         if(fabs(lnY) < fitRange)

@@ -469,9 +469,10 @@ int KnXSec_func()
     // born_xsec->DrawClone();
 
     std::vector<double> delta_cross_sections = {};
-    for(const auto& en : energies)
+    std::vector<double> my_energies = {1009.6, 1015.724, 1016.808, 1017.914, 1019.056, 1019.912, 1020.916, 1022.07, 1022.888, 1027.728};
+    for(const auto& en : my_energies)
     {
-        // delta_cross_sections.push_back(born_xsec->EvalPar([en], [1019.457, 4.270, 0.428e-03, 0.8) - ))
+        std::cout << born_xsec->Eval(en) << ", ";
     }
 
     // xsec.Fit(born_xsec, "ME");

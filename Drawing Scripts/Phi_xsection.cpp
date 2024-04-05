@@ -6,6 +6,7 @@
 #include "TFile.h"
 #include "TCanvas.h"
 #include <TLegend.h>
+#include <TRandom.h>
 
 int Phi_xsection()
 {
@@ -16,9 +17,10 @@ int Phi_xsection()
     std::vector<double> energy = {1.001859, 1.00596, 1.0096, 1.015724, 1.016808, 1.017914, 1.019056, 1.019912, 1.020916, 1.02207, 1.022896, 1.027728, 1.0338, 1.03979, 1.0498, 1.06};
     std::vector<double> energySpread = {0.0003492, 0.0003625, 0.0003626, 0.0003937, 0.0003473, 0.0003556, 0.0003819, 0.0004158, 0.0004071, 0.0003791, 0.0003914, 0.0003672, 0.00036, 0.00041, 0.000417, 0.000378};
 
-    // Old FF
-    // std::vector<double> xsec_vis = {2.52409, 8.54869, 22.92775, 219.98564, 378.05288, 657.75841, 986.31979, 973.88074, 778.15612, 518.83165, 398.13079, 145.33342, 75.84839, 49.53809, 32.36666, 23.08197};
-    // std::vector<double> xsec_vis_err = {0.143951, 0.166218, 0.54809, 1.360034, 1.128901, 2.044079, 2.033836, 2.35264, 2.098364, 1.980744, 1.932598, 1.130711, 0.799666, 0.682457, 0.506897, 0.455273};
+    // With Bkg
+    std::vector<double> xsec_vis_with_bkg = {4.72124, 10.16127, 24.95628, 225.61187, 387.14261, 667.53118, 998.52905, 989.26049, 788.19274, 530.25236, 407.61139, 151.73518, 81.20724, 53.87495, 34.92748, 25.41842};
+    std::vector<double> xsec_vis_with_bkg_err = {0.197209, 0.18273, 0.576638, 1.509155, 1.439604, 2.117351, 1.900085, 2.073628, 2.662238, 2.300914, 2.195585, 1.226125, 0.870177, 0.734421, 0.538556, 0.484794};
+    auto grVisXsec_with_bkg = new TGraphErrors(energy.size(), energy.data(), xsec_vis_with_bkg.data(), energySpread.data(), xsec_vis_with_bkg_err.data());
 
     // New FF: Const bkg fit
     std::vector<double> xsec_vis2 = {2.55493, 8.57642, 22.91284, 220.21836, 378.98208, 657.72612, 984.25605, 974.97838, 778.57844, 518.9548, 397.77018, 145.34911, 75.96123, 49.65799, 32.40645, 23.18225};
@@ -29,21 +31,73 @@ int Phi_xsection()
     std::vector<double> xsec_vis = {2.50786, 8.68968, 23.62778, 226.54159, 389.94455, 675.32426, 1010.04235, 1001.09009, 800.55697, 533.56961, 411.19664, 150.52218, 78.77594, 51.6739, 33.70135, 23.99367};
     std::vector<double> xsec_vis_err = {0.143587, 0.168791, 0.560805, 1.512828, 1.446984, 2.133892, 1.916838, 2.092197, 2.694341, 2.310825, 2.20793, 1.220632, 0.855789, 0.718334, 0.528582, 0.470581};
     
-    // TFile *top = new TFile("C:/work/Science/BINP/Kaon Mass Measure/PhiMesonFit/vcs_sig_mc_bkg_pol2.root", "recreate");
 
-    auto grVisXsec = new TGraphErrors(energy.size(), energy.data(), xsec_vis.data(), energySpread.data(), xsec_vis_err.data());
-    grVisXsec->GetYaxis()->SetTitle("#sigma_{vis}, nb");
-    grVisXsec->GetXaxis()->SetTitle("E_{avg}, MeV");
-    grVisXsec->SetName("vcs");
-    grVisXsec->SetMarkerColor(kRed);
-    grVisXsec2->SetMarkerColor(kBlue);
-    grVisXsec->SetMarkerSize(0.9);
-    grVisXsec->DrawClone("AP");
-    grVisXsec2->DrawClone("P same");
+    std::vector<std::vector<double>> xsec_vis_rand = {
+        {2.57247, 8.26814, 23.7833, 214.22, 371.415, 661.6, 1002.1, 1005.63, 767.857, 514.892, 400.077, 143.449, 74.9358, 49.0609, 31.3562, 22.4868},
+        {2.53891, 8.21763, 23.6718, 213.696, 373.168, 659.13, 1005.98, 1004.85, 767.48, 514.691, 396.675, 146.836, 74.7731, 51.4805, 31.9079, 22.9335},
+        {2.65096, 8.35693, 24.1935, 216.075, 370.053, 661.301, 1003.24, 1005.54, 764.776, 515.852, 397.117, 144.543, 73.8681, 51.3029, 31.7333, 23.0143},
+        {2.25664, 8.14144, 22.2421, 216.255, 370.938, 662.34, 1004.25, 1003.54, 766.256, 514.037, 391.492, 143.172, 73.9338, 49.9087, 32.8378, 22.9119},
+        {2.10354, 8.29098, 24.335, 212.946, 370.61, 660.946, 1002.45, 1004.99, 767.042, 515.535, 398.914, 145.173, 74.9507, 50.9194, 32.0915, 22.8704},
+        {2.56283, 8.5742, 23.892, 212.933, 370.64, 660.141, 1002.63, 1003.12, 770.437, 516.511, 393.859, 146.238, 75.1617, 49.9506, 31.7336, 23.2989},
+        {2.36254, 8.59378, 23.3287, 214.386, 371.825, 663.649, 1001.15, 1006.41, 767.016, 514.436, 401.07, 144.669, 74.899, 49.7429, 32.3396, 22.3556},
+        {2.1385, 8.41783, 22.2859, 212.741, 369.358, 661.476, 1002.67, 1007.54, 761.996, 515.402, 395.479, 144.256, 75.656, 48.9775, 32.5585, 22.9618},
+        {2.58969, 8.40348, 23.341, 212.913, 368.226, 664.675, 1001.84, 1005.31, 763.226, 513.022, 397.493, 144.108, 75.9234, 49.852, 31.6514, 21.9755},
+        {2.38908, 8.71652, 23.1769, 214.035, 371.545, 661.188, 1002.23, 1005.13, 769.987, 514.326, 397.18, 145.398, 74.6333, 49.823, 31.5205, 23.5013},
+    };
+
+    // New FF + track eff accounted for (514 > E > 505): Const bkg fit
+    std::vector<double> xsec_vis2_tr_eff = {2.5549, 8.5764, 22.9128, 217.9732, 374.9699, 655.7588, 992.0936, 984.1308, 785.6493, 516.9902, 402.6014, 145.3491, 75.9612, 49.658, 32.4064, 23.1822};
+    std::vector<double> xsec_vis_err2_tr_eff = {0.144931, 0.167673, 0.552109, 1.477628, 1.405281, 2.092725, 1.895317, 2.071939, 2.664084, 2.26347, 2.196763, 1.197029, 0.838923, 0.703349, 0.517876, 0.462314};
+    auto grVisXsec2_tr_eff = new TGraphErrors(energy.size(), energy.data(), xsec_vis2_tr_eff.data(), energySpread.data(), xsec_vis_err2_tr_eff.data());
+
+    TFile *top = new TFile("C:/work/Science/BINP/Kaon Mass Measure/PhiMesonFit/vcs/vcs_kskl_with_bkg.root", "recreate");
+    grVisXsec_with_bkg->GetYaxis()->SetTitle("#sigma_{vis}, nb");
+    grVisXsec_with_bkg->GetXaxis()->SetTitle("E_{avg}, MeV");
+    grVisXsec_with_bkg->SetName("vcs");
+    grVisXsec_with_bkg->SetMarkerColor(kRed);
+    grVisXsec_with_bkg->Write();
+    top->Write();
+    top->Save();
+
+    // auto grVisXsec = new TGraphErrors(energy.size(), energy.data(), xsec_vis.data(), energySpread.data(), xsec_vis_err.data());
+    // for(int i = 0; i < xsec_vis_rand.size(); i++)
+    // {
+    //     auto sample = xsec_vis_rand[i];
+    //     TFile *top = new TFile(("C:/work/Science/BINP/Kaon Mass Measure/PhiMesonFit/vcs/ToyMC/vcs_kskl_rand_sample" + std::to_string(i) + ".root").c_str(), "recreate");
+    //     auto grVisXsec = new TGraphErrors(energy.size(), energy.data(), sample.data(), energySpread.data(), xsec_vis_err.data());
+    //     grVisXsec->GetYaxis()->SetTitle("#sigma_{vis}, nb");
+    //     grVisXsec->GetXaxis()->SetTitle("E_{avg}, MeV");
+    //     grVisXsec->SetName("vcs");
+    //     grVisXsec->SetMarkerColor(kRed);
+    //     grVisXsec->DrawClone("AP");
+        
+    //     grVisXsec->Write();
+    //     top->Write();
+    //     top->Save();
+    // }
+    // auto grVisXsec = new TGraphErrors(energy.size(), energy.data(), xsec_vis_rand.data(), energySpread.data(), xsec_vis_err.data());
+    // grVisXsec2_tr_eff->GetYaxis()->SetTitle("#sigma_{vis}, nb");
+    // grVisXsec2_tr_eff->GetXaxis()->SetTitle("E_{avg}, MeV");
+    // grVisXsec2_tr_eff->SetName("vcs");
+    // grVisXsec2_tr_eff->SetMarkerColor(kRed);
+    // grVisXsec2->SetMarkerColor(kBlue);
+    // grVisXsec2_tr_eff->DrawClone("AP");
+    // grVisXsec2->DrawClone("P same");
     
-    // grVisXsec->Write();
+    // grVisXsec2_tr_eff->Write();
     // top->Write();
     // top->Save();
+
+
+    std::vector<double> sample = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, -1, 10};
+    std::vector<double> mass = {1019.442,  1019.437, 1019.437, 1019.424, 1019.437, 1019.440, 1019.439, 1019.432, 1019.435, 1019.440};
+    std::vector<double> mass_err = {0.005, 0.006, 0.005, 0.005, 0.007, 0.005, 0.005, 0.005, 0.005, 0.005};
+    std::vector<double> width = {4.29, 4.29, 4.29, 4.27, 4.29, 4.3, 4.27, 4.28, 4.30, 4.32};
+    std::vector<double> width_err = {0.010, 0.010, 0.010, 0.010, 0.010, 0.010, 0.010, 0.010, 0.010, 0.010};
+    auto gr_toyMC_mass = new TGraphErrors(sample.size(), sample.data(), mass.data(), zeroes.data(), mass_err.data());
+    auto gr_toyMC_width = new TGraphErrors(sample.size(), sample.data(), width.data(), zeroes.data(), width_err.data());
+
+    // gr_toyMC_mass->DrawClone("AP");
 
 /************ Efficiency vs energy ************/
     // Outdated (old Kaon FF in MCGPJ) efficiency.

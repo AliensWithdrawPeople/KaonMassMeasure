@@ -44,18 +44,18 @@ int KsMassEval()
     std::string energyPoint = "509";
     
     std::string fileNameMC = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/MC/KsKl_Smeared/New formfactor/XsecConv/MC" + energyPoint + "_XsecConv.root";
-    // std::string fileNameMC = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/MC/KsKl_Smeared/phi_width 4.5 MeV/MC" + energyPoint + "_XsecConv.root";
-    auto handlerMC = new HandlerMC(fileNameMC, energyPoint, 0.27, meanEnergies[energyPoint].first, true, false);
+    // // std::string fileNameMC = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/MC/KsKl_Smeared/phi_width 4.5 MeV/MC" + energyPoint + "_XsecConv.root";
+    auto handlerMC = new HandlerMC(fileNameMC, energyPoint, 0.27, meanEnergies[energyPoint].first, false, false);
     auto [mass, massErr] = handlerMC->Eval();
     std::cout << mass << " + " << massErr << std::endl;
 
     auto [meanEnergy_Spectrum, meanEnergyErr_Spectrum] = handlerMC->GetEnergySpectrumMean();
     std::cout << meanEnergy_Spectrum << " + " << meanEnergyErr_Spectrum << std::endl;
-    handlerMC->Draw("hDiffRecGen", {-0.8, 0.8});
-    // handlerMC->SaveHists("C:/work/Science/BINP/Kaon Mass Measure/hists/MC/Hists_MC" + energyPoint + ".root");
-    // handlerMC->SaveSplines("C:/work/Science/BINP/Kaon Mass Measure/splines/spline_" + energyPoint + ".root");
-    delete handlerMC;
-
+    // handlerMC->Draw("hDiffRecGen", {-0.8, 0.8});
+    handlerMC->Draw("hMlnYpfx", {-0.5, 0.5});
+    handlerMC->SaveHists("C:/work/Science/BINP/Kaon Mass Measure/hists/MC/Hists_MC" + energyPoint + ".root");
+    handlerMC->SaveSplines("C:/work/Science/BINP/Kaon Mass Measure/splines/spline_" + energyPoint + ".root");
+    // delete handlerMC;
     // std::string fileNameExp = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/expKsKl/exp" + energyPoint + ".root";
     // auto handlerExp = new HandlerExp(fileNameExp, energyPoint, 0.27, meanEnergies[energyPoint].first, 
     //                                 radiativeCorrections[energyPoint], pion_theta_covariance[energyPoint], 
@@ -63,7 +63,7 @@ int KsMassEval()
     // auto [mass, massErr] = handlerExp->Eval();
     // std::cout << mass << " +/- " << massErr << std::endl;
     // handlerExp->Draw("hMassVsKsTheta", {-0.8, 0.8});
-    // handlerExp->Draw("hMlnYpfx", {-0.4, 0.4});
+    // handlerExp->Draw("hMlnYpfx", {-0.5, 0.5});
     // handlerExp->SaveHists("C:/work/Science/BINP/Kaon Mass Measure/hists/Exp/Hists_Exp" + energyPoint + ".root");
     // delete handlerExp;
 

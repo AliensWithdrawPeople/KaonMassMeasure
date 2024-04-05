@@ -104,7 +104,7 @@ HandlerExp::HandlerExp(std::string fKsKl,
     tree->SetReco(true);
     data = tree->data; 
 
-    container.Add("hMlnY", new TH2D("hMlnY", "M(lnY)", 300, -0.3, 0.3, 600, 480, 520));
+    container.Add("hMlnY", new TH2D("hMlnY", "M(lnY)", 300, -0.8, 0.8, 600, 480, 520));
     container.Add("hDeltaM", new TProfile("hDeltaM", "DeltaM(lnY)", 40, -1, 1, -1, 1));
     container.Add("MPsi", new TH2D("MPsi", "M(Psi)", 200, 2, TMath::Pi(), 200, 480, 520));
     container.Add("hM_CrAnglelnY", new TH2D("hM_CrAnglelnY", "M_CrAngle(lnY)", 30, -0.4, 0.4, 40000, 490, 515));
@@ -185,6 +185,7 @@ void HandlerExp::FillHists(bool useCorrectedEnergy)
 
         container["hDeltaM"]->Fill(lnY, massCorr);
         container["hMlnYpfx"]->Fill(lnY, mass); 
+        container["hMlnY"]->Fill(lnY, mass); 
         container["hMassVsKstlen"]->Fill(fabs(data->ks_len), mass); 
 
         if(fabs(lnY) < fitRange)

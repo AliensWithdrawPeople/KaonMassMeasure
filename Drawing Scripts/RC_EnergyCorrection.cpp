@@ -1,4 +1,6 @@
 #include "TF1.h"
+#include "TH1.h"
+#include "TH2F.h"
 #include "TGraphErrors.h"
 #include "TLine.h"
 #include "TGaxis.h"
@@ -8,7 +10,8 @@
 
 int RC_EnergyCorrection()
 {
-    TCanvas c("canv", "canv");
+    TCanvas *c = new TCanvas("c1","hists with different scales",600,400);
+    gStyle->SetOptStat(kFALSE);
     std::vector<Float_t> zeroes(100, 0.0);
 /*
 ******************************
@@ -40,9 +43,25 @@ int RC_EnergyCorrection()
     grEcorr.SetMarkerStyle(22);
     grEcorr.SetMarkerColor(kBlue);
 
-    grEcorr_smeared.DrawClone("AP");
+    auto h2 = new TH2F("h", "Axes", 100, 504 , 512, 100, 0.03, 0.6);
+    h2->SetTitle("Black -- with Energy smearing, Blue -- without");
+    h2->GetXaxis()->SetTitle("E_{beam}, MeV");
+    h2->GetYaxis()->SetTitle("#DeltaE^{(RC)}, MeV");
+
+    h2->Draw();
+    c->Update();
+
+    TGaxis *axis = new TGaxis(gPad->GetUxmax(), gPad->GetUymin(),
+         gPad->GetUxmax(), gPad->GetUymax(), 0.03, 0.6 * 1.0748, 510, "+L");
+    axis->SetTitle("#DeltaM^{(RC)}, MeV ");
+    axis->SetTitleFont(42);
+    axis->SetTitleSize(0.05);
+    axis->SetTitleOffset(0.7);
+    axis->Draw();
+
+    grEcorr_smeared.DrawClone("P same");
     grEcorr.DrawClone("P same");
-    
-    c.DrawClone();
+    std::cout << gPad->GetUxmax() << " : " << gPad->GetUymin() << std::endl;
+
     return 0;
 }

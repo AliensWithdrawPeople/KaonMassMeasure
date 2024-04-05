@@ -114,7 +114,7 @@ int MassVsE()
     grRCNC_exp_NoEnergyCorr.SetLineColor(kBlue);
     grRCNC_exp_NoEnergyCorr.GetFunction("pol0")->SetLineColor(kBlue);
 
-    // grRCNC_exp.DrawClone("AP");
+    grRCNC_exp.DrawClone("AP");
     // grRCNC_exp_relaxed.DrawClone("same P");
     // grRCNC_exp_tightened.DrawClone("same P");
     // grRCNC_exp_NoEnergyCorr.DrawClone("same P");
@@ -168,7 +168,8 @@ int MassVsE()
 ******************************
 */
 
-    std::vector<Float_t> vM_Exp_cowboy = {497.466, 497.601, 497.564, 497.567, 497.575, 497.606, 497.593, 497.602, 497.577, 497.538};
+    // std::vector<Float_t> vM_Exp_cowboy = {497.466, 497.601, 497.564, 497.567, 497.575, 497.606, 497.593, 497.602, 497.577, 497.538};
+    std::vector<Float_t> vM_Exp_cowboy = {497.46, 497.594, 497.563, 497.569, 497.565, 497.59, 497.605, 497.593, 497.581, 497.543};
     std::vector<Float_t> vMerr_Exp_cowboy = {0.0537, 0.0239, 0.0144, 0.0136, 0.0111, 0.0116, 0.0139, 0.0199, 0.0258, 0.0724};
     TGraphErrors grNC_exp_cowboy(vM_Exp_cowboy.size(), vE.data(), vM_Exp_cowboy.data(), zeroes.data(), vMerr_Exp_cowboy.data());
 
@@ -179,13 +180,14 @@ int MassVsE()
     grNC_exp_cowboy.SetName("Cowboy");
     grNC_exp_cowboy.SetMarkerSize(1);
 
-    std::vector<Float_t> vM_Exp_sailor = {497.552, 497.575, 497.568, 497.562, 497.559, 497.581, 497.58, 497.56, 497.596, 497.673};
+    // std::vector<Float_t> vM_Exp_sailor = {497.552, 497.575, 497.568, 497.562, 497.559, 497.581, 497.58, 497.56, 497.596, 497.673};
+    std::vector<Float_t> vM_Exp_sailor = {497.538, 497.565, 497.571, 497.564, 497.541, 497.56, 497.588, 497.569, 497.613, 497.643};
     std::vector<Float_t> vMerr_Exp_sailor = {0.0616, 0.0235, 0.0144, 0.0137, 0.0111, 0.0116, 0.0141, 0.0187, 0.0262, 0.0761};
     TGraphErrors grNC_exp_sailor(vM_Exp_sailor.size(), vE.data(), vM_Exp_sailor.data(), zeroes.data(), vMerr_Exp_sailor.data());
 
     grNC_exp_sailor.SetTitle("Black -- Cowboy, Blue -- Sailor");
     grNC_exp_sailor.GetXaxis()->SetTitle("E_{beam}, MeV");
-    grNC_exp_sailor.GetYaxis()->SetTitle("MM_{K_{S}}, #frac{MeV}{c^{2}}");
+    grNC_exp_sailor.GetYaxis()->SetTitle("M_{K_{S}}, #frac{MeV}{c^{2}}");
     grNC_exp_sailor.GetYaxis()->SetTitleOffset(1.2);
     grNC_exp_sailor.SetName("Sailor");
     grNC_exp_sailor.SetMarkerColor(kBlue);

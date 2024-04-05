@@ -28,9 +28,9 @@ int Mass_MC_Exp_DrawAll()
         auto file = TFile::Open(filename_MC(points[i]).c_str());
         auto hist = file->Get<TH2D>("hMassVsKsTheta");
         auto pfx_MC = hist->ProfileX(("MC_pfx" + points[i]).c_str());
-        pfx_MC->Rebin(10);
+        pfx_MC->Rebin(5);
         pfx_MC->GetXaxis()->SetRangeUser(-0.6, 0.6);
-        pfx_MC->GetYaxis()->SetRangeUser(497.4, 498.);
+        pfx_MC->GetYaxis()->SetRangeUser(497.5, 497.7);
         pfx_MC->SetTitle(("E_{beam} = " + points[i] + " MeV, Black -- MC, Blue -- Exp").c_str());
 
         pfx_MC->GetYaxis()->SetTitle("M_{K^{0}_{S}}, MeV/c^{2}");
@@ -41,22 +41,23 @@ int Mass_MC_Exp_DrawAll()
         auto file_Exp = TFile::Open(filename_Exp(points[i]).c_str());
         auto hist_exp = file_Exp->Get<TH2D>("hMassVsKsTheta");
         auto pfx_Exp = hist_exp->ProfileX(("Exp_pfx" + points[i]).c_str());
-        pfx_Exp->Rebin(10);
+        pfx_Exp->Rebin(5);
         pfx_Exp->GetXaxis()->SetRangeUser(-0.6, 0.6);
+        pfx_Exp->GetYaxis()->SetRangeUser(497.5, 497.7);
+
         pfx_Exp->SetTitle(("E_{beam} = " + points[i] + " MeV, Black -- MC, Blue -- Exp").c_str());
         pfx_Exp->SetMarkerColor(kBlue);
         pfx_Exp->GetYaxis()->SetTitle("M_{K^{0}_{S}}, MeV/c^{2}");
         pfx_Exp->GetXaxis()->SetTitle("#theta_{K^{0}_{S}} - #pi/2, rad");
         auto func_exp = new TF1("func_Exp", "pol0", -0.3, 0.3);
         func_exp->SetLineColor(kBlue);
-        pfx_MC->Fit(func_exp, "QSLME", "goff", -0.3, 0.3);
-        pfx_Exp->Fit(func, "QSLME", "goff", -0.3, 0.3);
+        pfx_MC->Fit(func, "", "goff", -0.3, 0.3);
+        pfx_Exp->Fit(func_exp, "", "goff", -0.3, 0.3);
 
-        pfx_MC->DrawClone("");
-        pfx_Exp->DrawClone("same");
-
-        func_exp->DrawClone("same");
+        pfx_Exp->DrawClone("");
+        pfx_MC->DrawClone("same");
         func->DrawClone("same");
+        func_exp->DrawClone("same");
     }
 
     canv->DrawClone();
