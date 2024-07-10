@@ -5,7 +5,7 @@ import numpy as np
 
 energy_points = ["501", "503", "505", "508", "508.5", "509", "509.5", "510", "510.5", "511", "511.5", "514", "517", "520", "525", "530"]
 # energy_points = ["508", "508.5", "509", "509.5", "510", "510.5", "511", "511.5", "514"]
-energy_points = ["492"]
+# energy_points = ["517",  "520", "525", "530"]
 aux1, aux2 = "\"", "\\"
 pattern = r'luminosity = ([\d.]+)\r\nluminosity_err = ([\d.]+)\r\nentries = (\d+)\r\nrunCounter = (\d+)'
 pattern_bckg = r'N_bckg = ([\d.]+)\r\nN_bckg_err = ([\d.]+)'
@@ -42,6 +42,7 @@ for en in energy_points:
 print("How many matches?", len(n_signal)) 
 print("Is it ok?", "Yes!" if (len(n_signal) == len(energy_points)) else "No...")
 print("n_signal =", n_signal)
+print("n_bckg =", n_bckg)
 print("luminosity =", luminosity)
 print("luminosity_err =", luminosity_err)
 print("sigma_bckg =", list(np.round(np.array(n_bckg)/np.array(luminosity), 5)))

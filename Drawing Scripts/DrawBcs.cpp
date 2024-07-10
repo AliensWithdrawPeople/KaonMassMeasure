@@ -12,7 +12,7 @@
 int DrawBcs()
 {
     // std::string filename = "bcs_bkg_pol0.root";
-    std::string filename = "bcs_kskl_with_bkg.root";
+    std::string filename = "bcs_kskl_track_rec_eff.root";
     std::string fullFilename = "C:/work/Science/BINP/Kaon Mass Measure/PhiMesonFit/bcs/" + filename; 
     auto file = TFile::Open(fullFilename.c_str());
     auto vcs = file->Get<TGraphErrors>("vcs");

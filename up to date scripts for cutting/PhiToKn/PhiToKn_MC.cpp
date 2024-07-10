@@ -97,6 +97,8 @@ void PhiToKn_MC::Loop(std::string output_fname, double energy0)
     tNew->Branch("emeas", &emeas, "emeas/F");
     tNew->Branch("demeas", &demeas, "demeas/F");
     tNew->Branch("runnum", &runnum, "runnum/I");
+    tNew->Branch("trigbits", &trigbits, "trigbits/I");
+
     tNew->Branch("ksminv", ksminv, "ksminv[15]/F");
     tNew->Branch("mass", &mass, "mass/D");
     tNew->Branch("z", &z, "z/D");
@@ -130,7 +132,7 @@ void PhiToKn_MC::Loop(std::string output_fname, double energy0)
     const double ksMomUpperBound = res->Parameter(1) + 5 * res->Parameter(2);
     const double ksMomLowerBound = energy0 < 513 ? res->Parameter(1) - 5 * res->Parameter(2) : 85.;
     std::cout << "Ks Momentum bounds = " <<  ksMomLowerBound << "--" << ksMomUpperBound << std::endl;
-    const double min_psi = 1 * 2 * sqrt(TMath::ACos((energy0 * energy0 - 497.614 * 497.614) / (energy0 * energy0 - 4 * 139.57 * 139.57)));
+    const double min_psi = 0.8 * 2 * sqrt(TMath::ACos((energy0 * energy0 - 497.614 * 497.614) / (energy0 * energy0 - 4 * 139.57 * 139.57)));
     std::cout << "Min psi_{pins} = " <<  min_psi << std::endl;
 
     nbytes = 0, nb = 0;
@@ -145,6 +147,17 @@ void PhiToKn_MC::Loop(std::string output_fname, double energy0)
         std::vector<int> KsCand = {};
         std::vector<double> KlCandMasses = {};
         std::vector<double> KsCandMasses = {};
+        auto ks_sim_flag = false;
+        for(int k = 0; k < nsim; k++)
+        {
+            if(simtype[k] == 310 || simtype[k] == 130)
+            {
+                ks_sim_flag = true;
+                break;
+            }
+        }
+        if(ks_sim_flag)
+        { continue; }
         for(int k = 0; k < nks; k++)
         {
             if(isGoodTrack(ksvind[k][0]) && isGoodTrack(ksvind[k][1]) &&
@@ -272,22 +285,20 @@ void PhiToKn_MC::Loop(std::string output_fname, double energy0)
     }
 
     int n_events = tNew->GetEntries();
-    // if(energy0 < 506 || energy0 > 511.8)
-    {
-        auto hMass = new TH1D("hMass", "Mass without background", 160, 420, 580);
-        tNew->Draw("mass >> hMass", "", "goff");
-        auto res2 = hMass->Fit("pol0", "SQMEL0", "", 420, 465);
-        auto res1 = hMass->Fit("pol0", "SQMEL", "", 540, 580);
-        double bckgLevel = res1->Parameter(0);
-        double bckgLevelErr = res1->ParError(0);
-        n_events = hMass->Integral() - bckgLevel * hMass->GetNbinsX();
-        
-        std::cout << "bckgLevel_Left = " << res2->Parameter(0) << "; bckgLevel_Right = " << res1->Parameter(0) << "; bckgLevel_Avg = " << bckgLevel << std::endl;
-        std::cout << "N_bckg = " << bckgLevel * hMass->GetNbinsX() << std::endl;
-        std::cout << "N_bckg_err = " <<  bckgLevelErr * hMass->GetNbinsX() << std::endl;
-        std::cout << "res1 chi2 /ndf = " << res1->Chi2() / res1->Ndf() << std::endl;
-        std::cout << "res1 chi2 /ndf = " << res2->Chi2() / res2->Ndf() << std::endl;
-    }
+
+    auto hMass = new TH1D("hMass", "Mass without background", 80, 420, 580);
+    tNew->Draw("mass >> hMass", "", "goff");
+    auto res2 = hMass->Fit("pol0", "SQMEL0", "", 420, 465);
+    auto res1 = hMass->Fit("pol0", "SQMEL", "", 540, 576);
+    double bckgLevel = res1->Parameter(0);
+    double bckgLevelErr = res1->ParError(0);
+    n_events = hMass->Integral() - bckgLevel * hMass->GetNbinsX();
+    
+    std::cout << "bckgLevel_Left = " << res2->Parameter(0) << "; bckgLevel_Right = " << res1->Parameter(0) << "; bckgLevel_Avg = " << bckgLevel << std::endl;
+    std::cout << "N_bckg = " << bckgLevel * hMass->GetNbinsX() << std::endl;
+    std::cout << "N_bckg_err = " <<  bckgLevelErr * hMass->GetNbinsX() << std::endl;
+    std::cout << "res1 chi2 /ndf = " << res1->Chi2() / res1->Ndf() << std::endl;
+    std::cout << "res1 chi2 /ndf = " << res2->Chi2() / res2->Ndf() << std::endl;
 
     std::cout << "n_events = " << n_events << std::endl;
     std::cout << "Ks counter = " << counter << std::endl;

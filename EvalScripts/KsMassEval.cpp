@@ -41,11 +41,11 @@ int KsMassEval()
         piNeg_correction[energyPoints[i]] = std::make_pair(piNeg_correction_constant[i], piNeg_correction_slope[i]);
     }
 
-    std::string energyPoint = "509";
+    std::string energyPoint = "509.5";
     
     std::string fileNameMC = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/MC/KsKl_Smeared/New formfactor/XsecConv/MC" + energyPoint + "_XsecConv.root";
     // // std::string fileNameMC = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/MC/KsKl_Smeared/phi_width 4.5 MeV/MC" + energyPoint + "_XsecConv.root";
-    auto handlerMC = new HandlerMC(fileNameMC, energyPoint, 0.27, meanEnergies[energyPoint].first, false, false);
+    auto handlerMC = new HandlerMC(fileNameMC, energyPoint, 0.27, meanEnergies[energyPoint].first, true, false);
     auto [mass, massErr] = handlerMC->Eval();
     std::cout << mass << " + " << massErr << std::endl;
 

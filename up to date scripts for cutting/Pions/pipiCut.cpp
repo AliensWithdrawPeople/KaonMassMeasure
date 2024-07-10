@@ -59,6 +59,8 @@ void pipiCut::Loop(std::string histFileName)
     tNew->Branch("tphi", tphi, "tphi[10]/F");
     tNew->Branch("tth", tth, "tth[10]/F");
     tNew->Branch("tptot", tptot, "tptot[10]/F");
+    tNew->Branch("tdedx", tdedx, "tdedx[10]/F");
+    tNew->Branch("trho", trho, "trho[10]/F");
     tNew->Branch("tcharge", tcharge, "tcharge[10]/I");
 
     int NgoodTr = 0;
@@ -75,6 +77,8 @@ void pipiCut::Loop(std::string histFileName)
 
     double pionMomentum0 = 0;
     std::vector<int> nTracks;
+    tNew->Branch("nTracks", &nTracks);
+
 
     auto hDeltaMom = new TH1D("hDeltaMom", "Lorentz delta mom", 1000, -0.2, 0.2);
     auto hDeltaMomVsDeltaPhi = new TH2D("hDeltaMomVsDeltaPhi", "delta mom vs delta phi", 2000, -20, 20, 2000, -3.15, 3.15);

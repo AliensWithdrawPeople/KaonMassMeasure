@@ -6,7 +6,7 @@ from functools import reduce
 
 energy_points = ["501", "503", "505", "508", "508.5", "509", "509.5", "510", "510.5", "511", "511.5", "514", "517", "520", "525", "530"]
 # energy_points = ["508", "508.5", "509", "509.5", "510", "510.5", "511", "511.5", "514"]
-energy_points = ["509.5"]
+# energy_points = ["509.5"]
 aux1, aux2 = "\"", "\\"
 eff = []
 eff_err = []
@@ -28,6 +28,8 @@ for en in energy_points:
     if match:
         events = int(match.group(1))
         n_events[en] = events
+
+# n_events = [435301, 442150, 437024, 375314, 376623, 1171328, 1442828, 1380284, 390709, 393034, 395841, 445593, 232444, 230920, 232878, 234515]
 
 for en in energy_points:
     print(en)

@@ -82,6 +82,7 @@ HandlerMC::HandlerMC(std::string fKsKl, std::string energyPoint, double fitRange
     container.Add("hDeltaM", new TProfile("hDeltaM", "DeltaM(lnY)", 40, -1, 1, -1, 1));
     container.Add("hPsilnY", new TH2D("hPsilnY", "Psi(lnY)", 200, -0.4, 0.4, 10000, 2.4, 3.3));
     container.Add("hEnergySpectrum", new TH1D("hEnergySpectrum", "hEnergySpectrum", 6000, 480, 540));
+    container.Add("hEnergySpectrum_NoCut", new TH1D("hEnergySpectrum_NoCut", "hEnergySpectrum_NoCut", 6000, 480, 540));
     container.Add("hMassVsKsTheta", new TH2D("hMassVsKsTheta", "M vs KsTheta", 600, -1.57, 1.57, 40000, 480, 520));
 
     container.Add("hDiffRecGen", new TH2D("hDiffRecGen", "hDiffRecGen", 1200, -6., 6., 20000, -1, 1));    
@@ -115,6 +116,9 @@ HandlerMC::HandlerMC(std::string fKsKl, std::string energyPoint, double fitRange
 
     for(const auto &entry : *tree.get())
     {
+        if(useEnergySmearing? true : fabs(tree->emeas - meanEnergy.value_or(0)) < 20e-3)
+        { container["hEnergySpectrum_NoCut"]->Fill(tree->etrue); }
+
         if(abs(data->Y - 1) > 3e-7 && fabs(data->ks.theta - TMath::Pi() / 2) < 1 &&
             data->piPos.nhit > 10 && data->piNeg.nhit > 10 && 
             1.1 < data->piPos.theta && data->piPos.theta < TMath::Pi() - 1.1 &&
@@ -175,8 +179,8 @@ double HandlerMC::GetPionThetaCorrection_(double ksTheta, bool isPos, bool isWri
             tmp_hThetaDiffRecGenVsTheta_PionNeg->Fill(data->ks.theta, data->piPos.theta - tree->gen.piPos.theta); 
             tmp_hThetaDiffRecGenVsTheta_PionPos->Fill(data->ks.theta, data->piNeg.theta - tree->gen.piNeg.theta); 
         }
-        auto res_pos = tmp_hThetaDiffRecGenVsTheta_PionPos->Fit("pol1", "SQME", "goff", TMath::Pi()/2 - 0.8, TMath::Pi()/2 + 0.8);
-        auto res_neg = tmp_hThetaDiffRecGenVsTheta_PionNeg->Fit("pol1", "SQME", "goff", TMath::Pi()/2 - 0.8, TMath::Pi()/2 + 0.8);
+        auto res_pos = tmp_hThetaDiffRecGenVsTheta_PionPos->Fit("pol1", "SQME", "goff", TMath::Pi()/2 - 0.3, TMath::Pi()/2 + 0.3);
+        auto res_neg = tmp_hThetaDiffRecGenVsTheta_PionNeg->Fit("pol1", "SQME", "goff", TMath::Pi()/2 - 0.3, TMath::Pi()/2 + 0.3);
         piPos_corr = std::make_pair(res_pos->Parameter(0), res_pos->Parameter(1));
         piNeg_corr = std::make_pair(res_neg->Parameter(0), res_neg->Parameter(1));
         std::cout << piPos_corr.first << " : " << piPos_corr.second << std::endl;
