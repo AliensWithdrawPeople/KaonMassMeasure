@@ -10,6 +10,8 @@ cs_track_rec_corr_dict = dict(zip([el.split('_')[0] for el in df['elabel']],
                          )
 cs_track_rec_corr = np.array(df['full_cs_corr'])
 cs_track_rec_corr_err = np.array(df['full_cs_corr_er'])
+print(list(cs_track_rec_corr))
+print(list(cs_track_rec_corr_err))
 
 E = np.array([501, 503, 505, 508, 508.5, 509, 509.5, 510, 510.5, 511, 511.5, 514, 517, 520, 525, 530])
 energy_points = ["501", "503", "505", "508", "508.5", "509", "509.5", "510", "510.5", "511", "511.5", "514", "517", "520", "525", "530"]
@@ -48,16 +50,20 @@ n_events = [260, 2579, 1781, 27053, 123149, 150554, 587751, 453786, 190345, 8483
 n_events = [267, 2569, 1781, 26862, 121999, 148571, 580460, 448154, 187365, 84091, 47117, 17018.021, 9184.62, 5388.09, 3967.18, 2498.96]
 
 events_total = []
-for i, point in enumerate(energy_points):
-    with up.open(f"C:/work/Science/BINP/Kaon Mass Measure/tr_ph/PhiXSection/Kn{point}.root:Kn") as KnTree: # type: ignore
-        events_total.append(len(KnTree['emeas'].array())) # type: ignore
-events_total = np.array(events_total)
+# for i, point in enumerate(energy_points):
+#     with up.open(f"C:/work/Science/BINP/Kaon Mass Measure/tr_ph/PhiXSection/Kn{point}.root:Kn") as KnTree: # type: ignore
+#         events_total.append(len(KnTree['emeas'].array())) # type: ignore
+# events_total = np.array(events_total)
 
 # New: MC + pol2 fit 
-ev_sig = np.array([303.308, 2664.73, 1792.23, 27217.7, 124000, 151043, 589622, 455541, 191265, 85200.7, 47883.5, 17112.1, 9295.12, 5465.21, 4224.31, 2660.99])
-ev_sig_err = np.array([18.7858, 53.0068, 43.1968, 166.921, 352.878, 52.2047, 3.90865e-05, 68.892, 440.145, 278.756, 7.9838e-07, 106.129, 98.6353, 76.1091, 67.4571, 53.9637])
+# ev_sig = np.array([303.308, 2664.73, 1792.23, 27217.7, 124000, 151043, 589622, 455541, 191265, 85200.7, 47883.5, 17112.1, 9295.12, 5465.21, 4224.31, 2660.99])
+# ev_sig_err = np.array([18.7858, 53.0068, 43.1968, 166.921, 352.878, 52.2047, 3.90865e-05, 68.892, 440.145, 278.756, 7.9838e-07, 106.129, 98.6353, 76.1091, 67.4571, 53.9637])
 # ev_bkg = np.array([281.694, 492.196, 122.718, 120.75, 329.694, 210.224, 745.039, 403.48, 135.046, 249.214, 215.988, 287.243, 398.87, 376.729, 573.031, 573.982])
 # ev_bkg_err = np.array([18.2023, 25.2735, 14.0677, 27.7477, 29.0511, 94.7366, 3.39091e-06, 7.3185, 50.7135, 31.2297, 1.30522e-07, 24.2181, 28.8786, 26.6231, 30.2251, 28.7813])
+ev_sig = np.array([307.566, 2654.43, 1797.53, 27817.9, 126417, 154515, 600473, 465934, 194871, 86986.6, 47916.4, 17060.1, 9309.34, 5724.98, 4172.94, 2689.46])
+ev_sig_err = np.array([18.9421, 53.0088, 41.8419, 166.802, 355.696, 397.511, 777.746, 690.166, 446.172, 294.985, 213.353, 127.298, 95.248, 79.2939, 64.8708, 55.4257])
+sig_extraction_syst = np.array([0.022, 0.009, 0.002, 0.03, 0.001, 0.007, 0.019, 0.008, 0.006, 0.001, 0.011, 0.001, 0.002, 0.011, 0.014, 0.016])
+ev_sig_err = ev_sig * ((ev_sig_err / ev_sig)**2 + sig_extraction_syst**2)**0.5
 
 ev_bkg = np.array([297.766, 537.771, 111.102, 239.959, 1106.63, 724.437, 2439.95, 2035.55, 973.33, 617.743, 386.658, 276.97887, 397.379, 309.905, 410.821, 320.037])
 ev_bkg_err = ev_bkg**0.5
@@ -67,22 +73,24 @@ xsec_bkg_err = np.round(np.sqrt( (1 / lumi)**2 * ev_bkg_err**2 + (ev_bkg / (lumi
 
 bkg_events_estimated = lumi * np.array([0.346154, 0.37076, 0.3926, 0.474208, 0.538273, 0.659605, 0.791, 0.792818, 0.693963, 0.59955, 0.546487, 0.447324, 0.417396, 0.407344, 0.399081, 0.396])
 xsec_bkg_estimated = np.array([0.346154, 0.37076, 0.3926, 0.474208, 0.538273, 0.659605, 0.791, 0.792818, 0.693963, 0.59955, 0.546487, 0.447324, 0.417396, 0.407344, 0.399081, 0.396])
-print(list(np.round(xsec_bkg, 3)))
-print(list(np.round(xsec_bkg_estimated, 3)))
-print(list(np.round(100 * (xsec_bkg_estimated) / xsec_bkg, 2)))
+# print(list(np.round(xsec_bkg, 3)))
+# print(list(np.round(xsec_bkg_estimated, 3)))
+# print(list(np.round(100 * (xsec_bkg_estimated) / xsec_bkg, 2)))
 # n_events = events_total - bkg_events_estimated
 n_events = ev_sig
+n_events_err = ev_sig_err
 efficiency = e_MC
 
 xsec_vis = n_events / lumi
 
 xsec_err_energy_part = np.array([0.00903471, 0.015707, 0.0667149, 1.00209, 6.51135, 4.1341, 3.67391, 6.89706, 4.01397, 1.47482, 1.1773, 0.204747, 0.137859, 0.0518114, 0.019589, 0.0228199])
-xsec_vis_err = np.sqrt( (np.sqrt(n_events) / lumi / efficiency)**2 + 
+xsec_vis_err = np.sqrt( (n_events_err / lumi / efficiency)**2 + 
                        (n_events / efficiency / (lumi**2))**2 * lumi_err**2  + 
                        (n_events / lumi / (efficiency**2))**2 * e_MC_err**2 +
-                       (n_events / efficiency / lumi / (cs_track_rec_corr**2))**2 * cs_track_rec_corr_err**2
+                       0 * (n_events / efficiency / lumi / (cs_track_rec_corr**2))**2 * cs_track_rec_corr_err**2
                         )
-xsec = n_events / lumi / efficiency / cs_track_rec_corr
+# xsec = n_events / lumi / efficiency / cs_track_rec_corr
+xsec = n_events / lumi / efficiency
 
 print("E_beam =", energy_points)
 # print("N_events =", list(n_events))

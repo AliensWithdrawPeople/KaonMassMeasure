@@ -3,12 +3,15 @@
 #include <TH1D.h>
 #include <TF1.h>
 #include <TRandom.h>
+#include <Math/MinimizerOptions.h>
 
 #include "RooAbsReal.h"
 #include "RooRealVar.h"
 #include "RooDataSet.h"
 #include "RooGaussian.h"
 #include "RooPolynomial.h"
+#include "RooBernstein.h"
+#include "RooChebychev.h"
 #include "RooDataHist.h"
 #include "RooHistPdf.h"
 #include "RooPlot.h"
@@ -35,24 +38,29 @@ int Xsec_FitMass()
     std::vector<double> ev_sig_err = {};
     std::vector<double> ev_bkg = {};
     std::vector<double> ev_bkg_err = {};
-
+    // ROOT::Math::MinimizerOptions::SetDefaultPrecision(1e-4);
     std::vector<std::string> ens = {"501", "503", "505", "508", "508.5", "509", "509.5", "510", "510.5", "511", "511.5", "514", "517", "520", "525", "530"};
-    std::string energy = "509.5";
+    std::string energy = "505";
+    int n_bins = 80;
+    double left_border = 420;
+    double right_border = 570;
     auto c = new TCanvas("canv","canv",800,400);  
     // c->Divide(4, 2);
     // for(int i = 0; i < 16; i++)
     {
-        auto pad = c->cd(-1 + 1);
+        auto pad = c->cd(0);
+        // auto pad = c->cd(i + 1);
         pad->SetLogy();
         // std::string energy = ens[i];
         auto exp = TFile::Open(("./tr_ph/PhiXSection/Kn" + energy + ".root").c_str());
-        auto mass_exp = new TH1D("mass_exp", "mass_exp", 80, 420, 580);
+
+        auto mass_exp = new TH1D("mass_exp", "mass_exp", n_bins, left_border, right_border);
         auto tr_exp = exp->Get<TTree>("Kn");
         tr_exp->Draw("mass >> mass_exp", "", "goff");
 
         auto MC = TFile::Open(("./tr_ph/PhiXSection/MC/MC_Kn" + energy + ".root").c_str());
-        auto mass_MC = new TH1D("mass_MC", "mass_MC", 80, 420, 580);
-        auto mass_MC_conv = new TH1D("mass_MC_conv", "mass_MC_conv", 160, 420, 580);
+        auto mass_MC = new TH1D("mass_MC", "mass_MC", n_bins, left_border, right_border);
+        auto mass_MC_conv = new TH1D("mass_MC_conv", "mass_MC_conv", 2 * n_bins, left_border, right_border);
         auto tr_MC = MC->Get<TTree>("Kn_MC");
         tr_MC->Draw("mass >> mass_MC", "", "goff");
         for(int i = 0; i < mass_MC->GetNbinsX(); i++)
@@ -62,20 +70,21 @@ int Xsec_FitMass()
         }
         
         
-        RooRealVar mass("mass", "mass", 420, 580, "MeV/c^{2}");
+        RooRealVar mass("mass", "mass", left_border, right_border, "MeV/c^{2}");
         mass.setRange("left_slope", 430, 505);
         mass.setRange("right_slope", 490, 570);
-        mass.setRange("short", 425, 575);
-        mass.setRange("max", 420, 580);
+        mass.setRange("super short", 460, 530);
+        mass.setRange("short", 480, 510);
+        mass.setRange("max", left_border, right_border);
         RooDataHist exp_hist("exp_hist", "exp_hist", mass, mass_exp);
         RooDataHist mc_conv_hist("mc_conv_hist", "mc_conv_hist", mass, mass_MC_conv);
         const auto hist = &exp_hist;
         double hist_events = hist->sumEntries();
     // **************** Polynomial background: Start **************************
-        RooRealVar a0("a0", "a0", -2.98085e+02, -1e5, 1e4);
-        RooRealVar a1("a1", "a1",  -4.98627e+00, -100, 1e2);
+        RooRealVar a0("a0", "a0", 0.1);
+        RooRealVar a1("a1", "a1",  1);
         RooRealVar a2("a2", "a2", 1.04242e-02, -100, 100);
-        RooRealVar a3("a3", "a3", 0, -1000, 1000);
+        RooRealVar a3("a3", "a3", 0.1, -1, 1);
         // RooPolynomial bkg("bkg", "Background", mass, RooArgSet());
         RooPolynomial bkg("bkg", "Background", mass, RooArgSet(a0, a1));
     // **************** Polynomial background: End **************************
@@ -87,28 +96,28 @@ int Xsec_FitMass()
         RooDataHist sig_hist("sig_hist", "sig_hist", mass, mass_MC);
         RooHistPdf sig_pdf("sig_pdf", "sig_pdf", mass, sig_hist, 3);
 
-        RooRealVar mean_corr("mean_corr", "mean_corr", -0.7, -5, 5);
-        RooRealVar sigma_corr("sigma_corr", "sigma_corr", 1e-1, 1e-6, 5);
+        RooRealVar mean_corr("mean_corr", "mean_corr", -0.8, -5, 5);
+        RooRealVar sigma_corr("sigma_corr", "sigma_corr", 8e-2, 1e-6, 5);
         RooGaussian gauss_pdf("gauss", "gauss", mass, mean_corr, sigma_corr);
         // sigma_corr.setConstant(true);
         RooFFTConvPdf sig_conv_pdf("sig_conv_pdf", "sig_conv_pdf", mass, sig_pdf, gauss_pdf);
     // **************** Signal + gaussian smearing: End **************************
 
         RooRealVar n_sig("n_sig", "n_sig", hist_events, 0, 1.2 * hist_events);
-        RooRealVar n_bkg("n_bkg", "n_bkg", 1.e2, 0, 1.2 * hist_events);        
+        RooRealVar n_bkg("n_bkg", "n_bkg", hist_events * 1e-2, 0.0, 1.2 * hist_events);   
         RooAddPdf model("model", "MC + bkg(pol2)", RooArgSet(sig_conv_pdf, bkg), RooArgSet(n_sig, n_bkg));
-        auto res = model.fitTo(*hist, Save(), PrintLevel(0), Range("short"), MaxCalls(3000));
+        auto res = model.fitTo(*hist, Save(), PrintLevel(0), Range("max"), MaxCalls(15000));
+        // auto res = model.fitTo(*hist, Save(), PrintLevel(0));
         // std::cout << "Nll = " << res->minNll() << std::endl;
 
         hist->plotOn(frame);
         model.plotOn(frame);
         model.plotOn(frame, Components(bkg), LineStyle(kDashed), LineColor(kRed));
         model.plotOn(frame, Components(sig_conv_pdf), LineStyle(kDashDotted));
-        hist->plotOn(frame);
 
         frame->SetTitle(("Energy = " + energy + " MeV").c_str());
-        frame->GetYaxis()->SetTitle("Events / 2 MeV/c^{2}");
-        frame->GetXaxis()->SetTitle("K_{S} Mass, MeV/c^{2}");
+        frame->GetYaxis()->SetTitle("Events / 1.9 MeV");
+        frame->GetXaxis()->SetTitle("M_{inv}, MeV");
         frame->GetYaxis()->SetRangeUser(0.1, mass_exp->GetEntries() / 2.);
         frame->DrawClone();
         
@@ -117,14 +126,19 @@ int Xsec_FitMass()
         std::cout << "chi2/ndf = " << frame->chiSquare(6) << std::endl;
         status.push_back(res->status());
         chi2.push_back(frame->chiSquare(6));
-        ev_sig.push_back(n_sig.getVal());
-        ev_sig_err.push_back(n_sig.getError());
+        // ev_sig.push_back(n_sig.getVal());
+        // ev_sig_err.push_back(n_sig.getError());
+
+        auto norm = sig_conv_pdf.createIntegral(mass, Range("max"))->getVal()/sig_conv_pdf.createIntegral(mass, Range("short"))->getVal();
+        ev_sig.push_back(n_sig.getVal() * norm);
+        ev_sig_err.push_back(n_sig.getError() * norm);
+
         ev_bkg.push_back(n_bkg.getVal());
         ev_bkg_err.push_back(n_bkg.getError());
         exp->Close();  
     }
 
-    TFile output("res_1.root", "recreate");
+    TFile output("./PhiMesonFit/EventCounting_results/res.root", "recreate");
     c->Write();
     output.Save();
     output.Close();

@@ -177,8 +177,9 @@ void PhiToKn::Loop(std::string output_fname, double energy0)
                 // ksalign[k] > 0.85 && 
                 kstlen[k] < max_kstlen &&
                 // kstlen[k] > min_kstlen &&
-                fabs(ksz0[k]) < max_ks_vertex_z &&
-                ksptot[k] > ksMomLowerBound && ksptot[k] < ksMomUpperBound
+                fabs(ksz0[k]) < max_ks_vertex_z 
+                // &&
+                // ksptot[k] > ksMomLowerBound && ksptot[k] < ksMomUpperBound
             ) 
             {
                 flag = true;
@@ -240,7 +241,7 @@ void PhiToKn::Loop(std::string output_fname, double energy0)
                 candNum = std::distance(KsCandMasses.begin(), it);
             }
             
-            if(missingMass > 350)
+            if(missingMass > 350 && true)
             {
                 posTrackNumber = tcharge[ksvind[KsCand[candNum]][0]] > 0 ? 0 : 1;
                 negTrackNumber = posTrackNumber == 1 ? 0 : 1;

@@ -108,29 +108,50 @@ minimum:
     6 |     phirho |  fixed  |                0 |        1e-05
 
 
+bcs_kskl_track_rec_eff_sig_extr_syst.root
+  minimum:
+    Valid         : yes
+    Function calls: 56
+    Minimum value : 25.87172868
+    Edm           : 2.806333244e-07
+    Internal parameters:
+        1019.464006
+        4.201452524
+    0.0004506071264
+    Internal covariance matrix:
+    8.8317405e-05  0.00014589061  6.2120649e-09
+    0.00014589061    0.001101568   1.862248e-08
+    6.2120649e-09   1.862248e-08  2.4795083e-12
+    External parameters:
+    Pos |    Name    |  type   |      Value       |    Error +/-
+      0 |     MPhi_n |  free   |      1019.464006 | 0.009397734031
+      1 |      WPhin |  free   |      4.201452524 | 0.03318987758
+      2 |         GB |  free   |  0.0004506071264 | 1.574645442e-06
+      3 |         An |  fixed  |                0 |        1e-05
+      4 |       phin |  fixed  |                0 |        1e-05
+      5 |       grho |  fixed  |             0.58 |        1e-05
+      6 |     phirho |  fixed  |                0 |        1e-05
 
-vcs_kskl_track_rec_eff.root
-minimum:
-  Valid         : yes
-  Function calls: 104
-  Minimum value : 47.98087353
-  Edm           : 2.509967976e-06
-  Internal parameters:
-       1019.45936
-      4.203874333
-  0.0004425620525
-     0.3431311657
-  Internal covariance matrix:
-  7.1157609e-05  2.5599968e-05  5.9268646e-09   0.0011296469
-  2.5599968e-05  0.00029316202  1.6033002e-08  -0.0006519746
-  5.9268646e-09  1.6033002e-08   1.752705e-12  7.3237271e-08
-   0.0011296469  -0.0006519746  7.3237271e-08    0.044669784
-  External parameters:
-  Pos |    Name    |  type   |      Value       |    Error +/-
-    0 |     MPhi_n |  free   |       1019.45936 | 0.008435496971
-    1 |      WPhin |  free   |      4.203874333 | 0.01712197473
-    2 |         GB |  free   |  0.0004425620525 | 1.323897673e-06
-    3 |         An |  fixed  |                0 |        1e-05
-    4 |       phin |  fixed  |                0 |        1e-05
-    5 |       grho |  free   |     0.3431311657 | 0.2113522739
-    6 |     phirho |  fixed  |                0 |        1e-05
+bcs_kskl_sig_extr_syst.root
+  minimum:
+    Valid         : yes
+    Function calls: 58
+    Minimum value : 9.161388077
+    Edm           : 7.410428304e-07
+    Internal parameters:
+        1019.448654
+        4.214728708
+    0.0004498979028
+    Internal covariance matrix:
+    8.8392561e-05  0.00014340167   6.312674e-09
+    0.00014340167   0.0010985274  1.8562327e-08
+    6.312674e-09  1.8562327e-08  2.4853346e-12
+    External parameters:
+    Pos |    Name    |  type   |      Value       |    Error +/-
+      0 |     MPhi_n |  free   |      1019.448654 | 0.00940173183
+      1 |      WPhin |  free   |      4.214728708 | 0.03314404084
+      2 |         GB |  free   |  0.0004498979028 | 1.576494412e-06
+      3 |         An |  fixed  |                0 |        1e-05
+      4 |       phin |  fixed  |                0 |        1e-05
+      5 |       grho |  fixed  |             0.58 |        1e-05
+      6 |     phirho |  fixed  |                0 |        1e-05

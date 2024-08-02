@@ -148,16 +148,16 @@ void PhiToKn_MC::Loop(std::string output_fname, double energy0)
         std::vector<double> KlCandMasses = {};
         std::vector<double> KsCandMasses = {};
         auto ks_sim_flag = false;
-        for(int k = 0; k < nsim; k++)
-        {
-            if(simtype[k] == 310 || simtype[k] == 130)
-            {
-                ks_sim_flag = true;
-                break;
-            }
-        }
-        if(ks_sim_flag)
-        { continue; }
+        // for(int k = 0; k < nsim; k++)
+        // {
+        //     if(simtype[k] == 310 || simtype[k] == 130)
+        //     {
+        //         ks_sim_flag = true;
+        //         break;
+        //     }
+        // }
+        // if(ks_sim_flag)
+        // { continue; }
         for(int k = 0; k < nks; k++)
         {
             if(isGoodTrack(ksvind[k][0]) && isGoodTrack(ksvind[k][1]) &&
