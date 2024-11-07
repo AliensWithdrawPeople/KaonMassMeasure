@@ -159,7 +159,7 @@ void HandlerExp::FillHists(bool useCorrectedEnergy)
         tree->GetEntry(entry);
         if(!KsThetaCut(data->ks.theta))
         { continue; }
-        
+
         auto lnY = log(data->Y);
         data->piPos.theta += GetPionThetaCorrection_(data->ks.theta, true);
         data->piNeg.theta += GetPionThetaCorrection_(data->ks.theta, false);
@@ -181,6 +181,14 @@ void HandlerExp::FillHists(bool useCorrectedEnergy)
                         FullRecMassFunc::Derivative(FullRecMassFunc::Var::psi, dpsi, energy, data->Y, 2);
         auto massCorrY = sigmaY * sigmaY / 2 * 
                         FullRecMassFunc::Derivative(FullRecMassFunc::Var::Y, dpsi, energy, data->Y, 2);
+    
+        // This correction was obtained using MC truth.
+        auto eventType = misc::GetEventType(data->piPos, data->piNeg);
+        auto event_type_mass_correction = eventType == misc::EventType::sailor? -0.010 : 0.006; // MeV
+        // It can be applied like that:
+        // auto mass = FullRecMassFunc::Eval(dpsi, energy, data->Y) + massCorr + massCorrY + event_type_mass_correction;
+        // I did it to estimate the systematic error of these shifts. Do not use it to obtain the results!!!
+
         auto mass = FullRecMassFunc::Eval(dpsi, energy, data->Y) + massCorr + massCorrY;
 
         container["hDeltaM"]->Fill(lnY, massCorr);
@@ -193,7 +201,7 @@ void HandlerExp::FillHists(bool useCorrectedEnergy)
             container["hMassVsKsTheta"]->Fill(data->ks.theta - TMath::Pi() / 2, mass); 
             container["hMassVsKstlen"]->Fill(fabs(data->ks_len), mass); 
         }
-        auto eventType = misc::GetEventType(data->piPos, data->piNeg);
+
         if(eventType == misc::EventType::cowboy)
         { 
             container["hMlnYpfx_cowboy"]->Fill(lnY, mass); 
