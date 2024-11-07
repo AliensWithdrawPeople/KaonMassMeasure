@@ -165,21 +165,15 @@ void PhiToKn::Loop(std::string output_fname, double energy0)
                 kspipt[k][0] < 320 && kspipt[k][1] < 320 &&
                 tcharge[ksvind[k][0]] * tcharge[ksvind[k][1]] < 0 && kstype[k] == 0 && 
                 energy > 100 && 
-                // is_coll != 1 &&
-
-                tdedx[ksvind[k][0]] < 4000. && 
-                tdedx[ksvind[k][1]] < 4000. &&
-                tdedx[ksvind[k][0]] > 1000. && 
-                tdedx[ksvind[k][1]] > 1000. &&
+                tdedx[ksvind[k][0]] < 5000. && 
+                tdedx[ksvind[k][1]] < 5000. &&
                 
                 1.1 < kspith[k][0] && kspith[k][0] < TMath::Pi() - 1.1 && 
                 1.1 < kspith[k][1] && kspith[k][1] < TMath::Pi() - 1.1 &&
-                // ksalign[k] > 0.85 && 
+
                 kstlen[k] < max_kstlen &&
-                // kstlen[k] > min_kstlen &&
-                fabs(ksz0[k]) < max_ks_vertex_z 
-                // &&
-                // ksptot[k] > ksMomLowerBound && ksptot[k] < ksMomUpperBound
+                fabs(ksz0[k]) < max_ks_vertex_z &&
+                ksptot[k] > ksMomLowerBound && ksptot[k] < ksMomUpperBound
             ) 
             {
                 flag = true;
@@ -241,7 +235,7 @@ void PhiToKn::Loop(std::string output_fname, double energy0)
                 candNum = std::distance(KsCandMasses.begin(), it);
             }
             
-            if(missingMass > 350 && true)
+            if(missingMass > 350)
             {
                 posTrackNumber = tcharge[ksvind[KsCand[candNum]][0]] > 0 ? 0 : 1;
                 negTrackNumber = posTrackNumber == 1 ? 0 : 1;
