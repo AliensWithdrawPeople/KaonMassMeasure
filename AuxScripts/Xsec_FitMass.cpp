@@ -40,18 +40,18 @@ int Xsec_FitMass()
     std::vector<double> ev_bkg_err = {};
     // ROOT::Math::MinimizerOptions::SetDefaultPrecision(1e-4);
     std::vector<std::string> ens = {"501", "503", "505", "508", "508.5", "509", "509.5", "510", "510.5", "511", "511.5", "514", "517", "520", "525", "530"};
-    std::string energy = "505";
+    // std::string energy = "505";
     int n_bins = 80;
     double left_border = 420;
     double right_border = 570;
     auto c = new TCanvas("canv","canv",800,400);  
-    // c->Divide(4, 2);
-    // for(int i = 0; i < 16; i++)
+    c->Divide(4, 2);
+    for(int i = 0; i < 16; i++)
     {
-        auto pad = c->cd(0);
-        // auto pad = c->cd(i + 1);
+        // auto pad = c->cd(0);
+        auto pad = c->cd(i + 1);
         pad->SetLogy();
-        // std::string energy = ens[i];
+        std::string energy = ens[i];
         auto exp = TFile::Open(("./tr_ph/PhiXSection/Kn" + energy + ".root").c_str());
 
         auto mass_exp = new TH1D("mass_exp", "mass_exp", n_bins, left_border, right_border);
@@ -126,12 +126,12 @@ int Xsec_FitMass()
         std::cout << "chi2/ndf = " << frame->chiSquare(6) << std::endl;
         status.push_back(res->status());
         chi2.push_back(frame->chiSquare(6));
-        // ev_sig.push_back(n_sig.getVal());
-        // ev_sig_err.push_back(n_sig.getError());
+        ev_sig.push_back(n_sig.getVal());
+        ev_sig_err.push_back(n_sig.getError());
 
-        auto norm = sig_conv_pdf.createIntegral(mass, Range("max"))->getVal()/sig_conv_pdf.createIntegral(mass, Range("short"))->getVal();
-        ev_sig.push_back(n_sig.getVal() * norm);
-        ev_sig_err.push_back(n_sig.getError() * norm);
+        // auto norm = sig_conv_pdf.createIntegral(mass, Range("max"))->getVal()/sig_conv_pdf.createIntegral(mass, Range("short"))->getVal();
+        // ev_sig.push_back(n_sig.getVal() * norm);
+        // ev_sig_err.push_back(n_sig.getError() * norm);
 
         ev_bkg.push_back(n_bkg.getVal());
         ev_bkg_err.push_back(n_bkg.getError());

@@ -101,34 +101,34 @@ int Phi_xsection()
     // std::vector<double> xsec_vis2_tr_eff = {2.48267, 8.99555, 23.41706, 229.4716, 394.43433, 691.81088, 1042.44045, 1041.40972, 829.71603, 545.48314, 419.11402, 150.32165, 85.46215, 58.48429, 37.67313, 28.53194};
     // std::vector<double> xsec_vis_err2_tr_eff = {0.179982, 0.227178, 0.791541, 7.37236, 2.226941, 6.024979, 19.864839, 8.943784, 6.780072, 4.355699, 6.557359, 3.628442, 3.414226, 3.222737, 2.289903, 2.083369};
     
-    std::vector<double> xsec_vis2_tr_eff = {2.5559, 8.70679, 23.69573, 231.83516, 398.65478, 693.88631, 1034.20517, 1031.72461, 822.24859, 547.55598, 414.08466, 150.77261, 79.20632, 54.62432, 33.5856, 24.44617};
-    std::vector<double> xsec_vis_err2_tr_eff = {0.179982, 0.227178, 0.791541, 7.37236, 2.226941, 6.024979, 19.864839, 8.943784, 6.780072, 4.355699, 6.557359, 3.628442, 3.414226, 3.222737, 2.289903, 2.083369};
+    std::vector<double> xsec_vis2_tr_eff = {2.5306, 8.62059, 23.46112, 229.53976, 394.7077, 687.01615, 1023.96552, 1021.50951, 814.10751, 542.13463, 409.98481, 149.27982, 78.4221, 54.08349, 33.25307, 24.20413};
+    std::vector<double> xsec_vis_err2_tr_eff = {0.167319, 0.191799, 0.559379, 7.127253, 1.548894, 5.356163, 19.753369, 8.548981, 5.691943, 2.47158, 5.071155, 1.220303, 0.871245, 0.985888, 0.712319, 0.643849};
     auto grVisXsec2_tr_eff = new TGraphErrors(energy.size(), energy.data(), xsec_vis2_tr_eff.data(), energySpread.data(), xsec_vis_err2_tr_eff.data());
-    // TFile *top = new TFile("C:/work/Science/BINP/Kaon Mass Measure/PhiMesonFit/vcs/vcs_kskl_sig_extr_syst.root", "recreate");
-    // grVisXsec2_tr_eff->GetYaxis()->SetTitle("#sigma_{vis}, nb");
-    // grVisXsec2_tr_eff->GetXaxis()->SetTitle("E_{avg}, MeV");
-    // grVisXsec2_tr_eff->SetName("vcs");
-    // grVisXsec2_tr_eff->SetMarkerColor(kRed);
-    // grVisXsec2_tr_eff->Write();
+    TFile *top = new TFile("C:/work/Science/BINP/Kaon Mass Measure/PhiMesonFit/vcs/vcs_kskl_sig_extr_syst_lumi_syst.root", "recreate");
+    grVisXsec2_tr_eff->GetYaxis()->SetTitle("#sigma_{vis}, nb");
+    grVisXsec2_tr_eff->GetXaxis()->SetTitle("E_{avg}, MeV");
+    grVisXsec2_tr_eff->SetName("vcs");
+    grVisXsec2_tr_eff->SetMarkerColor(kRed);
+    grVisXsec2_tr_eff->Write();
     // top->Write();
-    // top->Save();
+    top->Save();
 
     // auto grVisXsec = new TGraphErrors(energy.size(), energy.data(), xsec_vis.data(), energySpread.data(), xsec_vis_err.data());
-    for(int i = 0; i < xsec_vis_rand.size(); i++)
-    {
-        auto sample = xsec_vis_rand[i];
-        TFile *top = new TFile(("C:/work/Science/BINP/Kaon Mass Measure/PhiMesonFit/vcs/ToyMC/ver2/vcs_kskl_rand_sample" + std::to_string(i) + ".root").c_str(), "recreate");
-        auto grVisXsec = new TGraphErrors(energy.size(), energy.data(), sample.data(), energySpread.data(), xsec_vis_err.data());
-        grVisXsec->GetYaxis()->SetTitle("#sigma_{vis}, nb");
-        grVisXsec->GetXaxis()->SetTitle("E_{avg}, MeV");
-        grVisXsec->SetName("vcs");
-        grVisXsec->SetMarkerColor(kRed);
-        grVisXsec->DrawClone("AP");
+    // for(int i = 0; i < xsec_vis_rand.size(); i++)
+    // {
+    //     auto sample = xsec_vis_rand[i];
+    //     TFile *top = new TFile(("C:/work/Science/BINP/Kaon Mass Measure/PhiMesonFit/vcs/ToyMC/ver2/vcs_kskl_rand_sample" + std::to_string(i) + ".root").c_str(), "recreate");
+    //     auto grVisXsec = new TGraphErrors(energy.size(), energy.data(), sample.data(), energySpread.data(), xsec_vis_err.data());
+    //     grVisXsec->GetYaxis()->SetTitle("#sigma_{vis}, nb");
+    //     grVisXsec->GetXaxis()->SetTitle("E_{avg}, MeV");
+    //     grVisXsec->SetName("vcs");
+    //     grVisXsec->SetMarkerColor(kRed);
+    //     grVisXsec->DrawClone("AP");
         
-        grVisXsec->Write();
-        top->Write();
-        top->Save();
-    }
+    //     grVisXsec->Write();
+    //     top->Write();
+    //     top->Save();
+    // }
     // auto grVisXsec = new TGraphErrors(energy.size(), energy.data(), xsec_vis_rand.data(), energySpread.data(), xsec_vis_err.data());
     // grVisXsec2_tr_eff->GetYaxis()->SetTitle("#sigma_{vis}, nb");
     // grVisXsec2_tr_eff->GetXaxis()->SetTitle("E_{avg}, MeV");
