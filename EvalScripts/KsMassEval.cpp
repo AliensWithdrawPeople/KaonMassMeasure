@@ -20,7 +20,9 @@ int KsMassEval()
     const std::vector<double> piPos_correction_slope = {0.00443298, 0.00408992, 0.00410851, 0.00383344, 0.00373523, 0.00322678, 0.00349512, 0.00288437, 0.00325238, 0.00341808};
     const std::vector<double> piNeg_correction_constant = {-0.00683841, -0.00749158, -0.00641094, -0.00569952, -0.00557661, -0.00490508, -0.00509329, -0.00451928, -0.00465828, -0.00478692};
     const std::vector<double> piNeg_correction_slope = {0.00437792, 0.00472957, 0.00398921, 0.00359215, 0.0036446, 0.00310455, 0.00322322, 0.00279679, 0.00298795, 0.00309261};
-
+    // Energy shift of Compton laser system
+    const double energy_shift = 0.006;
+    const double sigma_matrix_window_width = 2;
 
     const std::vector<double> deltaE_RC_Smeared = {0.105504, 0.0760349, 0.069423, 0.0598971, 0.0769491, 0.118673, 0.197142, 0.336072, 0.467132, 1.54063};
     const std::vector<std::string> energyPoints = {"505", "508", "508.5", "509", "509.5", "510", "510.5", "511", "511.5", "514"};
@@ -33,7 +35,7 @@ int KsMassEval()
     std::map<std::string, std::pair<double, double>> piNeg_correction;
     for(int i = 0; i < energyPoints.size(); i++)
     {   
-        meanEnergies[energyPoints[i]] = std::make_pair(meanEnergies_vec[i], meanEnergiesErr[i]); 
+        meanEnergies[energyPoints[i]] = std::make_pair(meanEnergies_vec[i] + energy_shift, meanEnergiesErr[i]); 
         meanEnergiesSpectrum[energyPoints[i]] = std::make_pair(meanEnergiesSpectrum_vec[i], meanEnergiesErr[i]); 
         radiativeCorrections[energyPoints[i]] = deltaE_RC_Smeared[i]; 
         pion_theta_covariance[energyPoints[i]] = pion_theta_covariances[i]; 
@@ -41,11 +43,11 @@ int KsMassEval()
         piNeg_correction[energyPoints[i]] = std::make_pair(piNeg_correction_constant[i], piNeg_correction_slope[i]);
     }
 
-    std::string energyPoint = "509.5";
+    std::string energyPoint = "511.5";
     
     std::string fileNameMC = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/MC/KsKl_Smeared/New formfactor/XsecConv/MC" + energyPoint + "_XsecConv.root";
     // // std::string fileNameMC = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/MC/KsKl_Smeared/phi_width 4.5 MeV/MC" + energyPoint + "_XsecConv.root";
-    auto handlerMC = new HandlerMC(fileNameMC, energyPoint, 0.27, meanEnergies[energyPoint].first, true, false);
+    auto handlerMC = new HandlerMC(fileNameMC, energyPoint, 0.27, meanEnergies[energyPoint].first, true, false, true, sigma_matrix_window_width);
     auto [mass, massErr] = handlerMC->Eval();
     std::cout << mass << " + " << massErr << std::endl;
 
@@ -57,9 +59,10 @@ int KsMassEval()
     handlerMC->SaveSplines("C:/work/Science/BINP/Kaon Mass Measure/splines/spline_" + energyPoint + ".root");
     // delete handlerMC;
     // std::string fileNameExp = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/expKsKl/exp" + energyPoint + ".root";
-    // auto handlerExp = new HandlerExp(fileNameExp, energyPoint, 0.27, meanEnergies[energyPoint].first, 
-    //                                 radiativeCorrections[energyPoint], pion_theta_covariance[energyPoint], 
-    //                                 piPos_correction[energyPoint], piNeg_correction[energyPoint], true);
+    auto handlerExp = new HandlerExp(fileNameExp, energyPoint, 0.27, meanEnergies[energyPoint].first, 
+                                    radiativeCorrections[energyPoint], pion_theta_covariance[energyPoint], 
+                                    piPos_correction[energyPoint], piNeg_correction[energyPoint], 
+                                    sigma_matrix_window_width, true);
     // auto [mass, massErr] = handlerExp->Eval();
     // std::cout << mass << " +/- " << massErr << std::endl;
     // handlerExp->Draw("hMassVsKsTheta", {-0.8, 0.8});

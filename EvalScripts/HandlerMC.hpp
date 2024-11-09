@@ -30,6 +30,8 @@ private:
     std::unique_ptr<Painter> painter;
 
     double fitRange;
+    /// @brief Width in sigmas in which sigma^{(M_K)}_{psi} [lnY][ksTheta] is evaluated.
+    double sigma_matrix_window_width;
     bool useTrueEnergy = false;
     bool useEnergySmearing = true;
 
@@ -58,7 +60,8 @@ private:
 
 public:
     HandlerMC(std::string fKsKl, std::string energyPoint, double fitRange, std::optional<double> meanEnergy, 
-                bool useTrueEnergy, bool saveSplines = false, bool useEnergySmearing = true, bool isVerbose = true);
+                bool useTrueEnergy, bool saveSplines = false, bool useEnergySmearing = true, 
+                double sigma_matrix_window_width = 2, bool isVerbose = true);
 
     std::pair<double, double> GetMass(double fitRange = 0.27);
     std::pair<double, double> GetEnergySpectrumMean();
@@ -71,8 +74,9 @@ public:
 };
 
 HandlerMC::HandlerMC(std::string fKsKl, std::string energyPoint, double fitRange, std::optional<double> meanEnergy, 
-                        bool useTrueEnergy, bool saveSplines, bool useEnergySmearing, bool isVerbose): 
-    energyPoint{energyPoint}, fitRange{fitRange}, meanEnergy{meanEnergy}, useTrueEnergy{useTrueEnergy}, useEnergySmearing{useEnergySmearing}, verbose{isVerbose} 
+                        bool useTrueEnergy, bool saveSplines, bool useEnergySmearing, double sigma_matrix_window_width, bool isVerbose): 
+    energyPoint{energyPoint}, fitRange{fitRange}, meanEnergy{meanEnergy}, useTrueEnergy{useTrueEnergy}, useEnergySmearing{useEnergySmearing}, 
+    sigma_matrix_window_width{sigma_matrix_window_width}, verbose{isVerbose} 
 {
     tree = std::unique_ptr<Tree>(new Tree(fKsKl));
     painter = std::unique_ptr<Painter>(new Painter(&container));
@@ -113,7 +117,9 @@ HandlerMC::HandlerMC(std::string fKsKl, std::string energyPoint, double fitRange
     container["hThetaDiffRecGenVsTheta_PionPos"]->GetXaxis()->SetTitle("#theta_{K_{S}}, rad");
     container["hThetaDiffRecGenVsTheta_PionNeg"]->GetYaxis()->SetTitle("#theta^{(rec)}_{#pi^{-}} - #theta^{(gen)}_{#pi^{-}}, rad");
     container["hThetaDiffRecGenVsTheta_PionNeg"]->GetXaxis()->SetTitle("#theta_{K_{S}}, rad");
-
+   
+    auto energy_cut = std::map<std::string, double>({{"505", 501.4}, {"508" , 04.3}, {"508.5", 505.2}, {"509", 506.}, {"509.5", 506.6}, {"510", 506.7}, {"510.5", 506.5}, {"511", 506.3}, {"511.5", 505.8}, {"514", 505}});
+    
     for(const auto &entry : *tree.get())
     {
         if(useEnergySmearing? true : fabs(tree->emeas - meanEnergy.value_or(0)) < 20e-3)
@@ -126,12 +132,13 @@ HandlerMC::HandlerMC(std::string fKsKl, std::string energyPoint, double fitRange
         )
         {
             auto massFullRecWithEmeas = FullRecMassFunc::Eval(data->ksdpsi, tree->emeas, data->Y);    
+            // if(massFullRecWithEmeas > 490 && massFullRecWithEmeas < 505 && tree->etrue > energy_cut[this->energyPoint])
             if(massFullRecWithEmeas > 490 && massFullRecWithEmeas < 505)
             { goodEntries.push_back(entry); }
         }
     }
 
-    vSigmaMatrixFit = Sigmas::GetSigmaMatrix(tree, goodEntries, verbose);
+    vSigmaMatrixFit = Sigmas::GetSigmaMatrix(tree, goodEntries, sigma_matrix_window_width, sigma_matrix_window_width, verbose);
     auto [ksThetaBinCenters, deltaTheta, deltaThetaError] = Sigmas::GetThetaSigmas(tree, goodEntries);
     sigmaTheta = Spline(ksThetaBinCenters, deltaTheta, "sigmaTheta_spline");
     pion_theta_covariance = GetPionThetaCovariance();
@@ -235,8 +242,6 @@ void HandlerMC::FillHists(bool useTrueEnergy)
                         pion_theta_covariance *  PsiFunc::MixedThetaDerivative(data->piPos, data->piNeg) +
                         sigmaPhi * sigmaPhi / 2 * PsiFunc::Derivative(PsiFunc::Var::phiPos, data->piPos, data->piNeg, 2) +
                         sigmaPhi * sigmaPhi / 2 * PsiFunc::Derivative(PsiFunc::Var::phiNeg, data->piPos, data->piNeg, 2);
-        // data->piPos.theta = data->piPos.theta + GetPionThetaCorrection_(data->ks.theta, true, false);
-        // data->piNeg.theta = data->piNeg.theta + GetPionThetaCorrection_(data->ks.theta, false, false);
         auto dpsi = PsiFunc::Eval(data->piPos.theta, data->piPos.phi, data->piNeg.theta,  data->piNeg.phi) + psiCor;
 
         auto energy = useTrueEnergy? tree->etrue : meanEnergy.value_or(tree->emeas);
@@ -252,7 +257,7 @@ void HandlerMC::FillHists(bool useTrueEnergy)
         auto mass = FullRecMassFunc::Eval(dpsi, energy, data->Y) + massCorr + massCorrY;
 
         container["hDeltaM"]->Fill(lnY, massCorr);
-        container["hMlnYpfx"]->Fill(lnY, mass); 
+        container["hMlnYpfx"]->Fill(lnY, mass);
         container["hMlnY"]->Fill(lnY, mass);
 
         container["hDiffRecGen"]->Fill(data->ks.theta - TMath::Pi() / 2, dpsi - tree->gen.ksdpsi);
@@ -303,7 +308,6 @@ std::pair<double, double> HandlerMC::GetMass(double fitRange)
 
     double mass = res->Parameter(0);
     double massErr = res->ParError(0);
-
     return std::pair(mass, massErr);
 }
 

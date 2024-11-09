@@ -35,6 +35,8 @@ private:
     std::unique_ptr<Painter> painter;
     
     double fitRange;
+    /// @brief Width in sigmas in which sigma^{(M_K)}_{psi} [lnY][ksTheta] is evaluated.
+    double sigma_matrix_window_width;
     bool useCorrectedEnergy = true;
 
     /// @brief Numbers of entries that satisfy all selection cuts.
@@ -67,15 +69,11 @@ public:
             std::optional<double> energyCorrection, 
             std::optional<double> pion_theta_covariance, 
             std::optional<std::pair<double, double>> piPos_correction, 
-            std::optional<std::pair<double, double>> piNeg_correction, 
+            std::optional<std::pair<double, double>> piNeg_correction,
+            double sigma_matrix_window_width, 
             bool useCorrectedEnergy, 
             bool isVerbose = true);
 
-    // HandlerExp(std::string fKsKl, std::string energyPoint, bool useCorrectedEnergy, bool isVerbose = true): 
-    //         HandlerExp(fKsKl, energyPoint, 0.27, std::nullopt, std::nullopt, std::nullopt, std::nullopt, useCorrectedEnergy, isVerbose) {}
-
-    // HandlerExp(std::string fKsKl, std::string energyPoint, double fitRange, bool useCorrectedEnergy): 
-    //         HandlerExp(fKsKl, energyPoint, fitRange, std::nullopt, std::nullopt, std::nullopt, std::nullopt, useCorrectedEnergy, true) {}
 
     std::pair<double, double> GetMass(double fitRange = 0.27);
     
@@ -93,10 +91,12 @@ HandlerExp::HandlerExp(std::string fKsKl,
                     std::optional<double> pion_theta_covariance, 
                     std::optional<std::pair<double, double>> piPos_correction, 
                     std::optional<std::pair<double, double>> piNeg_correction, 
-                    bool useCorrectedEnergy, bool isVerbose = true): 
+                    double sigma_matrix_window_width, 
+                    bool useCorrectedEnergy, 
+                    bool isVerbose): 
     energyPoint{energyPoint}, fitRange{fitRange}, meanEnergy{meanEnergy}, energyCorrection{energyCorrection}, 
     useCorrectedEnergy{useCorrectedEnergy}, verbose{isVerbose}, pion_theta_covariance{pion_theta_covariance},
-    piPos_correction{piPos_correction}, piNeg_correction{piNeg_correction}  
+    piPos_correction{piPos_correction}, piNeg_correction{piNeg_correction}, sigma_matrix_window_width{sigma_matrix_window_width}
 {
     tree = std::unique_ptr<Tree>(new Tree(fKsKl, true));
     painter = std::unique_ptr<Painter>(new Painter(&container));
@@ -129,7 +129,7 @@ HandlerExp::HandlerExp(std::string fKsKl,
             { goodEntries.push_back(entry); }
         }
     }
-    vSigmaMatrixFit = Sigmas::GetSigmaMatrix(tree, goodEntries, verbose); 
+    vSigmaMatrixFit = Sigmas::GetSigmaMatrix(tree, goodEntries, sigma_matrix_window_width, sigma_matrix_window_width, verbose); 
     std::string spline_filename = misc::GetSplineFilename(energyPoint);
     std::tie(deltaPsi_RecGenDiff, sigmaTheta) = LoadSplines(spline_filename);
     FillHists(useCorrectedEnergy);

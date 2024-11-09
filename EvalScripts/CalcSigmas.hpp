@@ -14,10 +14,8 @@
 #include "TFitResultPtr.h"
 
 namespace Sigmas {
-    /// @brief Calc sigma^{(M_K)}_{psi} [lnY][ksTheta].
-    /// @param tree -- pointer to a tree with data;
-    /// @param goodEntries -- numbers of entries that satisfy all selection cuts.
-    /// @returns std::vector<std::vector<double>> vSigmaFitMatrix with shape (8, 12).
+
+    /// @returns Bin numbers in the sigma^{(M_K)}_{psi} [lnY][ksTheta] matrix.
     std::pair<int, int> GetSigmaMatrix_bin(double lnY, double ksTheta)
     {
         auto binY = lnY > -0.3? int(floor((lnY + 0.3) / 0.075)) : -1;
@@ -27,7 +25,14 @@ namespace Sigmas {
         return {binY, binKsTheta};
     }
 
-    std::vector<std::vector<double>> GetSigmaMatrix(std::unique_ptr<Tree> const &tree, const std::vector<int> &goodEntries, bool isVerbose)
+    /// @brief Calc sigma^{(M_K)}_{psi} [lnY][ksTheta].
+    /// @param tree -- pointer to a tree with data;
+    /// @param goodEntries -- numbers (ids) of entries that satisfy all selection cuts.
+    /// @param left_window_width -- number of sigmas from the mean to the left: mean - left_window_width * sigma.
+    /// @param right_window_width -- number of sigmas from the mean to the right: mean + left_window_width * sigma.
+    /// @param isVerbose -- prints out the matrix if isVerbose == true.
+    /// @returns std::vector<std::vector<double>> vSigmaFitMatrix with shape (8, 12).
+    std::vector<std::vector<double>> GetSigmaMatrix(std::unique_ptr<Tree> const &tree, const std::vector<int> &goodEntries, double left_window_width, double right_window_width, bool isVerbose)
     {
         // Distributions of ksdpsi (angle between pions' momentums) in different bins (lnY, kstheta).
         std::vector<std::vector<std::unique_ptr<TH1D>>> psiDistrs;
@@ -65,10 +70,10 @@ namespace Sigmas {
                 if(psiDistrs[i][j]->GetEntries() < 600)
                 { psiDistrs[i][j]->Rebin(2 * int(3 - psiDistrs[i][j]->GetEntries() / 300)); }
 
-                auto leftBorder = psiDistrs[i][j]->GetBinCenter(psiDistrs[i][j]->GetMaximumBin()) - 2 * psiDistrs[i][j]->GetStdDev();
-                auto rightBorder = psiDistrs[i][j]->GetBinCenter(psiDistrs[i][j]->GetMaximumBin()) + 2 * psiDistrs[i][j]->GetStdDev();
+                auto leftBorder = psiDistrs[i][j]->GetBinCenter(psiDistrs[i][j]->GetMaximumBin()) - left_window_width * psiDistrs[i][j]->GetStdDev();
+                auto rightBorder = psiDistrs[i][j]->GetBinCenter(psiDistrs[i][j]->GetMaximumBin()) + right_window_width * psiDistrs[i][j]->GetStdDev();
                 r = psiDistrs[i][j]->Fit("gaus", "SEQ", "", leftBorder, rightBorder);
-                r = psiDistrs[i][j]->Fit("gaus", "SEQ", "", r->Parameter(1) - 2 * r->Parameter(2), r->Parameter(1) + 2 * r->Parameter(2));
+                r = psiDistrs[i][j]->Fit("gaus", "SEQ", "", r->Parameter(1) - left_window_width * r->Parameter(2), r->Parameter(1) + right_window_width * r->Parameter(2));
                 vSigmaMatrixFit[i].push_back(r->Parameter(2));
             }
         }
