@@ -6,7 +6,7 @@
 #include "HandlerExp.hpp"
 
 
-int KsMassEval_All(bool isExp = false)
+int KsMassEval_All(bool isExp = true)
 {
     auto start = std::chrono::system_clock::now();
 
@@ -58,7 +58,8 @@ int KsMassEval_All(bool isExp = false)
             auto [mass, massErr] = handlerExp->Eval();
             res.push_back(std::make_tuple(energyPoint, mass, massErr));
             std::cout << "EXP" << energyPoint << ": " << mass << " + " << massErr << std::endl;
-            handlerExp->SaveHists("C:/work/Science/BINP/Kaon Mass Measure/hists/Exp/Hists_Exp" + energyPoint + ".root");
+            handlerExp->SaveHists("C:/work/Science/BINP/Kaon Mass Measure/hists/Exp/tests/Hists_Exp" + energyPoint + "_sigma1.14.root");
+            // handlerExp->SaveHists("C:/work/Science/BINP/Kaon Mass Measure/hists/Exp/Hists_Exp" + energyPoint + ".root");
             delete handlerExp;
         }
     }
@@ -71,8 +72,9 @@ int KsMassEval_All(bool isExp = false)
             auto [mass, massErr] = handlerMC->Eval();
             res.push_back(std::make_tuple(energyPoint, mass, massErr));
             std::cout << "MC" << energyPoint << ": " << mass << " + " << massErr << std::endl;
-            handlerMC->SaveHists("C:/work/Science/BINP/Kaon Mass Measure/hists/MC/Hists_MC" + energyPoint + ".root");
-            handlerMC->SaveSplines("C:/work/Science/BINP/Kaon Mass Measure/splines/spline_" + energyPoint + ".root");
+            // handlerMC->SaveHists("C:/work/Science/BINP/Kaon Mass Measure/hists/MC/tests/Hists_MC" + energyPoint + "_std_no_E_smear.root");
+            // handlerMC->SaveHists("C:/work/Science/BINP/Kaon Mass Measure/hists/MC/Hists_MC" + energyPoint + ".root");
+            // handlerMC->SaveSplines("C:/work/Science/BINP/Kaon Mass Measure/splines/spline_" + energyPoint + ".root");
             
             auto [mean, meanErr] = handlerMC->GetEnergySpectrumMean();
             spectrum_mean_corr.push_back(std::make_tuple(energyPoint, meanEnergies[energyPoint].first - mean, meanErr));

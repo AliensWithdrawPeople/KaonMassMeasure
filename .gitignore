@@ -4,3 +4,13 @@
 /hists and root files
 /tr_ph
 *.root
+/PhiMesonFit/vcs
+*.eps
+*.jpg
+*.jpeg
+*.png
+*.pdf
+*.pyc
+*.zip
+
+siminfo.txt

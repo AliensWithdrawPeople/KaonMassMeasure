@@ -15,6 +15,7 @@
 
 #include "TMath.h"
 #include "TVector3.h"
+#include "TRandom.h"
 
 
 class HandlerMC: Evaluator
@@ -88,6 +89,7 @@ HandlerMC::HandlerMC(std::string fKsKl, std::string energyPoint, double fitRange
     container.Add("hEnergySpectrum", new TH1D("hEnergySpectrum", "hEnergySpectrum", 6000, 480, 540));
     container.Add("hEnergySpectrum_NoCut", new TH1D("hEnergySpectrum_NoCut", "hEnergySpectrum_NoCut", 6000, 480, 540));
     container.Add("hMassVsKsTheta", new TH2D("hMassVsKsTheta", "M vs KsTheta", 600, -1.57, 1.57, 40000, 480, 520));
+    container.Add("hMass", new TH1D("hMass", "Mass spectrum after all corrections", 15000, 490, 505));
 
     container.Add("hDiffRecGen", new TH2D("hDiffRecGen", "hDiffRecGen", 1200, -6., 6., 20000, -1, 1));    
     container.Add("hDiffRecGen_cowboy", new TH2D("hDiffRecGen_cowboy", "hDiffRecGen_cowboy", 1200, -6., 6., 20000, -1, 1));
@@ -108,6 +110,17 @@ HandlerMC::HandlerMC(std::string fKsKl, std::string energyPoint, double fitRange
     container.Add("hPhiDiffRecGenVsTheta_PionNeg", new TH2D("hPhiDiffRecGenVsTheta_PionNeg", "hPhiDiffRecGenVsTheta_PionNeg", 2000, 0., 3.14, 2000, -1, 1));
     container.Add("hPhiDiffRecGenVsTheta_PionPos", new TH2D("hPhiDiffRecGenVsTheta_PionPos", "hPhiDiffRecGenVsTheta_PionPos", 2000, 0., 3.14, 2000, -1, 1));
 
+    container.Add("hPiPlusThetaVsKsTheta", new TH2D("hPiPlusThetaVsKsTheta", "Pi+ Theta vs KsTheta", 600, -1.57, 1.57, 600, -3.14, 3.14));
+    container.Add("hPiMinusThetaVsKsTheta", new TH2D("hPiMinusThetaVsKsTheta", "Pi- Theta vs KsTheta", 600, -1.57, 1.57, 600, -3.14, 3.14));
+    container.Add("hPiPlusThetaGenVsKsTheta", new TH2D("hPiPlusThetaGenVsKsTheta", "MC Truth Pi+ Theta vs KsTheta", 600, -1.57, 1.57, 600, -3.14, 3.14));
+    container.Add("hPiMinusThetaGenVsKsTheta", new TH2D("hPiMinusThetaGenVsKsTheta", "MC Truth Pi- Theta vs KsTheta", 600, -1.57, 1.57, 600, -3.14, 3.14));
+
+    container.Add("hPiMinusTheta", new TH1D("hPiMinusTheta", "Theta spectrum for pi^- after all cuts", 1000, -0.6, 0.6));
+    container.Add("hPiPlusTheta", new TH1D("hPiPlusTheta", "Theta spectrum for pi^+ after all cuts", 1000, -0.6, 0.6));
+    container.Add("hPsi", new TH1D("hPsi", "psi spectrum after all cuts", 1000, 2.4, 3.3));
+
+    container.Add("hPsiCor", new TH2D("hPsiCor", "PsiCor vs Pi- Theta", 600, -1.57, 1.57, 600, 60, 300));
+
     container["hPhiDiffRecGenVsTheta_PionPos"]->GetYaxis()->SetTitle("#phi^{(rec)}_{#pi^{+}} - #phi^{(gen)}_{#pi^{+}}, rad");
     container["hPhiDiffRecGenVsTheta_PionPos"]->GetXaxis()->SetTitle("#theta_{K_{S}}, rad");
     container["hPhiDiffRecGenVsTheta_PionNeg"]->GetYaxis()->SetTitle("#phi^{(rec)}_{#pi^{-}} - #phi^{(gen)}_{#pi^{-}}, rad");
@@ -118,7 +131,17 @@ HandlerMC::HandlerMC(std::string fKsKl, std::string energyPoint, double fitRange
     container["hThetaDiffRecGenVsTheta_PionNeg"]->GetYaxis()->SetTitle("#theta^{(rec)}_{#pi^{-}} - #theta^{(gen)}_{#pi^{-}}, rad");
     container["hThetaDiffRecGenVsTheta_PionNeg"]->GetXaxis()->SetTitle("#theta_{K_{S}}, rad");
    
-    auto energy_cut = std::map<std::string, double>({{"505", 501.4}, {"508" , 04.3}, {"508.5", 505.2}, {"509", 506.}, {"509.5", 506.6}, {"510", 506.7}, {"510.5", 506.5}, {"511", 506.3}, {"511.5", 505.8}, {"514", 505}});
+    container["hPiPlusThetaVsKsTheta"]->GetYaxis()->SetTitle("#theta^{(rec)}_{#pi^{+}}, rad");
+    container["hPiPlusThetaVsKsTheta"]->GetXaxis()->SetTitle("#theta_{K_{S}}, rad");
+
+    container["hPiMinusTheta"]->GetXaxis()->SetTitle("#theta_{#pi^{-}} - #pi/2, rad");
+    container["hPiPlusTheta"]->GetXaxis()->SetTitle("#theta_{#pi^{+}} - #pi/2, rad");
+    container["hPsi"]->GetXaxis()->SetTitle("#psi, rad");
+
+    container["hPiMinusThetaVsKsTheta"]->GetYaxis()->SetTitle("#theta^{(rec)}_{#pi^{-}}, rad");
+    container["hPiMinusThetaVsKsTheta"]->GetXaxis()->SetTitle("#theta_{K_{S}}, rad");
+
+    auto energy_cut = std::map<std::string, double>({{"505", 501.4}, {"508" , 504.3}, {"508.5", 505.2}, {"509", 506.}, {"509.5", 506.6}, {"510", 506.7}, {"510.5", 506.5}, {"511", 506.3}, {"511.5", 505.8}, {"514", 505}});
     
     for(const auto &entry : *tree.get())
     {
@@ -190,8 +213,8 @@ double HandlerMC::GetPionThetaCorrection_(double ksTheta, bool isPos, bool isWri
         auto res_neg = tmp_hThetaDiffRecGenVsTheta_PionNeg->Fit("pol1", "SQME", "goff", TMath::Pi()/2 - 0.3, TMath::Pi()/2 + 0.3);
         piPos_corr = std::make_pair(res_pos->Parameter(0), res_pos->Parameter(1));
         piNeg_corr = std::make_pair(res_neg->Parameter(0), res_neg->Parameter(1));
-        std::cout << piPos_corr.first << " : " << piPos_corr.second << std::endl;
-        std::cout << piNeg_corr.first << " : " << piNeg_corr.second << std::endl;
+        std::cout << "Correction of pi^+ theta angle: " << piPos_corr.first << " + (" << piPos_corr.second << ") * theta" << std::endl;
+        std::cout << "Correction of pi^- theta angle: " << piNeg_corr.first << " + (" << piNeg_corr.second << ") * theta" << std::endl;
         return 0;
     }
     if(isPos)
@@ -265,6 +288,16 @@ void HandlerMC::FillHists(bool useTrueEnergy)
         { 
             container["hMassVsKsTheta"]->Fill(data->ks.theta - TMath::Pi() / 2, mass); 
             container["hMassVsKstlen"]->Fill(fabs(data->ks_len), mass); 
+            container["hMass"]->Fill(mass); 
+            container["hPiPlusThetaVsKsTheta"]->Fill(data->ks.theta - TMath::Pi() / 2, data->piPos.theta - TMath::Pi() / 2); 
+            container["hPiMinusThetaVsKsTheta"]->Fill(data->ks.theta - TMath::Pi() / 2, data->piNeg.theta - TMath::Pi() / 2); 
+            container["hPsiCor"]->Fill(data->piPos.theta - TMath::Pi() / 2, PsiFunc::Derivative(PsiFunc::Var::thetaPos, data->piPos, data->piNeg, 2) * FullRecMassFunc::Derivative(FullRecMassFunc::Var::psi, dpsi, energy, data->Y, 2)); 
+
+            container["hPiPlusThetaGenVsKsTheta"]->Fill(data->ks.theta - TMath::Pi() / 2, tree->gen.piPos.theta - TMath::Pi() / 2); 
+            container["hPiMinusThetaGenVsKsTheta"]->Fill(data->ks.theta - TMath::Pi() / 2, tree->gen.piNeg.theta - TMath::Pi() / 2); 
+            container["hPiMinusTheta"]->Fill(data->piNeg.theta - TMath::Pi() / 2); 
+            container["hPiPlusTheta"]->Fill(data->piPos.theta - TMath::Pi() / 2); 
+            container["hPsi"]->Fill(dpsi); 
         }
 
         container["hThetaPionDiffRecGen"]->Fill(data->piPos.theta - tree->gen.piPos.theta, data->piNeg.theta - tree->gen.piNeg.theta);
@@ -274,7 +307,7 @@ void HandlerMC::FillHists(bool useTrueEnergy)
         container["hPhiDiffRecGenVsTheta_PionNeg"]->Fill(data->ks.theta, data->piPos.phi - tree->gen.piPos.phi); 
         container["hPhiDiffRecGenVsTheta_PionPos"]->Fill(data->ks.theta, data->piNeg.phi - tree->gen.piNeg.phi); 
         container["hThetaDiffRecGenVsTheta_PionPos"]->Fill(data->ks.theta, data->piPos.theta - tree->gen.piPos.theta); 
-        container["hThetaDiffRecGenVsTheta_PionNeg"]->Fill(data->ks.theta, data->piNeg.theta - tree->gen.piNeg.theta); 
+        container["hThetaDiffRecGenVsTheta_PionNeg"]->Fill(data->piNeg.theta, data->piNeg.theta - tree->gen.piNeg.theta); 
 
         auto eventType = misc::GetEventType(data->piPos, data->piNeg);
         if(eventType == misc::EventType::cowboy)
@@ -290,7 +323,7 @@ void HandlerMC::FillHists(bool useTrueEnergy)
         }
         container["hPsilnY"]->Fill(lnY, dpsi); 
 
-        if(fabs(lnY) < 0.3)
+        if(fabs(lnY) < fitRange)
         { container["hEnergySpectrum"]->Fill(tree->etrue); }
     }
 }

@@ -1,0 +1,26 @@
+---------------------------------------
+additional smear 3 std_rms errors vs std MC:
+Resolution: Mean = 0.00687751
+Resolution: Mean error = 0.00172502
+Resolution: Sigma = 0.00811438
+Resolution: Sigma error = 0.00129859
+hist_events = 18903
+chi2/ndf = 2.18863
+
+--------------------------------------
+std  vs gen angles  MC:
+Resolution: Mean = 0.024251
+Resolution: Mean error = 0.00692821
+Resolution: Sigma = 0.469249
+Resolution: Sigma error = 0.00713346
+hist_events = 18902
+chi2/ndf = 1.24656
+
+--------------------------------------
+std EXP  vs gen angles MC:
+Resolution: Mean = -0.0692102
+Resolution: Mean error = 0.0087795
+Resolution: Sigma = 0.546339
+Resolution: Sigma error = 0.010853
+hist_events = 15006
+chi2/ndf = 0.899684

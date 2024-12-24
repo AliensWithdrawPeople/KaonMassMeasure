@@ -110,11 +110,28 @@ HandlerExp::HandlerExp(std::string fKsKl,
     container.Add("hM_CrAnglelnY", new TH2D("hM_CrAnglelnY", "M_CrAngle(lnY)", 30, -0.4, 0.4, 40000, 490, 515));
     container.Add("hPsilnY", new TH2D("hPsilnY", "Psi(lnY)", 200, -0.4, 0.4, 10000, 2.4, 3.3));
     container.Add("hMassVsKsTheta", new TH2D("hMassVsKsTheta", "M vs KsTheta", 600, -1.57, 1.57, 40000, 480, 520));
+    container.Add("hPiPlusThetaVsKsTheta", new TH2D("hPiPlusThetaVsKsTheta", "Pi+ Theta vs KsTheta", 600, -1.57, 1.57, 600, -3.14, 3.14));
+    container.Add("hPiMinusThetaVsKsTheta", new TH2D("hPiMinusThetaVsKsTheta", "Pi- Theta vs KsTheta", 600, -1.57, 1.57, 600, -3.14, 3.14));
+    container.Add("hMass", new TH1D("hMass", "Mass spectrum after all corrections", 15000, 490, 505));
 
     container.Add("hMassVsKstlen", new TProfile("hMassVsKstlen", "M vs tlen", 100, 0, 2, 490, 505));
     container.Add("hMlnYpfx", new TProfile("hMlnYpfx","Profile of M versus lnY", 30, -1, 1, 490, 505));
     container.Add("hMlnYpfx_cowboy", new TProfile("hMlnYpfx_cowboy", "Profile of M versus lnY, cowboy", 30, -1, 1, 490, 505));
     container.Add("hMlnYpfx_sailor", new TProfile("hMlnYpfx_sailor", "Profile of M versus lnY, sailor", 30, -1, 1, 490, 505));
+
+    container.Add("hPiMinusTheta", new TH1D("hPiMinusTheta", "Theta spectrum for pi^- after all cuts", 1000, -0.6, 0.6));
+    container.Add("hPiPlusTheta", new TH1D("hPiPlusTheta", "Theta spectrum for pi^+ after all cuts", 1000, -0.6, 0.6));
+    container.Add("hPsi", new TH1D("hPsi", "psi spectrum after all cuts", 1000, 2.4, 3.3));
+
+    container["hPiPlusThetaVsKsTheta"]->GetYaxis()->SetTitle("#theta^{(rec)}_{#pi^{+}}, rad");
+    container["hPiPlusThetaVsKsTheta"]->GetXaxis()->SetTitle("#theta_{K_{S}}, rad");
+
+    container["hPiMinusThetaVsKsTheta"]->GetYaxis()->SetTitle("#theta^{(rec)}_{#pi^{-}}, rad");
+    container["hPiMinusThetaVsKsTheta"]->GetXaxis()->SetTitle("#theta_{K_{S}}, rad");
+
+    container["hPiMinusTheta"]->GetXaxis()->SetTitle("#theta_{#pi^{-}} - #pi/2, rad");
+    container["hPiPlusTheta"]->GetXaxis()->SetTitle("#theta_{#pi^{+}} - #pi/2, rad");
+    container["hPsi"]->GetXaxis()->SetTitle("#psi, rad");
 
     for(const auto &entry : *tree.get())
     {
@@ -200,6 +217,13 @@ void HandlerExp::FillHists(bool useCorrectedEnergy)
         { 
             container["hMassVsKsTheta"]->Fill(data->ks.theta - TMath::Pi() / 2, mass); 
             container["hMassVsKstlen"]->Fill(fabs(data->ks_len), mass); 
+            container["hMass"]->Fill(mass); 
+            container["hPiPlusThetaVsKsTheta"]->Fill(data->ks.theta - TMath::Pi() / 2, data->piPos.theta - TMath::Pi() / 2); 
+            container["hPiMinusThetaVsKsTheta"]->Fill(data->ks.theta - TMath::Pi() / 2, data->piNeg.theta - TMath::Pi() / 2); 
+
+            container["hPiMinusTheta"]->Fill(data->piNeg.theta - TMath::Pi() / 2); 
+            container["hPiPlusTheta"]->Fill(data->piPos.theta - TMath::Pi() / 2); 
+            container["hPsi"]->Fill(dpsi); 
         }
 
         if(eventType == misc::EventType::cowboy)
