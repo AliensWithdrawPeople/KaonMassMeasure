@@ -51,15 +51,15 @@ int KsMassEval_All(bool isExp = true)
     {
         for(const auto& energyPoint : energyPoints)
         {
-            std::string fileNameExp = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/expKsKl/exp" + energyPoint + ".root";
+            std::string fileNameExp = "C:/work/Science/KaonMassMeasure/tr_ph/expKsKl/exp" + energyPoint + ".root";
             auto handlerExp = new HandlerExp(fileNameExp, energyPoint, 0.27, meanEnergies[energyPoint].first, 
                                             radiativeCorrections[energyPoint], pion_theta_covariance[energyPoint], 
                                             piPos_correction[energyPoint], piNeg_correction[energyPoint], sigma_matrix_window_width, true);
             auto [mass, massErr] = handlerExp->Eval();
             res.push_back(std::make_tuple(energyPoint, mass, massErr));
             std::cout << "EXP" << energyPoint << ": " << mass << " + " << massErr << std::endl;
-            handlerExp->SaveHists("C:/work/Science/BINP/Kaon Mass Measure/hists/Exp/tests/Hists_Exp" + energyPoint + "_sigma1.14.root");
-            // handlerExp->SaveHists("C:/work/Science/BINP/Kaon Mass Measure/hists/Exp/Hists_Exp" + energyPoint + ".root");
+            handlerExp->SaveHists("C:/work/Science/KaonMassMeasure/hists/Exp/tests/Hists_Exp" + energyPoint + "_sigma1.14.root");
+            // handlerExp->SaveHists("C:/work/Science/KaonMassMeasure/hists/Exp/Hists_Exp" + energyPoint + ".root");
             delete handlerExp;
         }
     }
@@ -67,14 +67,15 @@ int KsMassEval_All(bool isExp = true)
     {
         for(const auto& energyPoint : energyPoints)
         {
-            std::string fileNameMC = "C:/work/Science/BINP/Kaon Mass Measure/tr_ph/MC/KsKl_Smeared/New formfactor/XsecConv/MC" + energyPoint + "_XsecConv.root";
-            auto handlerMC = new HandlerMC(fileNameMC, energyPoint, 0.27, meanEnergies[energyPoint].first, true, false, true, sigma_matrix_window_width);
+            std::string fileNameMC = "C:/work/Science/KaonMassMeasure/tr_ph/MC/KsKl_Smeared/New formfactor/XsecConv/MC" + energyPoint + "_XsecConv.root";
+            auto handlerMC = new HandlerMC(fileNameMC, energyPoint, 0.27, meanEnergies[energyPoint].first, false, false, true, sigma_matrix_window_width);
             auto [mass, massErr] = handlerMC->Eval();
             res.push_back(std::make_tuple(energyPoint, mass, massErr));
             std::cout << "MC" << energyPoint << ": " << mass << " + " << massErr << std::endl;
-            // handlerMC->SaveHists("C:/work/Science/BINP/Kaon Mass Measure/hists/MC/tests/Hists_MC" + energyPoint + "_std_no_E_smear.root");
-            // handlerMC->SaveHists("C:/work/Science/BINP/Kaon Mass Measure/hists/MC/Hists_MC" + energyPoint + ".root");
-            // handlerMC->SaveSplines("C:/work/Science/BINP/Kaon Mass Measure/splines/spline_" + energyPoint + ".root");
+            handlerMC->SaveHists("C:/work/Science/KaonMassMeasure/hists/MC/tests/Hists_MC" + energyPoint + "_std_with_E_smearing.root");
+            // handlerMC->SaveHists("C:/work/Science/KaonMassMeasure/hists/MC/tests/Hists_MC" + energyPoint + "_genY.root");
+            // handlerMC->SaveHists("C:/work/Science/KaonMassMeasure/hists/MC/Hists_MC" + energyPoint + ".root");
+            // handlerMC->SaveSplines("C:/work/Science/KaonMassMeasure/splines/spline_" + energyPoint + ".root");
             
             auto [mean, meanErr] = handlerMC->GetEnergySpectrumMean();
             spectrum_mean_corr.push_back(std::make_tuple(energyPoint, meanEnergies[energyPoint].first - mean, meanErr));

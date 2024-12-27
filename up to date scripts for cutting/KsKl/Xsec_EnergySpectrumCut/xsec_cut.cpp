@@ -15,39 +15,15 @@
 #include <set>
 #include <map>
 
-#include "C:/work/Science/BINP/Kaon Mass Measure/PhiMesonFit/KnXSec.cpp"
+#include "C:/work/Science/KaonMassMeasure/PhiMesonFit/KnXSec.cpp"
 
 void xsec_cut::Loop(std::string histFileName)
 {
-    //   In a ROOT session, you can do:
-    //      root> .L ksklCut_mcgpj.C
-    //      root> ksklCut_mcgpj t
-    //      root> t.GetEntry(12); // Fill t data members with entry number 12
-    //      root> t.Show();       // Show values of entry 12
-    //      root> t.Show(16);     // Read and show values of entry 16
-    //      root> t.Loop();       // Loop on all entries
-    //
-
-    //     This is the loop skeleton where:
-    //    jentry is the global entry number in the chain
-    //    ientry is the entry number in the current Tree
-    //  Note that the argument to GetEntry must be:
-    //    jentry for TChain::GetEntry
-    //    ientry for TTree::GetEntry and TBranch::GetEntry
-    //
-    //       To read only selected branches, Insert statements like:
-    // METHOD1:
-    //    fChain->SetBranchStatus("*",0);  // disable all branches
-    //    fChain->SetBranchStatus("branchname",1);  // activate branchname
-    // METHOD2: replace line
-    //    fChain->GetEntry(jentry);       //read all branches
-    // by  b_branchname->GetEntry(ientry); //read only this branch
     if (fChain == 0)
         return;
 
     auto xsec = new KnXSec();
-    TFile *new_file = new TFile(("C:/work/Science/BINP/Kaon Mass Measure/tr_ph/mcgpj/tr_ph v9 new form factor/Merged/xsec_cutted/" + histFileName).c_str(), "recreate");
-    // TFile *new_file = new TFile(("C:/work/Science/BINP/Kaon Mass Measure/tr_ph/mcgpj/tr_ph v9 phi_width 4.5 MeV/xsec_cutted/" + histFileName).c_str(), "recreate");
+    TFile *new_file = new TFile(("C:/work/Science/KaonMassMeasure/tr_ph/mcgpj/tr_ph v9 new form factor/Merged/xsec_cutted/" + histFileName).c_str(), "recreate");
     auto tnew = fChain->CloneTree(0);
 
     auto energy_spectrum = new TH1D("energy_spectrum", "energy_spectrum", 3500, 500, 535);

@@ -43,12 +43,12 @@ int eval_sigma()
     std::vector<double> sigma_errs = {}; 
     // for(const auto& energyPoint : energyPoints)
     {
-        std::string energyPoint = "508";
-        // auto filename_exp = "/mnt/c/work/Science/BINP/Kaon Mass Measure/hists/Exp/tests/Hists_Exp" + energyPoint + "_std.root";
-        // auto filename_exp = "/mnt/c/work/Science/BINP/Kaon Mass Measure/hists/MC/tests/Hists_MC" + energyPoint + "_std_smear_1.16sigma.root";
-        auto filename_exp = "/mnt/c/work/Science/BINP/Kaon Mass Measure/hists/MC/tests/Hists_MC" + energyPoint + "_std.root";
-        // auto filename_MC = "/mnt/c/work/Science/BINP/Kaon Mass Measure/hists/MC/tests/Hists_MC" + energyPoint + "_std_no_E_smear.root";
-        auto filename_MC = "/mnt/c/work/Science/BINP/Kaon Mass Measure/hists/MC/tests/Hists_MC" + energyPoint + "_std_no_E_smear.root";
+        std::string energyPoint = "509";
+        auto filename_exp = "/mnt/c/work/Science/KaonMassMeasure/hists/Exp/tests/Hists_Exp" + energyPoint + "_std.root";
+        // auto filename_exp = "/mnt/c/work/Science/KaonMassMeasure/hists/MC/tests/Hists_MC" + energyPoint + "_std_smear_1.16sigma.root";
+        // auto filename_exp = "/mnt/c/work/Science/KaonMassMeasure/hists/MC/tests/Hists_MC" + energyPoint + "_std_with_E_smearing.root";
+        // auto filename_MC = "/mnt/c/work/Science/Kaon Mass Measure/hists/MC/tests/Hists_MC" + energyPoint + "_std_no_E_smear.root";
+        auto filename_MC = "/mnt/c/work/Science/KaonMassMeasure/hists/MC/tests/Hists_MC" + energyPoint + "_std_with_E_smearing.root";
         
         auto exp = TFile::Open(filename_exp.c_str());
         auto exp_distr = exp->Get<TH1D>("hMass");

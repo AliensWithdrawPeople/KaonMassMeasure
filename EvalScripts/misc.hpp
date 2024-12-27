@@ -22,7 +22,7 @@ namespace misc {
     };
 
     std::string GetSplineFilename(std::string energyPoint)
-    { return "C:/work/Science/BINP/Kaon Mass Measure/splines/spline_" + energyPoint + ".root"; }
+    { return "C:/work/Science/KaonMassMeasure/splines/spline_" + energyPoint + ".root"; }
 
     std::vector<int> pascalsTriangle(int n) 
     {
