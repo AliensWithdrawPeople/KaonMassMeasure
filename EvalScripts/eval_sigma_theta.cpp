@@ -39,9 +39,9 @@ int eval_sigma_theta()
     const std::vector<std::string> energyPoints = {"505", "508", "508.5", "509", "509.5", "510", "510.5", "511", "511.5", "514"};
     std::string energyPoint = "508"; 
     int rebin_factor = 16;
-    auto filename_exp = "/mnt/c/work/Science/BINP/Kaon Mass Measure/hists/Exp/tests/Hists_Exp" + energyPoint + "_std.root";
+    // auto filename_exp = "/mnt/c/work/Science/BINP/Kaon Mass Measure/hists/Exp/tests/Hists_Exp" + energyPoint + "_std.root";
     // auto filename_exp = "/mnt/c/work/Science/BINP/Kaon Mass Measure/hists/MC/tests/Hists_MC" + energyPoint + "_std_smear_1.16sigma.root";
-    // auto filename_exp = "/mnt/c/work/Science/BINP/Kaon Mass Measure/hists/MC/tests/Hists_MC" + energyPoint + "_std.root";
+    auto filename_exp = "/mnt/c/work/Science/BINP/Kaon Mass Measure/hists/MC/tests/Hists_MC" + energyPoint + "_std.root";
     // auto filename_MC = "/mnt/c/work/Science/BINP/Kaon Mass Measure/hists/MC/tests/Hists_MC" + energyPoint + "_std_smear_1.16sigma.root";
     auto filename_MC = "/mnt/c/work/Science/BINP/Kaon Mass Measure/hists/MC/tests/Hists_MC" + energyPoint + "_gen.root";
     
