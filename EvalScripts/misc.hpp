@@ -81,7 +81,7 @@ namespace misc {
         { energy = 631.041 / (rnum-61094.5) / (rnum-61094.5) + 509.527; }
         
         // E = 510 MeV
-        if(rnum >= 61380 && rnum <= 61461)
+        if(rnum >= 61380 && rnum <= 61560)
         { energy = 364.312 / (rnum - 61332.6) / (rnum - 61332.6) + 509.925; }
 
         if(rnum >= 61560 && rnum <= 61689)
