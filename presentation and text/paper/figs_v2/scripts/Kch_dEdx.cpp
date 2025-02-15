@@ -28,7 +28,7 @@ void Kch_dEdx()
     cut3.SetLineWidth(3);
 
     TLatex lat; 
-    double x = 0.25;
+    double x = 0.2;
     double y = 0.85;
     lat.SetNDC();
     lat.SetTextFont(72);
@@ -37,14 +37,17 @@ void Kch_dEdx()
     hist->GetYaxis()->SetTitle("dE/dx, a.u");
     hist->GetXaxis()->SetTitle("P, MeV");
     hist->GetYaxis()->SetMaxDigits(3);
+    hist->GetZaxis()->SetMaxDigits(3);
 
-
-    hist->DrawClone("P");
+    hist->DrawClone("col z");
     cut1.DrawClone("same");
     cut2.DrawClone("same");
     cut3.DrawClone("same");
 
     lat.DrawLatex(x, y, "CMD-3");
+
+    canvas.SetRightMargin(0.15);
+    canvas.SetTopMargin(0.07);
     canvas.DrawClone();
 
     canvas.SaveAs("C:/work/Science/KaonMassMeasure/presentation and text/paper/figs_v2/Kch_dEdx.pdf");
